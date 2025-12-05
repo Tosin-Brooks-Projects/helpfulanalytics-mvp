@@ -1,5 +1,6 @@
 "use client"
 
+import { signIn } from "next-auth/react"
 import { useState } from "react"
 import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -21,7 +22,7 @@ export default function LoginPage() {
 
   const handleSignIn = async () => {
     setIsLoading(true)
-    window.location.href = "/api/auth/login"
+    await signIn("google", { callbackUrl: "/" })
   }
 
   return (
