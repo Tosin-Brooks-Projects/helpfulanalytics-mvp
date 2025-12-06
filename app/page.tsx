@@ -14,6 +14,9 @@ import { LocationsReport } from "@/components/locations-report"
 import { AcquisitionReport } from "@/components/acquisition-report"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { LoadingSkeleton } from "@/components/loading-skeleton"
+import { DashboardShell } from "@/components/layout/dashboard-shell"
+import { StatCard } from "@/components/ui/stat-card"
+import { Users, Eye, MousePointer, Clock } from "lucide-react"
 
 interface DateRange {
   from: Date
@@ -100,18 +103,22 @@ export default function Dashboard() {
     }
   }
 
-  const formatDateRange = (range: DateRange) => {
-    const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" }
-    return `${range.from.toLocaleDateString("en-US", options)} - ${range.to.toLocaleDateString("en-US", options)}`
-  }
-
   const renderReport = () => {
     switch (selectedReport) {
       case "overview":
         return (
           <div className="space-y-6">
+            {/* We'll replace MetricsOverview with inline StatCards for better control or keep it if updated */}
             <MetricsOverview data={analyticsData?.metrics} loading={loading} error={error} />
-            <TrafficSources data={analyticsData?.trafficSources} loading={loading} error={error} />
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+              <div className="col-span-4">
+                <TrafficSources data={analyticsData?.trafficSources} loading={loading} error={error} />
+              </div>
+              <div className="col-span-3">
+                {/* Placeholder for another chart or devices */}
+                <DevicesReport data={analyticsData} loading={loading} error={error} />
+              </div>
+            </div>
           </div>
         )
       case "pages":
@@ -136,28 +143,34 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <DashboardShell>
+      <div className="flex flex-col space-y-8 p-8">
+        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
-            {selectedProperty && <p className="text-gray-600 mt-1">{formatDateRange(dateRange)}</p>}
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-muted-foreground">
+              Overview of your property performance.
+            </p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <PropertySelector onPropertySelect={setSelectedProperty} selectedProperty={selectedProperty} />
             <DateRangeSelector dateRange={dateRange} onDateRangeChange={setDateRange} />
           </div>
         </div>
 
-        {/* Property Selector */}
-        <PropertySelector onPropertySelect={setSelectedProperty} selectedProperty={selectedProperty} />
+        {/* Report Selector Tabs - Could be moved to a Tabs component */}
+        {selectedProperty && (
+          <div className="flex items-center space-x-2 pb-4">
+            <ReportSelector selectedReport={selectedReport} onReportSelect={setSelectedReport} />
+          </div>
+        )}
 
-        {/* Report Selector */}
-        {selectedProperty && <ReportSelector selectedReport={selectedReport} onReportSelect={setSelectedReport} />}
-
-        {/* Report Content */}
-        {selectedProperty && <ErrorBoundary>{renderReport()}</ErrorBoundary>}
+        {selectedProperty && (
+          <ErrorBoundary>
+            {renderReport()}
+          </ErrorBoundary>
+        )}
       </div>
-    </div>
+    </DashboardShell>
   )
 }

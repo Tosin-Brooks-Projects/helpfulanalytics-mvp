@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 
 interface TrafficSource {
   source: string
@@ -18,21 +18,13 @@ interface TrafficSourcesProps {
 export function TrafficSources({ data, loading, error }: TrafficSourcesProps) {
   if (loading) {
     return (
-      <Card>
+      <Card className="col-span-4">
         <CardHeader>
           <CardTitle>Traffic Sources</CardTitle>
           <CardDescription>Where your visitors come from</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <div className="flex justify-between">
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-24" />
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-16" />
-              </div>
-              <div className="h-2 bg-gray-200 rounded animate-pulse" />
-            </div>
-          ))}
+        <CardContent>
+          <div className="h-[350px] w-full bg-muted/20 animate-pulse rounded-lg" />
         </CardContent>
       </Card>
     )
@@ -40,13 +32,12 @@ export function TrafficSources({ data, loading, error }: TrafficSourcesProps) {
 
   if (error) {
     return (
-      <Card>
+      <Card className="col-span-4 border-red-200 dark:border-red-900">
         <CardHeader>
-          <CardTitle>Traffic Sources</CardTitle>
-          <CardDescription>Where your visitors come from</CardDescription>
+          <CardTitle className="text-red-600">Error</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-red-600">Error loading traffic sources: {error}</p>
+          <p className="text-sm text-muted-foreground">{error}</p>
         </CardContent>
       </Card>
     )
@@ -54,42 +45,49 @@ export function TrafficSources({ data, loading, error }: TrafficSourcesProps) {
 
   if (!data || data.length === 0) {
     return (
-      <Card>
+      <Card className="col-span-4">
         <CardHeader>
           <CardTitle>Traffic Sources</CardTitle>
-          <CardDescription>Where your visitors come from</CardDescription>
+          <CardDescription>No data available</CardDescription>
         </CardHeader>
-        <CardContent>
-          <p className="text-gray-500">No traffic source data available</p>
+        <CardContent className="h-[350px] flex items-center justify-center text-muted-foreground">
+          No traffic source data available
         </CardContent>
       </Card>
     )
   }
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
-    return num.toLocaleString()
-  }
-
   return (
-    <Card>
+    <Card className="col-span-4">
       <CardHeader>
         <CardTitle>Traffic Sources</CardTitle>
-        <CardDescription>Where your visitors come from</CardDescription>
+        <CardDescription>Top sources driving traffic to your site.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {data.map((source, index) => (
-          <div key={index} className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="font-medium capitalize">{source.source.replace(/([A-Z])/g, " $1").trim()}</span>
-              <span className="text-muted-foreground">
-                {formatNumber(source.sessions)} ({source.percentage.toFixed(1)}%)
-              </span>
-            </div>
-            <Progress value={source.percentage} className="h-2" />
-          </div>
-        ))}
+      <CardContent className="pl-2">
+        <ResponsiveContainer width="100%" height={350}>
+          <BarChart data={data}>
+            <XAxis
+              dataKey="source"
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => value.replace(/([A-Z])/g, " $1").trim()}
+            />
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `${value}`}
+            />
+            <Tooltip
+              cursor={{ fill: "transparent" }}
+              contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))", background: "hsl(var(--background))" }}
+            />
+            <Bar dataKey="sessions" fill="currentColor" radius={[4, 4, 0, 0]} className="fill-primary" />
+          </BarChart>
+        </ResponsiveContainer>
       </CardContent>
     </Card>
   )

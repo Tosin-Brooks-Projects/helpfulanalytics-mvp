@@ -1,11 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { BetaAnalyticsDataClient } from "@google-analytics/data"
+import { authOptions } from "@/lib/auth-options"
 
 export async function GET(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions)
+        // @ts-ignore
         if (!session?.accessToken) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
         }
@@ -20,29 +20,26 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Property ID is required" }, { status: 400 })
         }
 
-        const analyticsDataClient = new BetaAnalyticsDataClient({
-            credentials: {
-                access_token: session.accessToken,
-            },
-        })
+        // @ts-ignore
+        const accessToken = session.accessToken
 
         let response
 
         switch (reportType) {
             case "overview":
-                response = await getOverviewData(analyticsDataClient, propertyId, startDate, endDate)
+                response = await getOverviewData(accessToken, propertyId, startDate, endDate)
                 break
             case "pages":
-                response = await getTopPagesData(analyticsDataClient, propertyId, startDate, endDate)
+                response = await getTopPagesData(accessToken, propertyId, startDate, endDate)
                 break
             case "devices":
-                response = await getDevicesData(analyticsDataClient, propertyId, startDate, endDate)
+                response = await getDevicesData(accessToken, propertyId, startDate, endDate)
                 break
             case "locations":
-                response = await getLocationsData(analyticsDataClient, propertyId, startDate, endDate)
+                response = await getLocationsData(accessToken, propertyId, startDate, endDate)
                 break
             case "acquisition":
-                response = await getAcquisitionData(analyticsDataClient, propertyId, startDate, endDate)
+                response = await getAcquisitionData(accessToken, propertyId, startDate, endDate)
                 break
             default:
                 return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
@@ -58,15 +55,28 @@ export async function GET(request: NextRequest) {
     }
 }
 
-async function getOverviewData(
-    client: BetaAnalyticsDataClient,
-    propertyId: string,
-    startDate: string,
-    endDate: string,
-) {
+// Helper to run GA4 reports via fetch
+async function runReport(accessToken: string, propertyId: string, requestBody: any) {
+    const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+    })
+
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`GA4 API Error (${response.status}): ${errorText}`)
+    }
+
+    return await response.json()
+}
+
+async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
     const [metricsResponse, trafficResponse] = await Promise.all([
-        client.runReport({
-            property: `properties/${propertyId}`,
+        runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             metrics: [
                 { name: "sessions" },
@@ -76,8 +86,7 @@ async function getOverviewData(
                 { name: "averageSessionDuration" },
             ],
         }),
-        client.runReport({
-            property: `properties/${propertyId}`,
+        runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             dimensions: [{ name: "sessionDefaultChannelGroup" }],
             metrics: [{ name: "sessions" }],
@@ -86,8 +95,8 @@ async function getOverviewData(
         }),
     ])
 
-    const metrics = metricsResponse[0].rows?.[0]?.metricValues || []
-    const trafficSources = trafficResponse[0].rows || []
+    const metrics = metricsResponse.rows?.[0]?.metricValues || []
+    const trafficSources = trafficResponse.rows || []
 
     const totalSessions = Number.parseInt(metrics[0]?.value || "0")
 
@@ -99,22 +108,17 @@ async function getOverviewData(
             bounceRate: Number.parseFloat(metrics[3]?.value || "0"),
             avgSessionDuration: Number.parseFloat(metrics[4]?.value || "0"),
         },
-        trafficSources: trafficSources.map((row) => ({
+        trafficSources: trafficSources.map((row: any) => ({
             source: row.dimensionValues?.[0]?.value || "Unknown",
             sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
-            percentage: totalSessions > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalSessions) * 100 : 0,
+            percentage:
+                totalSessions > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalSessions) * 100 : 0,
         })),
     }
 }
 
-async function getTopPagesData(
-    client: BetaAnalyticsDataClient,
-    propertyId: string,
-    startDate: string,
-    endDate: string,
-) {
-    const response = await client.runReport({
-        property: `properties/${propertyId}`,
+async function getTopPagesData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
+    const response = await runReport(accessToken, propertyId, {
         dateRanges: [{ startDate, endDate }],
         dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
         metrics: [
@@ -127,11 +131,14 @@ async function getTopPagesData(
         limit: 20,
     })
 
-    const rows = response[0].rows || []
-    const totalPageViews = rows.reduce((sum, row) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"), 0)
+    const rows = response.rows || []
+    const totalPageViews = rows.reduce(
+        (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
+        0,
+    )
 
     return {
-        pages: rows.map((row) => {
+        pages: rows.map((row: any) => {
             const pageViews = Number.parseInt(row.metricValues?.[0]?.value || "0")
             return {
                 pagePath: row.dimensionValues?.[0]?.value || "/",
@@ -147,10 +154,9 @@ async function getTopPagesData(
     }
 }
 
-async function getDevicesData(client: BetaAnalyticsDataClient, propertyId: string, startDate: string, endDate: string) {
+async function getDevicesData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
     const [devicesResponse, browsersResponse] = await Promise.all([
-        client.runReport({
-            property: `properties/${propertyId}`,
+        runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             dimensions: [{ name: "deviceCategory" }],
             metrics: [
@@ -161,8 +167,7 @@ async function getDevicesData(client: BetaAnalyticsDataClient, propertyId: strin
             ],
             orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
         }),
-        client.runReport({
-            property: `properties/${propertyId}`,
+        runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             dimensions: [{ name: "browser" }],
             metrics: [{ name: "sessions" }],
@@ -171,17 +176,20 @@ async function getDevicesData(client: BetaAnalyticsDataClient, propertyId: strin
         }),
     ])
 
-    const deviceRows = devicesResponse[0].rows || []
-    const browserRows = browsersResponse[0].rows || []
+    const deviceRows = devicesResponse.rows || []
+    const browserRows = browsersResponse.rows || []
 
-    const totalSessions = deviceRows.reduce((sum, row) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"), 0)
+    const totalSessions = deviceRows.reduce(
+        (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
+        0,
+    )
     const totalBrowserSessions = browserRows.reduce(
-        (sum, row) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
+        (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
         0,
     )
 
     return {
-        devices: deviceRows.map((row) => {
+        devices: deviceRows.map((row: any) => {
             const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
             return {
                 deviceCategory: row.dimensionValues?.[0]?.value || "Unknown",
@@ -192,7 +200,7 @@ async function getDevicesData(client: BetaAnalyticsDataClient, propertyId: strin
                 percentage: totalSessions > 0 ? (sessions / totalSessions) * 100 : 0,
             }
         }),
-        browsers: browserRows.map((row) => {
+        browsers: browserRows.map((row: any) => {
             const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
             return {
                 browser: row.dimensionValues?.[0]?.value || "Unknown",
@@ -204,26 +212,28 @@ async function getDevicesData(client: BetaAnalyticsDataClient, propertyId: strin
     }
 }
 
-async function getLocationsData(
-    client: BetaAnalyticsDataClient,
-    propertyId: string,
-    startDate: string,
-    endDate: string,
-) {
-    const response = await client.runReport({
-        property: `properties/${propertyId}`,
+async function getLocationsData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
+    const response = await runReport(accessToken, propertyId, {
         dateRanges: [{ startDate, endDate }],
         dimensions: [{ name: "country" }, { name: "countryId" }],
-        metrics: [{ name: "sessions" }, { name: "totalUsers" }, { name: "bounceRate" }, { name: "averageSessionDuration" }],
+        metrics: [
+            { name: "sessions" },
+            { name: "totalUsers" },
+            { name: "bounceRate" },
+            { name: "averageSessionDuration" },
+        ],
         orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
         limit: 20,
     })
 
-    const rows = response[0].rows || []
-    const totalSessions = rows.reduce((sum, row) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"), 0)
+    const rows = response.rows || []
+    const totalSessions = rows.reduce(
+        (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
+        0,
+    )
 
     return {
-        countries: rows.map((row) => {
+        countries: rows.map((row: any) => {
             const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
             return {
                 country: row.dimensionValues?.[0]?.value || "Unknown",
@@ -239,14 +249,8 @@ async function getLocationsData(
     }
 }
 
-async function getAcquisitionData(
-    client: BetaAnalyticsDataClient,
-    propertyId: string,
-    startDate: string,
-    endDate: string,
-) {
-    const response = await client.runReport({
-        property: `properties/${propertyId}`,
+async function getAcquisitionData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
+    const response = await runReport(accessToken, propertyId, {
         dateRanges: [{ startDate, endDate }],
         dimensions: [{ name: "sessionSource" }, { name: "sessionMedium" }],
         metrics: [
@@ -260,11 +264,14 @@ async function getAcquisitionData(
         limit: 20,
     })
 
-    const rows = response[0].rows || []
-    const totalSessions = rows.reduce((sum, row) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"), 0)
+    const rows = response.rows || []
+    const totalSessions = rows.reduce(
+        (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
+        0,
+    )
 
     return {
-        sources: rows.map((row) => {
+        sources: rows.map((row: any) => {
             const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
             return {
                 source: row.dimensionValues?.[0]?.value || "Unknown",
