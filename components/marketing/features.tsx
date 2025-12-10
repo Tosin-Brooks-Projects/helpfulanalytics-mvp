@@ -33,21 +33,9 @@ const features = [
 ]
 
 export function Features() {
-    const containerRef = useRef(null)
-    const { scrollY } = useScroll()
-    const scrollVelocity = useVelocity(scrollY)
-    const smoothVelocity = useSpring(scrollVelocity, {
-        damping: 50,
-        stiffness: 400
-    })
-
-    // Skew based on velocity
-    const skewX = useTransform(smoothVelocity, [-1000, 1000], [-2, 2])
-    const skewY = useTransform(smoothVelocity, [-1000, 1000], [-1, 1])
-
     return (
         <section id="features" className="bg-[#f0f4f8] py-24 relative overflow-hidden">
-            <div className="container relative z-10" ref={containerRef}>
+            <div className="container relative z-10">
                 <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center mb-16">
                     <TextReveal
                         text="Features that matter"
@@ -64,10 +52,7 @@ export function Features() {
                     </motion.p>
                 </div>
 
-                <motion.div
-                    style={{ skewX, skewY }}
-                    className="mx-auto grid justify-center gap-8 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3 origin-center"
-                >
+                <div className="mx-auto grid justify-center gap-8 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
                     {features.map((feature, i) => (
                         <motion.div
                             key={i}
@@ -114,7 +99,7 @@ export function Features() {
                             </div>
                         </div>
                     </motion.div>
-                </motion.div>
+                </div>
             </div>
         </section>
     )

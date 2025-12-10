@@ -8,29 +8,17 @@ import { useRef } from "react"
 import { TextReveal } from "@/components/ui/text-reveal"
 
 export function Hero() {
-    const ref = useRef(null)
-    const { scrollYProgress } = useScroll({
-        target: ref,
-        offset: ["start start", "end start"],
-    })
-
-    // Parallax effects
-    const yBackground = useTransform(scrollYProgress, [0, 1], ["0%", "50%"])
-    const yText = useTransform(scrollYProgress, [0, 1], ["0%", "100%"])
-    const yImage = useTransform(scrollYProgress, [0, 1], ["0%", "-20%"])
-
     return (
-        <section ref={ref} className="relative overflow-hidden bg-[#f0f4f8] pt-32 pb-16 md:pt-48 md:pb-32 min-h-[120vh]">
-            {/* Background Blobs with Parallax */}
-            <motion.div style={{ y: yBackground }} className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <section className="relative overflow-hidden bg-[#f0f4f8] pt-32 pb-16 md:pt-48 md:pb-32 min-h-[120vh]">
+            {/* Background Blobs */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-200/40 blur-3xl mix-blend-multiply animate-blob" />
                 <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] rounded-full bg-indigo-200/40 blur-3xl mix-blend-multiply animate-blob animation-delay-2000" />
                 <div className="absolute bottom-[-20%] left-[20%] w-[600px] h-[600px] rounded-full bg-pink-200/40 blur-3xl mix-blend-multiply animate-blob animation-delay-4000" />
-            </motion.div>
+            </div>
 
             <div className="container relative z-10 flex flex-col items-center text-center">
                 <motion.div
-                    style={{ y: yText }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
@@ -53,7 +41,6 @@ export function Hero() {
                 </div>
 
                 <motion.p
-                    style={{ y: yText }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
@@ -63,7 +50,6 @@ export function Hero() {
                 </motion.p>
 
                 <motion.div
-                    style={{ y: yText }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.3 }}
@@ -81,12 +67,11 @@ export function Hero() {
                     </Button>
                 </motion.div>
 
-                {/* Floating Hero Image with Parallax */}
+                {/* Floating Hero Image */}
                 <div className="relative mt-20 w-full max-w-5xl perspective-1000">
                     <motion.div
-                        style={{ y: yImage }}
-                        initial={{ opacity: 0, rotateX: 20, y: 100 }}
-                        animate={{ opacity: 1, rotateX: 10, y: 0 }}
+                        initial={{ opacity: 0, y: 100 }}
+                        animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 1, delay: 0.4, type: "spring" }}
                         className="relative mx-auto rounded-3xl bg-[#f0f4f8] p-4 shadow-[20px_20px_60px_#d1d9e6,-20px_-20px_60px_#ffffff] border border-white/50"
                     >
@@ -100,22 +85,12 @@ export function Hero() {
                     </motion.div>
 
                     {/* Floating Elements */}
-                    <motion.div
-                        style={{ y: yImage }}
-                        animate={{ y: [0, -20, 0] }}
-                        transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
-                        className="absolute -top-12 -left-12 hidden lg:block rounded-2xl bg-white p-4 shadow-[10px_10px_20px_#d1d9e6,-10px_-10px_20px_#ffffff]"
-                    >
+                    <div className="absolute -top-12 -left-12 hidden lg:block rounded-2xl bg-white p-4 shadow-[10px_10px_20px_#d1d9e6,-10px_-10px_20px_#ffffff]">
                         <Activity className="h-8 w-8 text-indigo-500" />
-                    </motion.div>
-                    <motion.div
-                        style={{ y: yImage }}
-                        animate={{ y: [0, 20, 0] }}
-                        transition={{ repeat: Infinity, duration: 5, ease: "easeInOut", delay: 1 }}
-                        className="absolute -bottom-12 -right-12 hidden lg:block rounded-2xl bg-white p-4 shadow-[10px_10px_20px_#d1d9e6,-10px_-10px_20px_#ffffff]"
-                    >
+                    </div>
+                    <div className="absolute -bottom-12 -right-12 hidden lg:block rounded-2xl bg-white p-4 shadow-[10px_10px_20px_#d1d9e6,-10px_-10px_20px_#ffffff]">
                         <PieChart className="h-8 w-8 text-purple-500" />
-                    </motion.div>
+                    </div>
                 </div>
             </div>
         </section>
