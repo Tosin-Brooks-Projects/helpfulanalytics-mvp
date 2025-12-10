@@ -41,6 +41,9 @@ export async function GET(request: NextRequest) {
             case "acquisition":
                 response = await getAcquisitionData(accessToken, propertyId, startDate, endDate)
                 break
+            case "realtime":
+                response = await getRealtimeData(accessToken, propertyId)
+                break
             default:
                 return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
         }
@@ -285,5 +288,40 @@ async function getAcquisitionData(accessToken: string, propertyId: string, start
             }
         }),
         totalSessions,
+    }
+}
+
+async function getRealtimeData(accessToken: string, propertyId: string) {
+    // GA4 Realtime API
+    const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runRealtimeReport`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            metrics: [{ name: "activeUsers" }],
+            dimensions: [{ name: "unifiedScreenName" }], // or pagePath
+            limit: 10,
+        }),
+    })
+
+    if (!response.ok) {
+        // Fallback or throw
+        return { activeUsers: 0, pages: [] }
+    }
+
+    const data = await response.json()
+    const rows = data.rows || []
+
+    const totalActive = rows.reduce((sum: number, row: any) => sum + parseInt(row.metricValues?.[0]?.value || "0"), 0)
+
+    return {
+        activeUsers: totalActive,
+        pages: rows.map((row: any) => ({
+            path: row.dimensionValues?.[0]?.value || "Unknown",
+            active: parseInt(row.metricValues?.[0]?.value || "0"),
+            title: row.dimensionValues?.[0]?.value || "Unknown", // Realtime API is limited on dimensions
+        })),
     }
 }

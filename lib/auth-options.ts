@@ -77,14 +77,16 @@ export const authOptions: NextAuthOptions = {
             }
             return true
         },
-        async jwt({ token, account }) {
+        async jwt({ token, account, user }) {
             // Initial sign in
-            if (account) {
+            if (account && user) {
+                console.log("DEBUG: Auth JWT Callback - Sign In", { userId: user.id })
                 return {
+                    ...token,
                     accessToken: account.access_token,
                     accessTokenExpires: account.expires_at! * 1000,
                     refreshToken: account.refresh_token,
-                    user: token,
+                    userId: user.id, // Explicitly save user ID
                 }
             }
 
@@ -102,6 +104,10 @@ export const authOptions: NextAuthOptions = {
             session.accessToken = token.accessToken
             // @ts-ignore
             session.error = token.error
+            // @ts-ignore
+            session.userId = token.userId || token.sub
+
+            console.log("DEBUG: Auth Session Callback - Session UserId:", session.userId)
             return session
         },
     },

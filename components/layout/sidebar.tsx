@@ -10,7 +10,7 @@ import { signOut } from "next-auth/react"
 const sidebarItems = [
     {
         title: "Overview",
-        href: "/",
+        href: "/dashboard",
         icon: LayoutDashboard,
     },
     {
