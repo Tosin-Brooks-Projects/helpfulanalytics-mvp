@@ -68,6 +68,13 @@ export const authOptions: NextAuthOptions = {
                             name: user.name,
                             image: user.image,
                             lastSeen: new Date(),
+                            tokens: {
+                                google: {
+                                    accessToken: account.access_token,
+                                    refreshToken: account.refresh_token,
+                                    expiresAt: account.expires_at,
+                                }
+                            }
                         },
                         { merge: true },
                     )
@@ -81,12 +88,14 @@ export const authOptions: NextAuthOptions = {
             // Initial sign in
             if (account && user) {
                 console.log("DEBUG: Auth JWT Callback - Sign In", { userId: user.id })
+                // We already saved to DB in signIn, but we can also ensure it here if needed.
+                // For now, just keeping them in the token for client-side usage is fine too.
                 return {
                     ...token,
                     accessToken: account.access_token,
                     accessTokenExpires: account.expires_at! * 1000,
                     refreshToken: account.refresh_token,
-                    userId: user.id, // Explicitly save user ID
+                    userId: user.id,
                 }
             }
 

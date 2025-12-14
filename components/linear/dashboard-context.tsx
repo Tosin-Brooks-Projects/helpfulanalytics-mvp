@@ -54,15 +54,29 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
         }
     }, [selectedProperty])
 
+    // Added useEffect to redirect if no property is found after loading
+    useEffect(() => {
+        if (!loading && !selectedProperty) {
+            // Check if user has ANY properties saved
+            // Ideally we check this via API, but for now we can assume if selectedProperty is null after load,
+            // they might need to set one up.
+            // A more robust check would count properties. 
+            // Let's rely on the fact that we try to load the "active" property.
+
+            // Redirect to onboarding if strictly no property is set
+            router.push("/onboarding")
+        }
+    }, [loading, selectedProperty, router])
+
     return (
-        <DashboardContext.Provider value={{ properties, selectedProperty, setSelectedProperty, loading }}>
+        <LinearDashboardContext.Provider value={{ selectedProperty, setSelectedProperty, timeRange, setTimeRange, loading }}>
             {children}
-        </DashboardContext.Provider>
+        </LinearDashboardContext.Provider>
     )
 }
 
 export function useDashboard() {
-    const context = useContext(DashboardContext)
+    const context = useContext(LinearDashboardContext) // Renamed context
     if (context === undefined) {
         throw new Error("useDashboard must be used within a LinearDashboardProvider")
     }

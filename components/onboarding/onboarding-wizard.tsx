@@ -9,20 +9,56 @@ import { Check, ChevronRight, Loader2 } from "lucide-react"
 export function OnboardingWizard() {
     const [step, setStep] = useState(1)
     const [loading, setLoading] = useState(false)
+    const [properties, setProperties] = useState([])
     const router = useRouter()
+
+    const fetchProperties = async () => {
+        try {
+            const res = await fetch("/api/analytics/properties")
+            if (res.ok) {
+                const data = await res.json()
+                setProperties(data.properties || [])
+            }
+        } catch (error) {
+            console.error("Failed to fetch properties", error)
+        }
+    }
 
     const handleConnect = async () => {
         setLoading(true)
-        // Simulate connection delay or redirect to auth
-        setTimeout(() => {
+        // Sign in flow should have happened already or we trigger it. 
+        // Assuming user is signed in but just needs to "connect" (fetch properties).
+        await fetchProperties()
+        setLoading(false)
+        setStep(2)
+    }
+
+    const handleSelectProperty = async (property: any) => {
+        setLoading(true)
+        try {
+            const res = await fetch("/api/user/properties", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    propertyId: property.id,
+                    propertyName: property.name,
+                    accountId: property.accountId
+                })
+            })
+
+            if (!res.ok) throw new Error("Failed to save property")
+
+            setStep(3)
+        } catch (error) {
+            console.error(error)
+            // Handle error state (optional)
+        } finally {
             setLoading(false)
-            setStep(2)
-        }, 1500)
+        }
     }
 
     const handleFinish = async () => {
         setLoading(true)
-        // Simulate finishing setup
         setTimeout(() => {
             setLoading(false)
             router.push("/dashboard")
@@ -37,8 +73,8 @@ export function OnboardingWizard() {
                     <div
                         key={i}
                         className={`flex h-8 w-8 items-center justify-center rounded-full border text-sm font-medium transition-colors ${step >= i
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-background text-muted-foreground"
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-muted-foreground"
                             }`}
                     >
                         {step > i ? <Check className="h-4 w-4" /> : i}
@@ -89,14 +125,26 @@ export function OnboardingWizard() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-2">
-                                {/* Mock Property List */}
-                                {["My Awesome Blog", "E-commerce Store", "Portfolio Site"].map((prop, i) => (
-                                    <div key={i} className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted cursor-pointer" onClick={() => setStep(3)}>
-                                        <div className="font-medium">{prop}</div>
-                                        <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                                {properties.length === 0 && !loading ? (
+                                    <p className="text-sm text-muted-foreground text-center py-4">No properties found. Make sure you have a GA4 account.</p>
+                                ) : (
+                                    properties.map((prop: any) => (
+                                        <div
+                                            key={prop.id}
+                                            className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted cursor-pointer transition-colors"
+                                            onClick={() => handleSelectProperty(prop)}
+                                        >
+                                            <div className="font-medium truncate pr-4">{prop.name}</div>
+                                            <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                                        </div>
+                                    ))
+                                )}
+                                {loading && (
+                                    <div className="flex justify-center py-4">
+                                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
                                     </div>
-                                ))}
+                                )}
                             </div>
                         </CardContent>
                     </>
