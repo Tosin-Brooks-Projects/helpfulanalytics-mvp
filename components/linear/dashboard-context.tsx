@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
+import { useRouter } from "next/navigation"
 
 interface Property {
     propertyId: string
@@ -15,26 +16,32 @@ interface DashboardContextType {
     loading: boolean
 }
 
-const DashboardContext = createContext<DashboardContextType | undefined>(undefined)
+const LinearDashboardContext = createContext<DashboardContextType | undefined>(undefined)
 
 export function LinearDashboardProvider({ children }: { children: ReactNode }) {
     const [properties, setProperties] = useState<Property[]>([])
     const [selectedProperty, setSelectedProperty] = useState<string>("")
     const [loading, setLoading] = useState(true)
+    const router = useRouter()
 
     useEffect(() => {
         async function fetchProperties() {
             try {
-                const res = await fetch("/api/properties")
-                const data = await res.json()
-                if (data.properties && data.properties.length > 0) {
-                    setProperties(data.properties)
-                    // Restore selection from local storage or default to first
-                    const saved = localStorage.getItem("linear_selected_property")
-                    if (saved && data.properties.find((p: Property) => p.propertyId === saved)) {
-                        setSelectedProperty(saved)
-                    } else {
-                        setSelectedProperty(data.properties[0].propertyId)
+                const res = await fetch("/api/analytics/properties")
+
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.properties && data.properties.length > 0) {
+                        setProperties(data.properties)
+                        // Restore selection from local storage or default to first
+                        const saved = localStorage.getItem("linear_selected_property")
+                        if (saved && data.properties.find((p: any) => p.id === saved)) {
+                            setSelectedProperty(saved)
+                        } else {
+                            // If user has saved an "activeProperty" in DB, we might want to use that.
+                            // For now, defaulting to first valid one is fine.
+                            setSelectedProperty(data.properties[0].id)
+                        }
                     }
                 }
             } catch (error) {
@@ -54,29 +61,24 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
         }
     }, [selectedProperty])
 
-    // Added useEffect to redirect if no property is found after loading
+    // Redirect if no property found
     useEffect(() => {
-        if (!loading && !selectedProperty) {
-            // Check if user has ANY properties saved
-            // Ideally we check this via API, but for now we can assume if selectedProperty is null after load,
-            // they might need to set one up.
-            // A more robust check would count properties. 
-            // Let's rely on the fact that we try to load the "active" property.
-
-            // Redirect to onboarding if strictly no property is set
+        if (!loading && !selectedProperty && properties.length === 0) {
+            // Only redirect if we truly have no properties loaded and loading is done.
+            // If properties are empty, they probably need onboarding.
             router.push("/onboarding")
         }
-    }, [loading, selectedProperty, router])
+    }, [loading, selectedProperty, properties, router])
 
     return (
-        <LinearDashboardContext.Provider value={{ selectedProperty, setSelectedProperty, timeRange, setTimeRange, loading }}>
+        <LinearDashboardContext.Provider value={{ properties, selectedProperty, setSelectedProperty, loading }}>
             {children}
         </LinearDashboardContext.Provider>
     )
 }
 
 export function useDashboard() {
-    const context = useContext(LinearDashboardContext) // Renamed context
+    const context = useContext(LinearDashboardContext)
     if (context === undefined) {
         throw new Error("useDashboard must be used within a LinearDashboardProvider")
     }

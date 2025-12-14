@@ -9,6 +9,8 @@ import { BetaAnalyticsDataClient } from "@google-analytics/data"
 // Since we want to keep it simple and likely don't have 'googleapis' installed yet (checking package.json earlier didn't show it),
 // we will use a direct fetch to the Admin API.
 
+export const dynamic = "force-dynamic"
+
 export async function GET() {
     const session = await getServerSession(authOptions)
 
