@@ -60,7 +60,14 @@ export async function GET(request: NextRequest) {
 
 // Helper to run GA4 reports via fetch
 async function runReport(accessToken: string, propertyId: string, requestBody: any) {
-    const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`, {
+    // propertyId coming from DB/Frontend is usually 'properties/12345' (Full Resource Name)
+    // If it *doesn't* start with 'properties/', we might need to add it, but based on our setup it does.
+    // The API expects: https://analyticsdata.googleapis.com/v1beta/properties/12345:runReport
+    // So if propertyId is 'properties/12345', we should use `.../v1beta/${propertyId}:runReport`
+
+    const resourceName = propertyId.startsWith("properties/") ? propertyId : `properties/${propertyId}`
+
+    const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/${resourceName}:runReport`, {
         method: "POST",
         headers: {
             Authorization: `Bearer ${accessToken}`,
