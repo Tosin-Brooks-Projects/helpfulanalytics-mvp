@@ -1,10 +1,14 @@
 "use client"
-// Force resolution
-
-import { Sparkles, Bot } from "lucide-react"
+import { Sparkles, Bot, Loader2 } from "lucide-react"
 import { Typewriter } from "@/components/ui/typewriter-effect"
+import { useAI } from "@/components/linear/ai-context"
 
 export function LinearAIPanel() {
+    const { insights, loading, error } = useAI() // Use shared context
+
+    const insightItem = insights.find(i => i.type === "Insight")
+    const suggestionItem = insights.find(i => i.type === "Suggestion")
+
     return (
         <div className="h-full rounded-lg border border-white/5 bg-black/40 p-5 backdrop-blur-sm flex flex-col">
             <div className="flex items-center gap-3 pb-4 border-b border-white/5 mb-4">
@@ -20,33 +24,58 @@ export function LinearAIPanel() {
             </div>
 
             <div className="flex-1 space-y-4">
-                <div className="flex gap-3">
-                    <div className="space-y-1.5 w-full">
-                        <div className="rounded-2xl rounded-tl-none bg-white/5 p-4 text-sm text-zinc-300 leading-relaxed border border-white/5">
-                            <span className="block text-xs text-indigo-400 mb-2 font-medium flex items-center gap-1">
-                                <Sparkles className="h-3 w-3" /> Insight
-                            </span>
-                            <Typewriter text="Hey! 👋 I noticed a nice spike in organic traffic today (+12%). It looks like your latest blog post is picking up steam!" speed={15} />
+                {loading ? (
+                    <div className="flex flex-col gap-4">
+                        <div className="rounded-2xl bg-white/5 p-4 h-24 flex items-center justify-center">
+                            <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />
+                        </div>
+                        <div className="rounded-2xl bg-white/5 p-4 h-24 flex items-center justify-center">
+                            <Loader2 className="h-5 w-5 animate-spin text-purple-500" />
                         </div>
                     </div>
-                </div>
+                ) : error ? (
+                    <div className="rounded-2xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-200">
+                        {error === "API Key Missing" ? "Please configure OPENROUTER_API_KEY" : "Could not generate insights"}
+                    </div>
+                ) : (
+                    <>
+                        {/* Insight Block */}
+                        <div className="flex gap-3">
+                            <div className="space-y-1.5 w-full">
+                                <div className="rounded-2xl rounded-tl-none bg-white/5 p-4 text-sm text-zinc-300 leading-relaxed border border-white/5">
+                                    <span className="block text-xs text-indigo-400 mb-2 font-medium flex items-center gap-1">
+                                        <Sparkles className="h-3 w-3" /> Insight
+                                    </span>
+                                    <Typewriter
+                                        text={insightItem?.description || "Analyzing your data patterns..."}
+                                        speed={15}
+                                    />
+                                </div>
+                            </div>
+                        </div>
 
-                <div className="flex gap-3">
-                    <div className="space-y-1.5 w-full">
-                        <div className="rounded-2xl rounded-tl-none bg-white/5 p-4 text-sm text-zinc-300 leading-relaxed border border-white/5">
-                            <span className="block text-xs text-purple-400 mb-2 font-medium flex items-center gap-1">
-                                <Bot className="h-3 w-3" /> Suggestion
-                            </span>
-                            <Typewriter text="Also, Twitter visitors are loving the site. Maybe tweet about it?" speed={20} />
+                        {/* Suggestion Block */}
+                        <div className="flex gap-3">
+                            <div className="space-y-1.5 w-full">
+                                <div className="rounded-2xl rounded-tl-none bg-white/5 p-4 text-sm text-zinc-300 leading-relaxed border border-white/5">
+                                    <span className="block text-xs text-purple-400 mb-2 font-medium flex items-center gap-1">
+                                        <Bot className="h-3 w-3" /> Suggestion
+                                    </span>
+                                    <Typewriter
+                                        text={suggestionItem?.description || "Formulating recommendations..."}
+                                        speed={20}
+                                    />
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
+                    </>
+                )}
             </div>
 
             <div className="mt-4 pt-3 border-t border-white/5">
-                <div className="flex items-center gap-2 text-xs text-zinc-600 animate-pulse">
-                    <div className="h-1.5 w-1.5 rounded-full bg-indigo-500" />
-                    <span>AI is analyzing real-time data...</span>
+                <div className="flex items-center gap-2 text-xs text-zinc-600">
+                    <div className={`h-1.5 w-1.5 rounded-full ${loading ? "bg-indigo-500 animate-pulse" : "bg-emerald-500"}`} />
+                    <span>{loading ? "AI is analyzing real-time data..." : "Analysis complete"}</span>
                 </div>
             </div>
         </div>

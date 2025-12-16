@@ -14,6 +14,7 @@ import {
     LogOut
 } from "lucide-react"
 import { signOut } from "next-auth/react"
+import { useDashboard } from "./dashboard-context"
 
 const items = [
     { title: "Overview", href: "/dashboard", icon: LayoutGrid },
@@ -25,6 +26,7 @@ const items = [
 
 export function LinearSidebar() {
     const pathname = usePathname()
+    const { subscription } = useDashboard()
 
     return (
         <div className="flex h-full flex-col justify-between p-4">
@@ -56,6 +58,34 @@ export function LinearSidebar() {
             </div>
 
             <div className="space-y-1">
+                {/* Subscription Card */}
+                {subscription && (
+                    <div className="mb-4 rounded-md border border-white/5 bg-white/5 p-3">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-zinc-300 capitalize">
+                                {subscription.tier} Plan
+                            </span>
+                            <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium ${subscription.status === 'active' || subscription.status === 'trialing'
+                                ? 'bg-emerald-500/10 text-emerald-400'
+                                : 'bg-yellow-500/10 text-yellow-500'
+                                }`}>
+                                {subscription.status === 'trialing' ? 'Trial' : subscription.status}
+                            </span>
+                        </div>
+                        {subscription.trialEndsAt && new Date(subscription.trialEndsAt) > new Date() && (
+                            <div className="mt-2 text-[10px] text-zinc-500">
+                                Trial ends in {Math.ceil((new Date(subscription.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
+                            </div>
+                        )}
+                        <Link
+                            href="/dashboard/settings"
+                            className="mt-3 block w-full rounded bg-indigo-500/10 py-1.5 text-center text-xs font-medium text-indigo-400 hover:bg-indigo-500/20"
+                        >
+                            Upgrade
+                        </Link>
+                    </div>
+                )}
+
                 <Link
                     href="/dashboard/settings"
                     className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-300"

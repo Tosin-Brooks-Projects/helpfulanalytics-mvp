@@ -1,36 +1,16 @@
 "use client"
 // Force resolution
-
-import { useEffect, useState } from "react"
 import { Users, Clock, MousePointer2, Activity, ArrowUpRight } from "lucide-react"
 import { LinearStatCard } from "./linear-stat-card"
 import { LinearAIPanel } from "./linear-ai-panel"
+import { useAnalytics } from "@/hooks/use-analytics"
 
 interface LinearMetricsOverviewProps {
     propertyId: string
 }
 
 export function LinearMetricsOverview({ propertyId }: LinearMetricsOverviewProps) {
-    const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
-
-    useEffect(() => {
-        async function fetchData() {
-            if (!propertyId) return
-            setLoading(true)
-            try {
-                const res = await fetch(`/api/analytics?propertyId=${propertyId}&reportType=overview`)
-                const json = await res.json()
-                setData(json)
-            } catch (error) {
-                console.error("Failed to fetch analytics", error)
-            } finally {
-                setLoading(false)
-            }
-        }
-
-        fetchData()
-    }, [propertyId])
+    const { data, loading } = useAnalytics(propertyId)
 
     if (loading) {
         return <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-pulse">

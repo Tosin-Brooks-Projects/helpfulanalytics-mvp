@@ -52,6 +52,13 @@ export async function GET() {
             }
         }
 
+        // Inject Demo Property for all users
+        properties.push({
+            id: "demo-property",
+            name: "Demo Property (Mock Data)",
+            accountId: "demo-account"
+        })
+
         return NextResponse.json({ properties })
     } catch (error) {
         console.error("Error fetching properties:", error)

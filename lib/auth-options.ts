@@ -62,12 +62,33 @@ export const authOptions: NextAuthOptions = {
             if (account?.provider === "google") {
                 try {
                     const { db } = await import("@/lib/firebase-admin")
-                    await db.collection("users").doc(user.id).set(
-                        {
-                            email: user.email,
+                    const userRef = db.collection("users").doc(user.id)
+                    const doc = await userRef.get()
+
+                    if (!doc.exists) {
+                        // New user
+                        await userRef.set(
+                            {
+                                email: user.email,
+                                name: user.name,
+                                image: user.image,
+                                lastSeen: new Date(),
+                                isOnboarded: false, // Flag as new
+                                tokens: {
+                                    google: {
+                                        accessToken: account.access_token,
+                                        refreshToken: account.refresh_token,
+                                        expiresAt: account.expires_at,
+                                    }
+                                }
+                            }
+                        )
+                    } else {
+                        // Existing user - update tokens/meta
+                        await userRef.set({
+                            lastSeen: new Date(),
                             name: user.name,
                             image: user.image,
-                            lastSeen: new Date(),
                             tokens: {
                                 google: {
                                     accessToken: account.access_token,
@@ -75,28 +96,45 @@ export const authOptions: NextAuthOptions = {
                                     expiresAt: account.expires_at,
                                 }
                             }
-                        },
-                        { merge: true },
-                    )
+                        }, { merge: true })
+                    }
                 } catch (error) {
                     console.error("Error saving user to Firestore", error)
                 }
             }
             return true
         },
-        async jwt({ token, account, user }) {
+        async jwt({ token, account, user, trigger, session }) {
             // Initial sign in
             if (account && user) {
                 console.log("DEBUG: Auth JWT Callback - Sign In", { userId: user.id })
-                // We already saved to DB in signIn, but we can also ensure it here if needed.
-                // For now, just keeping them in the token for client-side usage is fine too.
+
+                // Fetch onboarding status from DB to be sure
+                let isOnboarded = false
+                try {
+                    const { db } = await import("@/lib/firebase-admin")
+                    const doc = await db.collection("users").doc(user.id).get()
+                    if (doc.exists) {
+                        isOnboarded = doc.data()?.isOnboarded ?? false
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch onboarding status", e)
+                }
+
                 return {
                     ...token,
                     accessToken: account.access_token,
                     accessTokenExpires: account.expires_at! * 1000,
                     refreshToken: account.refresh_token,
                     userId: user.id,
+                    isOnboarded
                 }
+            }
+
+            // Handle session update (manual trigger from client)
+            if (trigger === "update" && session?.isOnboarded !== undefined) {
+                console.log("DEBUG: Auth JWT Callback - Update Triggered", session)
+                return { ...token, isOnboarded: session.isOnboarded }
             }
 
             // Return previous token if the access token has not expired yet
@@ -113,15 +151,23 @@ export const authOptions: NextAuthOptions = {
             session.accessToken = token.accessToken
             // @ts-ignore
             session.error = token.error
+            if (session.user) {
+                session.user.id = (token.userId as string) || (token.sub as string)
+                session.user.isOnboarded = token.isOnboarded as boolean
+            }
             // @ts-ignore
             session.userId = token.userId || token.sub
 
-            console.log("DEBUG: Auth Session Callback - Session UserId:", session.userId)
+            console.log("DEBUG: Auth Session Callback - Session UserId:", session.user.id)
             return session
         },
     },
     session: {
         strategy: "jwt",
+    },
+    pages: {
+        signIn: "/login",
+        error: "/login", // Also redirect errors to the login page
     },
     secret: process.env.NEXTAUTH_SECRET || "secret", // Fallback for dev
 }

@@ -34,7 +34,7 @@ export function LinearShell({ children }: LinearShellProps) {
             {/* Main Content */}
             <div className="flex-1 lg:pl-64">
                 <LinearHeader />
-                <main className="p-4 lg:p-10 max-w-[1600px] mx-auto animate-in fade-in duration-500 pt-16 lg:pt-10">
+                <main id="main-dashboard-content" className="p-4 lg:p-10 max-w-[1600px] mx-auto animate-in fade-in duration-500 pt-16 lg:pt-10">
                     {children}
                 </main>
             </div>

@@ -1,4 +1,5 @@
 import { LinearDashboardProvider } from "@/components/linear/dashboard-context"
+import { AIProvider } from "@/components/linear/ai-context"
 
 export default function LinearDashboardLayout({
     children,
@@ -7,7 +8,9 @@ export default function LinearDashboardLayout({
 }) {
     return (
         <LinearDashboardProvider>
-            {children}
+            <AIProvider>
+                {children}
+            </AIProvider>
         </LinearDashboardProvider>
     )
 }

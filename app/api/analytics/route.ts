@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions)
         // @ts-ignore
-        if (!session?.accessToken) {
+        if (!session) {
             return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
         }
 
@@ -20,10 +20,31 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: "Property ID is required" }, { status: 400 })
         }
 
+        let response
+
+        // Check for Demo Property
+        if (propertyId === "demo-property") {
+            switch (reportType) {
+                case "overview": response = await getMockOverviewData(); break;
+                case "pages": response = await getMockTopPagesData(); break;
+                case "devices": response = await getMockDevicesData(); break;
+                case "locations": response = await getMockLocationsData(); break;
+                case "acquisition": response = await getMockAcquisitionData(); break;
+                case "realtime": response = await getMockRealtimeData(); break;
+                default:
+                    return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
+            }
+            return NextResponse.json(response)
+        }
+
+        // Real Google Analytics Data Fetching
         // @ts-ignore
         const accessToken = session.accessToken
 
-        let response
+        // Check if access token exists for real data only
+        if (!accessToken) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+        }
 
         switch (reportType) {
             case "overview":
@@ -58,8 +79,120 @@ export async function GET(request: NextRequest) {
     }
 }
 
+// Mock Data Generators for Demo Property
+export async function getMockOverviewData() {
+    return {
+        metrics: {
+            sessions: 12543,
+            users: 8932,
+            pageViews: 45210,
+            bounceRate: 0.42,
+            avgSessionDuration: 185,
+        },
+        trafficSources: [
+            { source: "Direct", sessions: 4500, percentage: 35.8 },
+            { source: "Organic Search", sessions: 3800, percentage: 30.2 },
+            { source: "Social", sessions: 2100, percentage: 16.7 },
+            { source: "Referral", sessions: 1500, percentage: 11.9 },
+            { source: "Email", sessions: 643, percentage: 5.1 },
+        ],
+    }
+}
+
+async function getMockTopPagesData() {
+    const pages = [
+        { path: "/", title: "Home | Linear Analytics", views: 12000 },
+        { path: "/features", title: "Features - Powerful Insights", views: 8500 },
+        { path: "/pricing", title: "Pricing & Plans", views: 6200 },
+        { path: "/blog/analytics-tips", title: "5 Tips for Better Analytics", views: 4100 },
+        { path: "/docs/getting-started", title: "Documentation: Getting Started", views: 3500 },
+        { path: "/login", title: "Login", views: 2800 },
+        { path: "/signup", title: "Create Account", views: 2100 },
+        { path: "/blog/trends-2024", title: "Analytics Trends for 2024", views: 1800 },
+        { path: "/about", title: "About Us", views: 1500 },
+        { path: "/contact", title: "Contact Support", views: 1200 },
+    ]
+
+    const totalViews = pages.reduce((acc, p) => acc + p.views, 0)
+
+    return {
+        pages: pages.map(p => ({
+            pagePath: p.path,
+            pageTitle: p.title,
+            pageViews: p.views,
+            uniquePageViews: Math.floor(p.views * 0.8),
+            avgTimeOnPage: Math.floor(Math.random() * 60) + 30,
+            bounceRate: Number((Math.random() * 0.4 + 0.3).toFixed(2)),
+            percentage: (p.views / totalViews) * 100
+        })),
+        totalPageViews: totalViews
+    }
+}
+
+async function getMockDevicesData() {
+    return {
+        devices: [
+            { deviceCategory: "desktop", sessions: 6500, users: 5000, bounceRate: 0.38, avgSessionDuration: 210, percentage: 51.8 },
+            { deviceCategory: "mobile", sessions: 5200, users: 4100, bounceRate: 0.52, avgSessionDuration: 140, percentage: 41.4 },
+            { deviceCategory: "tablet", sessions: 843, users: 700, bounceRate: 0.45, avgSessionDuration: 180, percentage: 6.7 },
+        ],
+        browsers: [
+            { browser: "Chrome", sessions: 7200, percentage: 57.3 },
+            { browser: "Safari", sessions: 3100, percentage: 24.7 },
+            { browser: "Firefox", sessions: 1200, percentage: 9.5 },
+            { browser: "Edge", sessions: 800, percentage: 6.3 },
+            { browser: "Other", sessions: 243, percentage: 1.9 },
+        ],
+        totalSessions: 12543
+    }
+}
+
+async function getMockLocationsData() {
+    return {
+        countries: [
+            { country: "United States", countryCode: "US", sessions: 5400, percentage: 43 },
+            { country: "United Kingdom", countryCode: "GB", sessions: 1800, percentage: 14.3 },
+            { country: "Germany", countryCode: "DE", sessions: 1200, percentage: 9.5 },
+            { country: "Canada", countryCode: "CA", sessions: 950, percentage: 7.5 },
+            { country: "India", countryCode: "IN", sessions: 850, percentage: 6.7 },
+            { country: "France", countryCode: "FR", sessions: 700, percentage: 5.5 },
+            { country: "Australia", countryCode: "AU", sessions: 600, percentage: 4.7 },
+            { country: "Brazil", countryCode: "BR", sessions: 500, percentage: 3.9 },
+            { country: "Japan", countryCode: "JP", sessions: 350, percentage: 2.7 },
+            { country: "Netherlands", countryCode: "NL", sessions: 193, percentage: 1.5 },
+        ],
+        totalSessions: 12543
+    }
+}
+
+async function getMockAcquisitionData() {
+    return {
+        sources: [
+            { source: "google", medium: "organic", sessions: 4200, users: 3100, newUsers: 2800, bounceRate: 0.41, avgSessionDuration: 190, percentage: 33.4 },
+            { source: "(direct)", medium: "(none)", sessions: 3800, users: 2900, newUsers: 1500, bounceRate: 0.35, avgSessionDuration: 220, percentage: 30.2 },
+            { source: "twitter.com", medium: "referral", sessions: 1200, users: 950, newUsers: 800, bounceRate: 0.48, avgSessionDuration: 150, percentage: 9.5 },
+            { source: "newsletter", medium: "email", sessions: 950, users: 800, newUsers: 200, bounceRate: 0.32, avgSessionDuration: 240, percentage: 7.5 },
+            { source: "linkedin.com", medium: "referral", sessions: 850, users: 700, newUsers: 600, bounceRate: 0.55, avgSessionDuration: 170, percentage: 6.7 },
+        ],
+        totalSessions: 12543
+    }
+}
+
+async function getMockRealtimeData() {
+    return {
+        activeUsers: Math.floor(Math.random() * 50) + 20, // Random between 20-70
+        pages: [
+            { path: "/", title: "Home", active: Math.floor(Math.random() * 15) + 5 },
+            { path: "/features", title: "Features", active: Math.floor(Math.random() * 8) + 2 },
+            { path: "/pricing", title: "Pricing", active: Math.floor(Math.random() * 5) + 1 },
+            { path: "/blog/analytics-tips", title: "Blog Post", active: Math.floor(Math.random() * 4) + 1 },
+            { path: "/docs", title: "Documentation", active: Math.floor(Math.random() * 3) + 1 },
+        ]
+    }
+}
+
 // Helper to run GA4 reports via fetch
-async function runReport(accessToken: string, propertyId: string, requestBody: any) {
+export async function runReport(accessToken: string, propertyId: string, requestBody: any) {
     // propertyId coming from DB/Frontend is usually 'properties/12345' (Full Resource Name)
     // If it *doesn't* start with 'properties/', we might need to add it, but based on our setup it does.
     // The API expects: https://analyticsdata.googleapis.com/v1beta/properties/12345:runReport
@@ -84,8 +217,8 @@ async function runReport(accessToken: string, propertyId: string, requestBody: a
     return await response.json()
 }
 
-async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
-    const [metricsResponse, trafficResponse] = await Promise.all([
+export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
+    const [metricsResponse, trafficResponse, pagesResponse, locationsResponse] = await Promise.all([
         runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             metrics: [
@@ -103,12 +236,29 @@ async function getOverviewData(accessToken: string, propertyId: string, startDat
             orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
             limit: 10,
         }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
+            metrics: [{ name: "screenPageViews" }],
+            orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+            limit: 10,
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "country" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit: 10,
+        }),
     ])
 
     const metrics = metricsResponse.rows?.[0]?.metricValues || []
     const trafficSources = trafficResponse.rows || []
+    const pageRows = pagesResponse.rows || []
+    const countryRows = locationsResponse.rows || []
 
     const totalSessions = Number.parseInt(metrics[0]?.value || "0")
+    const totalPageViews = Number.parseInt(metrics[2]?.value || "0")
 
     return {
         metrics: {
@@ -123,6 +273,17 @@ async function getOverviewData(accessToken: string, propertyId: string, startDat
             sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
             percentage:
                 totalSessions > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalSessions) * 100 : 0,
+        })),
+        topPages: pageRows.map((row: any) => ({
+            path: row.dimensionValues?.[0]?.value || "/",
+            title: row.dimensionValues?.[1]?.value || "Untitled",
+            views: Number.parseInt(row.metricValues?.[0]?.value || "0"),
+            percentage: totalPageViews > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalPageViews) * 100 : 0,
+        })),
+        topCountries: countryRows.map((row: any) => ({
+            country: row.dimensionValues?.[0]?.value || "Unknown",
+            sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
+            percentage: totalSessions > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalSessions) * 100 : 0,
         })),
     }
 }
