@@ -3,7 +3,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Use dummy key for build/dev if missing, but logging warning in dev
+const resendKey = process.env.RESEND_API_KEY || "re_dummy_key_for_build"
+const resend = new Resend(resendKey);
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
@@ -15,7 +17,7 @@ export async function POST(req: Request) {
     try {
         const formData = await req.formData();
         const file = formData.get('file') as Blob;
-        
+
         if (!file) {
             return NextResponse.json({ error: 'No file provided' }, { status: 400 });
         }
