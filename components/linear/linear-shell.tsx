@@ -13,7 +13,7 @@ export function LinearShell({ children }: LinearShellProps) {
     const [open, setOpen] = useState(false)
 
     return (
-        <div className="flex min-h-screen bg-[#09090b] text-zinc-100 selection:bg-indigo-500/30">
+        <div className="flex min-h-screen bg-[#09090b] text-zinc-100 selection:bg-amber-500/30">
             {/* Desktop Sidebar */}
             <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-white/5 bg-[#09090b]/80 backdrop-blur-xl hidden lg:block">
                 <LinearSidebar />

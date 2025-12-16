@@ -70,7 +70,7 @@ export function AddPropertyModal({ children }: { children: React.ReactNode }) {
                 <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar space-y-2 mt-4">
                     {contextLoading ? (
                         <div className="flex flex-col items-center justify-center py-8 gap-2">
-                            <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
+                            <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
                             <p className="text-xs text-zinc-500">Loading properties...</p>
                         </div>
                     ) : availableProperties.length === 0 ? (
@@ -86,7 +86,7 @@ export function AddPropertyModal({ children }: { children: React.ReactNode }) {
                                 className={`group flex items-center justify-between rounded-md border border-white/5 bg-white/5 p-3 cursor-pointer transition-colors hover:bg-white/10 ${submitting ? 'opacity-50 pointer-events-none' : ''}`}
                             >
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className="h-8 w-8 rounded bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-xs shrink-0">
+                                    <div className="h-8 w-8 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
                                         {prop.name.charAt(0)}
                                     </div>
                                     <div className="min-w-0">

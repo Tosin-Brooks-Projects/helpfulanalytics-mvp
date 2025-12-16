@@ -23,7 +23,7 @@ export function LinearStatCard({ title, value, icon: Icon, trend, chartData, cla
             className
         )}>
             {/* Glow Effect */}
-            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-indigo-500/10 blur-[50px] transition-all duration-500 group-hover:bg-indigo-500/20" />
+            <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/10 blur-[50px] transition-all duration-500 group-hover:bg-amber-500/20" />
 
             <div className="relative z-10 flex flex-col justify-between h-full gap-4">
                 <div className="flex items-center justify-between">

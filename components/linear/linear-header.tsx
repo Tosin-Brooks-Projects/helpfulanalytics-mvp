@@ -85,7 +85,7 @@ export function LinearHeader() {
                     <Bell className="h-4 w-4" />
                 </Link>
                 <Link href="/dashboard/profile">
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 ring-2 ring-[#09090b] cursor-pointer hover:ring-indigo-500/50 transition-all" />
+                    <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 ring-2 ring-[#09090b] cursor-pointer hover:ring-amber-500/50 transition-all" />
                 </Link>
             </div>
         </header>

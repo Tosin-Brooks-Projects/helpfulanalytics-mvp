@@ -56,7 +56,7 @@ export function BillingSettings() {
                             className={cn(
                                 "flex flex-col justify-between rounded-xl border p-6 transition-all",
                                 isCurrent
-                                    ? "border-indigo-500/50 bg-indigo-500/5 shadow-[0_0_20px_-12px_rgba(99,102,241,0.5)]"
+                                    ? "border-amber-500/50 bg-amber-500/5 shadow-[0_0_20px_-12px_rgba(245,158,11,0.5)]"
                                     : "border-white/5 bg-white/5 hover:border-white/10"
                             )}
                         >
@@ -64,7 +64,7 @@ export function BillingSettings() {
                                 <div className="flex items-center justify-between">
                                     <h4 className="font-medium text-zinc-100">{tier.title}</h4>
                                     {isCurrent && (
-                                        <span className="flex items-center gap-1 rounded-full bg-indigo-500/20 px-2 py-0.5 text-[10px] font-medium text-indigo-400">
+                                        <span className="flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-medium text-amber-400">
                                             <Star className="h-3 w-3 fill-current" /> Current
                                         </span>
                                     )}
@@ -76,7 +76,7 @@ export function BillingSettings() {
                                 <ul className="mt-4 space-y-2">
                                     {tier.features.map((feature) => (
                                         <li key={feature} className="flex items-start gap-2 text-xs text-zinc-400">
-                                            <Check className="h-3.5 w-3.5 shrink-0 text-indigo-400" />
+                                            <Check className="h-3.5 w-3.5 shrink-0 text-amber-400" />
                                             {feature}
                                         </li>
                                     ))}
@@ -87,7 +87,7 @@ export function BillingSettings() {
                                 {isCurrent ? (
                                     <button
                                         disabled
-                                        className="w-full rounded-md border border-indigo-500/30 bg-indigo-500/10 py-2 text-xs font-medium text-indigo-400 cursor-default"
+                                        className="w-full rounded-md border border-amber-500/30 bg-amber-500/10 py-2 text-xs font-medium text-amber-400 cursor-default"
                                     >
                                         Current Plan
                                     </button>

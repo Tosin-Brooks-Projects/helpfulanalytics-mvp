@@ -36,17 +36,9 @@ export async function POST(req: Request) {
         )
 
         const userId = session.metadata?.userId
-        console.log("[WEBHOOK] userId:", userId)
-
         if (userId) {
             const priceId = subscription.items.data[0].price.id
-            console.log("[WEBHOOK] Received Price ID:", priceId)
-
-            // Log known tiers for debugging
-            console.log("[WEBHOOK] Configured Tiers:", pricingData.map(t => ({ title: t.title, priceId: t.priceId })))
-
             const tier = pricingData.find(t => t.priceId === priceId)
-            console.log("[WEBHOOK] Matched Tier:", tier?.title)
 
             await db.collection("users").doc(userId).set({
                 subscription: {
@@ -58,7 +50,6 @@ export async function POST(req: Request) {
                     stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000)
                 }
             }, { merge: true })
-            console.log("[WEBHOOK] DB Updated")
         }
     }
 
@@ -85,7 +76,6 @@ export async function POST(req: Request) {
                         stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000)
                     }
                 }, { merge: true })
-                console.log("[WEBHOOK] Renewal Updated for User", doc.id)
             }
         }
     }
@@ -112,7 +102,6 @@ export async function POST(req: Request) {
                     stripeCurrentPeriodEnd: periodEnd
                 }
             }, { merge: true })
-            console.log("[WEBHOOK] Subscription Status Updated")
         }
     }
 

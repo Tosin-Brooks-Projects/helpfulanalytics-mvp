@@ -32,7 +32,7 @@ export function LinearSidebar() {
         <div className="flex h-full flex-col justify-between p-4">
             <div className="space-y-6">
                 <div className="flex items-center gap-2 px-2 py-1">
-                    <div className="flex h-6 w-6 items-center justify-center rounded bg-indigo-500/20 text-indigo-400">
+                    <div className="flex h-6 w-6 items-center justify-center rounded bg-amber-500/20 text-amber-400">
                         <Layers className="h-4 w-4" />
                     </div>
                     <span className="text-sm font-medium tracking-tight text-zinc-100">Helpful Analytics</span>
@@ -79,7 +79,7 @@ export function LinearSidebar() {
                         )}
                         <Link
                             href="/dashboard/settings"
-                            className="mt-3 block w-full rounded bg-indigo-500/10 py-1.5 text-center text-xs font-medium text-indigo-400 hover:bg-indigo-500/20"
+                            className="mt-3 block w-full rounded bg-amber-500/10 py-1.5 text-center text-xs font-medium text-amber-400 hover:bg-amber-500/20"
                         >
                             Upgrade
                         </Link>

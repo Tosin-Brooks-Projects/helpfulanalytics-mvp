@@ -64,7 +64,7 @@ export function LinearMetricsOverview({ propertyId }: LinearMetricsOverviewProps
                             {data.trafficSources?.map((source: any, i: number) => (
                                 <div key={i} className="flex items-center justify-between group">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-8 w-8 items-center justify-center rounded bg-white/5 text-zinc-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-400 transition-colors">
+                                        <div className="flex h-8 w-8 items-center justify-center rounded bg-white/5 text-zinc-400 group-hover:bg-amber-500/20 group-hover:text-amber-400 transition-colors">
                                             <ArrowUpRight className="h-4 w-4" />
                                         </div>
                                         <div>
