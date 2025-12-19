@@ -1,8 +1,9 @@
 "use client"
 
-import { Bell, Lock, Plus, Zap, Users, Globe, BarChart3 } from "lucide-react"
+import { Bell, Lock, Plus, Zap, Users, Globe, BarChart3, User } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useSession } from "next-auth/react"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePickerWithRange } from "./date-range-picker"
@@ -14,6 +15,7 @@ import { CommandPalette } from "./command-palette"
 import { cn } from "@/lib/utils"
 
 export function LinearHeader() {
+    const { data: session } = useSession()
     const { properties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription } = useDashboard()
     const pathname = usePathname()
 
@@ -121,7 +123,13 @@ export function LinearHeader() {
                 )}
 
                 <Link href="/dashboard/profile">
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 ring-2 ring-white cursor-pointer hover:ring-amber-500/50 transition-all shadow-sm" />
+                    <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 ring-2 ring-white cursor-pointer hover:ring-amber-500/50 transition-all shadow-sm overflow-hidden flex items-center justify-center">
+                        {session?.user?.image ? (
+                            <img src={session.user.image} alt={session.user.name || "User"} className="h-full w-full object-cover" />
+                        ) : (
+                            <User className="h-4 w-4 text-white" />
+                        )}
+                    </div>
                 </Link>
             </div>
         </header>

@@ -3,59 +3,63 @@
 import { motion } from "framer-motion";
 import { ShinyButton } from "@/components/ui/shiny-button";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export function Hero() {
+    const { data: session } = useSession();
+
     return (
         <div className="relative isolate overflow-hidden">
             <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
                 <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8 text-center lg:text-left">
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                        className="mt-24 sm:mt-32 lg:mt-16"
-                    >
-                        <div className="inline-flex items-center gap-x-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-sm font-semibold leading-6 text-primary ring-1 ring-inset ring-primary/20">
-                            <span className="flex items-center gap-1">
-                                Latest Version v2.0 <ArrowRight className="h-4 w-4" />
-                            </span>
-                        </div>
-                    </motion.div>
                     <motion.h1
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="mt-10 text-4xl font-bold tracking-tight text-foreground sm:text-6xl"
+                        className="mt-24 sm:mt-32 lg:mt-16 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl leading-[1.1]"
                     >
-                        Analytics that
-                        <span className="text-primary"> empower </span>
-                        your business
+                        Stop Wrestling With
+                        <br />
+                        <motion.span
+                            animate={{
+                                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                            }}
+                            transition={{
+                                duration: 5,
+                                repeat: Infinity,
+                                ease: "linear",
+                            }}
+                            className="bg-gradient-to-r from-primary via-[#FBBC05] to-primary bg-[length:200%_auto] bg-clip-text text-transparent inline-block pb-2"
+                        >
+                            Google Analytics
+                        </motion.span>
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="mt-6 text-lg leading-8 text-muted-foreground"
+                        className="mt-8 text-lg leading-8 text-slate-600 max-w-xl mx-auto lg:mx-0"
                     >
-                        Gain deep insights into your audience with our state-of-the-art dashboard. Real-time data, predictive modeling, and seamless integration.
+                        Connect your Google Analytics in 60 seconds and get the clear dashboard you've been wishing for. You're stuck with GA4. We get it. We don't replace it - we just make it actually useful.
                     </motion.p>
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                        className="mt-10 flex items-center justify-center lg:justify-start gap-x-6"
-                    >
-                        <Link href="/login">
-                            <ShinyButton className="h-12 px-8">Get Started</ShinyButton>
-                        </Link>
-                        <Link
-                            href="#features"
-                            className="text-sm font-semibold leading-6 text-foreground hover:text-primary transition-colors"
+                    {!session && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
+                            className="mt-10 flex items-center justify-center lg:justify-start gap-x-6"
                         >
-                            Learn more <span aria-hidden="true">→</span>
-                        </Link>
-                    </motion.div>
+                            <Link href="/login">
+                                <ShinyButton className="h-12 px-8">Get Started</ShinyButton>
+                            </Link>
+                            <Link
+                                href="#features"
+                                className="text-sm font-semibold leading-6 text-slate-900 hover:text-primary transition-colors"
+                            >
+                                Learn more <span aria-hidden="true">→</span>
+                            </Link>
+                        </motion.div>
+                    )}
                 </div>
                 <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32">
                     <motion.div
@@ -66,7 +70,7 @@ export function Hero() {
                     >
                         <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 dark:bg-gray-100/10 dark:ring-gray-100/20 lg:-m-4 lg:rounded-2xl lg:p-4">
                             <img
-                                src="https://tailwindui.com/img/component-images/dark-project-app-screenshot.png"
+                                src="/dashboard-preview.png"
                                 alt="App screenshot"
                                 width={2432}
                                 height={1442}

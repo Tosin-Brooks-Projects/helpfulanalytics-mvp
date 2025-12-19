@@ -5,36 +5,25 @@ import { BarChart3, Globe2, Zap, Shield, Users, ArrowUpRight } from "lucide-reac
 
 const features = [
     {
-        name: "Real-time Analytics",
-        description: "Watch your data flow in as it happens. No delays, no caching.",
+        name: "Zero Migration 🔌",
+        description: "Connect your Google Analytics in 60 seconds. No tracking code changes. Uses your current GA4 tracking code.",
         icon: Zap,
-        className: "col-span-1 md:col-span-2 lg:col-span-2",
         color: "text-[#F9AB00]", // Yellow
         bg: "bg-[#F9AB00]/10",
     },
     {
-        name: "Global Coverage",
-        description: "Track users from every corner of the world with precision.",
-        icon: Globe2,
-        className: "col-span-1 md:col-span-1 lg:col-span-1",
+        name: "Plain English Dashboard 📊",
+        description: "Your GA4 data, translated. Instantly see what's working in simple terms, not technical jargon.",
+        icon: BarChart3,
         color: "text-[#4285F4]", // Blue
         bg: "bg-[#4285F4]/10",
     },
     {
-        name: "Advanced Security",
-        description: "Enterprise-grade encryption keeps your data safe and sound.",
-        icon: Shield,
-        className: "col-span-1 md:col-span-1 lg:col-span-1",
+        name: "Built for Real Businesses 👤",
+        description: "Made for business owners and marketers, not data analysts. If GA4 confuses you, you'll love this.",
+        icon: Users,
         color: "text-[#34A853]", // Green
         bg: "bg-[#34A853]/10",
-    },
-    {
-        name: "Team Collaboration",
-        description: "Share insights with your team instantly. Built-in comments and roles.",
-        icon: Users,
-        className: "col-span-1 md:col-span-2 lg:col-span-2",
-        color: "text-[#EA4335]", // Red
-        bg: "bg-[#EA4335]/10",
     },
 ];
 
@@ -65,7 +54,7 @@ export function Features() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.4, delay: index * 0.05 }}
                             whileHover={{ y: -5 }}
-                            className={`relative overflow-hidden rounded-3xl bg-secondary/50 p-8 ring-1 ring-inset ring-foreground/10 hover:bg-secondary/80 transition-colors ${feature.className}`}
+                            className="relative overflow-hidden rounded-3xl bg-secondary/50 p-8 ring-1 ring-inset ring-foreground/10 hover:bg-secondary/80 transition-colors"
                         >
                             <div className="flex items-center justify-between gap-x-4">
                                 <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${feature.bg}`}>

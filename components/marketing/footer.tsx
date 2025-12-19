@@ -1,31 +1,28 @@
 import Link from "next/link"
 
 export function Footer() {
+    const currentYear = new Date().getFullYear();
+
     return (
-        <footer className="container py-6 md:px-8 md:py-0">
-            <div className="flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
-                <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-                    Built by{" "}
-                    <a
-                        href="https://twitter.com/helpfulanalytics"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-medium underline underline-offset-4"
-                    >
-                        HelpfulAnalytics
-                    </a>
-                    . The source code is available on{" "}
-                    <a
-                        href="https://github.com/helpfulanalytics"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="font-medium underline underline-offset-4"
-                    >
-                        GitHub
-                    </a>
-                    .
-                </p>
+        <footer className="border-t border-foreground/5 bg-background">
+            <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
+                <div className="flex justify-center space-x-6 md:order-2">
+                    <Link href="/about" className="text-sm leading-6 text-muted-foreground hover:text-primary transition-colors">
+                        About
+                    </Link>
+                    <Link href="/privacy" className="text-sm leading-6 text-muted-foreground hover:text-primary transition-colors">
+                        Privacy Policy
+                    </Link>
+                    <Link href="/terms" className="text-sm leading-6 text-muted-foreground hover:text-primary transition-colors">
+                        Terms of Service
+                    </Link>
+                </div>
+                <div className="mt-8 md:order-1 md:mt-0">
+                    <p className="text-center text-xs leading-5 text-muted-foreground">
+                        &copy; {currentYear} Helpful Analytics. All rights reserved.
+                    </p>
+                </div>
             </div>
         </footer>
-    )
+    );
 }

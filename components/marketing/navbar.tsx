@@ -17,21 +17,18 @@ export function Navbar() {
         >
             <div className="flex h-16 w-full max-w-5xl items-center justify-between rounded-full bg-white/70 px-6 shadow-[0_8px_32px_0_rgba(249,171,0,0.07)] backdrop-blur-xl border border-white/20">
                 <div className="flex items-center">
-                    <Link href="/" className="mr-8 flex items-center space-x-2">
-                        {/* GA Logo Style: Rainbow gradient */}
-                        <div className="flex items-center justify-center h-8 w-8 rounded-lg bg-white shadow-lg shadow-gray-200 ring-1 ring-gray-100 overflow-hidden">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5">
-                                <path fill="#F9AB00" d="M3.5 13.5h5v5h-5z" />
-                                <path fill="#E37400" d="M10.5 8.5h5v10h-5z" />
-                                <path fill="#F9AB00" d="M17.5 3.5h5v15h-5z" /> {/* Using amber/orange for the bars */}
-                            </svg>
-                        </div>
-                        <span className="hidden font-bold text-slate-800 sm:inline-block text-lg tracking-tight">
-                            <span className="bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC05] to-[#34A853] text-transparent bg-clip-text">Helpful</span>
-                            <span>Analytics</span>
+                    <Link href="/" className="mr-8 flex items-center group">
+                        <span className="font-bold text-slate-900 text-xl tracking-tight">
+                            Helpful<span className="text-primary font-semibold">Analytics</span>
                         </span>
                     </Link>
                     <nav className="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-600">
+                        <Link
+                            href="/about"
+                            className="transition-colors hover:text-primary"
+                        >
+                            About
+                        </Link>
                         <Link
                             href="#features"
                             className="transition-colors hover:text-primary"
