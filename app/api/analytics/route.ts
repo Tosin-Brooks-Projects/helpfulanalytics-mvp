@@ -87,6 +87,7 @@ export async function getMockOverviewData() {
             users: 8932,
             pageViews: 45210,
             bounceRate: 0.42,
+            engagementRate: 0.58,
             avgSessionDuration: 185,
         },
         trafficSources: [
@@ -226,6 +227,7 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
                 { name: "totalUsers" },
                 { name: "screenPageViews" },
                 { name: "bounceRate" },
+                { name: "engagementRate" },
                 { name: "averageSessionDuration" },
             ],
         }),
@@ -266,7 +268,8 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
             users: Number.parseInt(metrics[1]?.value || "0"),
             pageViews: Number.parseInt(metrics[2]?.value || "0"),
             bounceRate: Number.parseFloat(metrics[3]?.value || "0"),
-            avgSessionDuration: Number.parseFloat(metrics[4]?.value || "0"),
+            engagementRate: Number.parseFloat(metrics[4]?.value || "0"),
+            avgSessionDuration: Number.parseFloat(metrics[5]?.value || "0"),
         },
         trafficSources: trafficSources.map((row: any) => ({
             source: row.dimensionValues?.[0]?.value || "Unknown",

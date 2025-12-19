@@ -1,6 +1,6 @@
 "use strict";
 
-import { motion, type AnimationProps } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 const animationProps = {
@@ -22,9 +22,9 @@ const animationProps = {
             mass: 0.5,
         },
     },
-} as AnimationProps;
+} as HTMLMotionProps<"button">;
 
-interface ShinyButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
+interface ShinyButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
     className?: string;
 }

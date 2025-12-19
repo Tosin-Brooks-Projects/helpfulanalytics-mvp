@@ -27,6 +27,8 @@ interface DashboardContextType {
     dateRange: DateRange | undefined
     setDateRange: (date: DateRange | undefined) => void
     subscription: Subscription | null
+    sidebarCollapsed: boolean
+    setSidebarCollapsed: (collapsed: boolean) => void
 }
 
 const LinearDashboardContext = createContext<DashboardContextType | undefined>(undefined)
@@ -41,6 +43,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
         to: new Date(),
     })
     const [subscription, setSubscription] = useState<Subscription | null>(null)
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const router = useRouter()
 
     useEffect(() => {
@@ -110,7 +113,18 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
     }, [selectedProperty])
 
     return (
-        <LinearDashboardContext.Provider value={{ properties, availableProperties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription }}>
+        <LinearDashboardContext.Provider value={{
+            properties,
+            availableProperties,
+            selectedProperty,
+            setSelectedProperty,
+            loading,
+            dateRange,
+            setDateRange,
+            subscription,
+            sidebarCollapsed,
+            setSidebarCollapsed
+        }}>
             {children}
         </LinearDashboardContext.Provider>
     )

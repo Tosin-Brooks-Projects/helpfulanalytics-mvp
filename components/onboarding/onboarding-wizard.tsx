@@ -89,18 +89,18 @@ export function OnboardingWizard() {
     return (
         <div className="relative">
             {/* Steps Indicator */}
-            <div className="mb-8 flex justify-center gap-4">
+            <div className="mb-10 flex justify-center gap-4">
                 {[1, 2, 3].map((i) => (
                     <motion.div
                         key={i}
                         animate={{
-                            backgroundColor: step >= i ? "#6366f1" : "rgba(255,255,255,0.05)",
-                            color: step >= i ? "#ffffff" : "rgba(255,255,255,0.4)",
-                            borderColor: step >= i ? "#6366f1" : "rgba(255,255,255,0.1)"
+                            backgroundColor: step >= i ? "#f59e0b" : "#f4f4f5",
+                            color: step >= i ? "#ffffff" : "#a1a1aa",
+                            borderColor: step >= i ? "#f59e0b" : "#e4e4e7"
                         }}
-                        className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-medium transition-colors`}
+                        className={`flex h-10 w-10 items-center justify-center rounded-full border text-sm font-bold shadow-sm transition-colors`}
                     >
-                        {step > i ? <Check className="h-4 w-4" /> : i}
+                        {step > i ? <Check className="h-5 w-5 stroke-[3px]" /> : i}
                     </motion.div>
                 ))}
             </div>
@@ -114,54 +114,54 @@ export function OnboardingWizard() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.3 }}
-                            className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl"
+                            className="bg-white border border-zinc-200 rounded-3xl p-10 shadow-xl"
                         >
                             <div className="flex flex-col items-center text-center">
-                                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/20 text-indigo-400 shadow-inner">
+                                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-600 shadow-inner">
                                     <Sparkles className="h-8 w-8" />
                                 </div>
 
-                                <h2 className="text-2xl font-medium text-white">Connect Google Analytics</h2>
-                                <p className="mt-2 text-zinc-400">
-                                    We need read-only access to visualize your data.
+                                <h2 className="text-3xl font-bold tracking-tight text-zinc-900">Connect Google Analytics</h2>
+                                <p className="mt-2 text-zinc-500">
+                                    We need read-only access to visualize your data insights.
                                 </p>
 
                                 <div className="mt-8 grid w-full gap-4 text-left">
-                                    <div className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/5 p-4">
-                                        <div className="mt-0.5 rounded-full bg-emerald-500/10 p-1 text-emerald-400">
+                                    <div className="flex items-start gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/50 p-5 transition-colors hover:bg-zinc-50">
+                                        <div className="mt-0.5 rounded-full bg-emerald-500/10 p-1.5 text-emerald-600">
                                             <ShieldCheck className="h-4 w-4" />
                                         </div>
                                         <div>
-                                            <h3 className="text-sm font-medium text-zinc-200">Privacy First</h3>
-                                            <p className="text-xs text-zinc-500 mt-0.5">We never store your personal user data. Read-only access.</p>
+                                            <h3 className="text-sm font-bold text-zinc-900">Privacy First</h3>
+                                            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">We never store your personal user data. Read-only access ensures complete security.</p>
                                         </div>
                                     </div>
-                                    <div className="flex items-start gap-3 rounded-xl border border-white/5 bg-white/5 p-4">
-                                        <div className="mt-0.5 rounded-full bg-blue-500/10 p-1 text-blue-400">
+                                    <div className="flex items-start gap-3 rounded-2xl border border-zinc-100 bg-zinc-50/50 p-5 transition-colors hover:bg-zinc-50">
+                                        <div className="mt-0.5 rounded-full bg-blue-500/10 p-1.5 text-blue-600">
                                             <BarChart2 className="h-4 w-4" />
                                         </div>
                                         <div>
-                                            <h3 className="text-sm font-medium text-zinc-200">Actionable Insights</h3>
-                                            <p className="text-xs text-zinc-500 mt-0.5">Instantly get reports on your traffic and performance.</p>
+                                            <h3 className="text-sm font-bold text-zinc-900">Actionable Insights</h3>
+                                            <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Instantly generate high-level reports on your traffic and performance trends.</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="mt-8 w-full">
-                                    <div className="mb-4 flex items-center justify-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 py-1.5 px-3">
+                                    <div className="mb-6 flex items-center justify-center gap-2 rounded-full border border-amber-200 bg-amber-50 py-2 px-4">
                                         <span className="relative flex h-2 w-2">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
                                         </span>
-                                        <span className="text-[10px] font-medium text-indigo-300 uppercase tracking-wide">Includes 30-Day Free Trial</span>
+                                        <span className="text-[10px] font-bold text-amber-700 uppercase tracking-widest">Includes 30-Day Free Trial</span>
                                     </div>
                                     <Button
                                         onClick={handleConnect}
                                         disabled={loading}
-                                        className="w-full bg-white text-black hover:bg-zinc-200 h-10 font-medium"
+                                        className="w-full bg-zinc-900 text-white hover:bg-zinc-800 h-12 rounded-2xl font-bold shadow-lg shadow-zinc-200 transition-all active:scale-[0.98]"
                                     >
-                                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Connect Account
+                                        {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                                        Connect Google Account
                                     </Button>
                                 </div>
                             </div>
@@ -175,45 +175,51 @@ export function OnboardingWizard() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.3 }}
-                            className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl h-[500px] flex flex-col"
+                            className="bg-white border border-zinc-200 rounded-3xl p-8 shadow-xl h-[550px] flex flex-col"
                         >
-                            <div className="mb-4">
-                                <h2 className="text-xl font-medium text-white">Select Property</h2>
-                                <p className="text-sm text-zinc-400">Choose the GA4 property to track.</p>
+                            <div className="mb-6">
+                                <h2 className="text-2xl font-bold tracking-tight text-zinc-900">Select Property</h2>
+                                <p className="text-sm text-zinc-500">Choose the GA4 property you want to track.</p>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-2">
+                            <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-3">
                                 {properties.length === 0 && !loading ? (
-                                    <div className="flex flex-col items-center justify-center h-full text-center">
-                                        <p className="text-zinc-500 mb-4">No GA4 properties found.</p>
-                                        <Button variant="outline" onClick={fetchProperties} className="border-white/10 text-zinc-300 hover:bg-white/5">Retry</Button>
+                                    <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                                        <div className="mb-4 rounded-full bg-zinc-100 p-4">
+                                            <BarChart2 className="h-8 w-8 text-zinc-400" />
+                                        </div>
+                                        <p className="text-zinc-500 mb-6 font-medium">No GA4 properties found on this account.</p>
+                                        <Button variant="outline" onClick={fetchProperties} className="border-zinc-200 text-zinc-600 hover:bg-zinc-50 rounded-xl px-8 font-bold">Try Again</Button>
                                     </div>
                                 ) : (
                                     properties.map((prop: any) => (
                                         <motion.div
                                             key={prop.id}
-                                            whileHover={{ scale: 1.01, backgroundColor: "rgba(255,255,255,0.08)" }}
+                                            whileHover={{ scale: 1.01, backgroundColor: "#f9fafb", borderColor: "#e4e4e7" }}
                                             whileTap={{ scale: 0.99 }}
-                                            className="group flex items-center justify-between rounded-xl border border-white/5 bg-white/5 p-3 cursor-pointer transition-all"
+                                            className="group flex items-center justify-between rounded-2xl border border-zinc-100 bg-white p-4 cursor-pointer transition-all shadow-sm"
                                             onClick={() => handleSelectProperty(prop)}
                                         >
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                <div className="h-8 w-8 rounded-lg bg-orange-500/20 text-orange-500 flex items-center justify-center font-bold text-sm shrink-0">
+                                            <div className="flex items-center gap-4 overflow-hidden">
+                                                <div className="h-10 w-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-sm transition-transform group-hover:rotate-3">
                                                     {prop.name.charAt(0)}
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <div className="font-medium truncate text-zinc-200 group-hover:text-white transition-colors">{prop.name}</div>
-                                                    <div className="text-[10px] text-zinc-500">ID: {prop.id.split('/')[1]}</div>
+                                                    <div className="font-bold truncate text-zinc-900 group-hover:text-amber-600 transition-colors uppercase tracking-tight">{prop.name}</div>
+                                                    <div className="text-[10px] text-zinc-400 font-mono tracking-wider">ID: {prop.id.split('/')[1]}</div>
                                                 </div>
                                             </div>
-                                            <ChevronRight className="h-4 w-4 text-zinc-600 group-hover:text-zinc-300 transition-colors" />
+                                            <ChevronRight className="h-5 w-5 text-zinc-300 group-hover:text-amber-500 transition-all group-hover:translate-x-1" />
                                         </motion.div>
                                     ))
                                 )}
                                 {loading && (
-                                    <div className="flex flex-col items-center justify-center h-full gap-2">
-                                        <Loader2 className="h-6 w-6 animate-spin text-indigo-500" />
-                                        <p className="text-xs text-zinc-500">Loading properties...</p>
+                                    <div className="flex flex-col items-center justify-center h-full gap-4">
+                                        <div className="relative">
+                                            <div className="h-12 w-12 rounded-full border-4 border-zinc-100 animate-pulse"></div>
+                                            <Loader2 className="h-12 w-12 animate-spin text-amber-500 absolute inset-0" />
+                                        </div>
+                                        <p className="text-sm font-bold text-zinc-500 uppercase tracking-widest animate-pulse">Fetching Properties</p>
                                     </div>
                                 )}
                             </div>
@@ -226,21 +232,25 @@ export function OnboardingWizard() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.4 }}
-                            className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-xl text-center"
+                            className="bg-white border border-zinc-200 rounded-3xl p-10 shadow-xl text-center"
                         >
                             <div className="flex flex-col items-center">
-                                <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 ring-1 ring-emerald-500/40">
-                                    <Check className="h-10 w-10" />
+                                <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-100 ring-4 ring-emerald-50">
+                                    <Check className="h-12 w-12 stroke-[3px]" />
                                 </div>
-                                <h2 className="text-2xl font-medium text-white">You&apos;re All Set!</h2>
-                                <p className="mt-2 text-zinc-400 max-w-xs mx-auto">
-                                    Your dashboard is ready. We&apos;ve started syncing your data in the background.
+                                <h2 className="text-3xl font-bold tracking-tight text-zinc-900">You&apos;re All Set!</h2>
+                                <p className="mt-3 text-zinc-500 max-w-xs mx-auto leading-relaxed">
+                                    Your dashboard is ready to go. We&apos;ve started syncing your data analytics in the background.
                                 </p>
-                                <div className="mt-8">
-                                    <Button onClick={handleFinish} disabled={loading} className="w-full bg-white text-black hover:bg-zinc-200 h-10 group">
-                                        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Go to Dashboard
-                                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                <div className="mt-10 w-full">
+                                    <Button
+                                        onClick={handleFinish}
+                                        disabled={loading}
+                                        className="w-full bg-amber-600 hover:bg-amber-500 text-white h-12 rounded-2xl font-bold shadow-lg shadow-amber-100 group transition-all active:scale-[0.98]"
+                                    >
+                                        {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                                        Explore Dashboard
+                                        <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                                     </Button>
                                 </div>
                             </div>

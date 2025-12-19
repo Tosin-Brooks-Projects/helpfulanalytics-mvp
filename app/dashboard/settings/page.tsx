@@ -97,8 +97,8 @@ export default function SettingsPage() {
         <LinearShell>
             <div className="flex flex-col gap-8 max-w-5xl">
                 <div>
-                    <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Settings</h1>
-                    <p className="text-sm text-zinc-400">Manage your dashboard preferences.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Settings</h1>
+                    <p className="text-sm text-zinc-500">Manage your dashboard preferences.</p>
                 </div>
 
                 <LinearGraphCard title="Billing & Subscription">
@@ -110,30 +110,30 @@ export default function SettingsPage() {
                         <LinearGraphCard title="General Settings">
                             <div className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="prop-name" className="text-zinc-300">Property Name</Label>
+                                    <Label htmlFor="prop-name" className="text-zinc-600 font-medium">Property Name</Label>
                                     <Input
                                         id="prop-name"
                                         value={name}
                                         onChange={(e) => setName(e.target.value)}
-                                        className="bg-white/5 border-white/10 text-zinc-200 focus:border-indigo-500/50"
+                                        className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:border-amber-500/50"
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="timezone" className="text-zinc-300">Timezone (Display only)</Label>
+                                    <Label htmlFor="timezone" className="text-zinc-600 font-medium">Timezone (Display only)</Label>
                                     <Input
                                         id="timezone"
                                         value={timezone}
                                         onChange={(e) => setTimezone(e.target.value)}
                                         placeholder="e.g. America/New_York"
-                                        className="bg-white/5 border-white/10 text-zinc-200 focus:border-indigo-500/50"
+                                        className="bg-zinc-50 border-zinc-200 text-zinc-900 focus:border-amber-500/50"
                                     />
-                                    <p className="text-[10px] text-zinc-500">Changing this overrides the dashboard display timezone.</p>
+                                    <p className="text-[10px] text-zinc-400">Changing this overrides the dashboard display timezone.</p>
                                 </div>
                                 <div className="pt-2">
                                     <Button
                                         onClick={handleSave}
                                         disabled={saving}
-                                        className="bg-indigo-600 hover:bg-indigo-500 text-white min-w-[100px]"
+                                        className="bg-amber-600 hover:bg-amber-500 text-white min-w-[100px] shadow-sm"
                                     >
                                         {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Changes"}
                                     </Button>
@@ -141,10 +141,10 @@ export default function SettingsPage() {
                             </div>
                         </LinearGraphCard>
 
-                        <LinearGraphCard title="Danger Zone" className="border-rose-500/20 bg-rose-500/[0.02]">
+                        <LinearGraphCard title="Danger Zone" className="border-rose-100 bg-rose-50/30">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h4 className="text-sm font-medium text-rose-400">Remove Property</h4>
+                                    <h4 className="text-sm font-semibold text-rose-600">Remove Property</h4>
                                     <p className="text-xs text-zinc-500 mt-1">Remove this property from your dashboard view.</p>
                                 </div>
                                 <Button
@@ -152,6 +152,7 @@ export default function SettingsPage() {
                                     size="sm"
                                     onClick={handleDelete}
                                     disabled={deleting}
+                                    className="bg-rose-600 hover:bg-rose-500 shadow-sm"
                                 >
                                     {deleting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Remove"}
                                 </Button>
@@ -159,7 +160,7 @@ export default function SettingsPage() {
                         </LinearGraphCard>
                     </>
                 ) : (
-                    <div className="rounded-xl border border-dashed border-zinc-800 p-8 text-center text-zinc-500">
+                    <div className="rounded-xl border border-dashed border-zinc-200 bg-white p-8 text-center text-zinc-500 shadow-sm">
                         No property selected. Go to specific settings to configure.
                     </div>
                 )}

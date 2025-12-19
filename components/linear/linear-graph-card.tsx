@@ -13,10 +13,10 @@ interface LinearGraphCardProps {
 
 export function LinearGraphCard({ title, subtitle, children, className, action }: LinearGraphCardProps) {
     return (
-        <div className={cn("rounded-lg border border-white/5 bg-white/[0.02] p-6", className)}>
+        <div className={cn("rounded-lg border border-zinc-200 bg-white p-6 shadow-sm", className)}>
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h3 className="text-sm font-medium text-zinc-200">{title}</h3>
+                    <h3 className="text-sm font-semibold text-zinc-900">{title}</h3>
                     {subtitle && <p className="text-xs text-zinc-500 mt-1">{subtitle}</p>}
                 </div>
                 {action}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { LinearShell } from "@/components/linear/linear-shell"
-import { LinearGraphCard, LinearDataTable } from "@/components/linear"
+import { LinearGraphCard, LinearDataTable, NoPropertyPlaceholder } from "@/components/linear"
 import { FileText } from "lucide-react"
 import { useDashboard } from "@/components/linear/dashboard-context"
 
@@ -38,61 +38,62 @@ export default function ReportsPage() {
         fetchData()
     }, [selectedProperty])
 
-    if (loading) {
-        return (
-            <LinearShell>
-                <div className="flex items-center justify-center h-96 text-zinc-500">
-                    Loading reports...
-                </div>
-            </LinearShell>
-        )
-    }
-
     const pagesData: PageData[] = data?.pages || []
 
     return (
         <LinearShell>
-            <div className="flex flex-col gap-8">
-                <div>
-                    <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Reports</h1>
-                    <p className="text-sm text-zinc-400">Detailed breakdown of your content performance.</p>
+            {!selectedProperty ? (
+                <NoPropertyPlaceholder
+                    title="Reports & Analytics"
+                    description="Select a property to generate and view detailed performance reports."
+                />
+            ) : loading ? (
+                <div className="flex items-center justify-center h-96 text-zinc-500 animate-pulse">
+                    Loading reports...
                 </div>
+            ) : (
+                <div className="flex flex-col gap-8">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Reports</h1>
+                        <p className="text-sm text-zinc-500">Detailed breakdown of your content performance.</p>
+                    </div>
 
-                <LinearGraphCard title="Top Pages" subtitle="Most visited pages in the last 30 days">
-                    <LinearDataTable<PageData>
-                        data={pagesData}
-                        columns={[
-                            {
-                                header: "Page Path",
-                                accessorKey: "pagePath",
-                                cell: (item) => (
-                                    <div className="flex items-center gap-2">
-                                        <FileText className="h-4 w-4 text-zinc-600" />
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{item.pageTitle}</span>
-                                            <span className="text-xs text-zinc-500">{item.pagePath}</span>
+                    <LinearGraphCard title="Top Pages" subtitle="Most visited pages in the last 30 days">
+                        <LinearDataTable<PageData>
+                            data={pagesData}
+                            columns={[
+                                {
+                                    header: "Page Path",
+                                    accessorKey: "pagePath",
+                                    cell: (item) => (
+                                        <div className="flex items-center gap-2">
+                                            <FileText className="h-4 w-4 text-zinc-400" />
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{item.pageTitle}</span>
+                                                <span className="text-xs text-zinc-500">{item.pagePath}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                )
-                            },
-                            { header: "Page Views", accessorKey: "pageViews", className: "text-right" },
-                            { header: "Unique Users", accessorKey: "uniquePageViews", className: "text-right text-zinc-500" },
-                            {
-                                header: "Avg. Time",
-                                accessorKey: "avgTimeOnPage",
-                                className: "text-right",
-                                cell: (item) => `${Math.floor(item.avgTimeOnPage)}s`
-                            },
-                            {
-                                header: "Bounce Rate",
-                                accessorKey: "bounceRate",
-                                className: "text-right",
-                                cell: (item) => `${(item.bounceRate * 100).toFixed(1)}%`
-                            },
-                        ]}
-                    />
-                </LinearGraphCard>
-            </div>
+                                    )
+                                },
+                                { header: "Page Views", accessorKey: "pageViews", className: "text-right" },
+                                { header: "Unique Users", accessorKey: "uniquePageViews", className: "text-right text-zinc-500" },
+                                {
+                                    header: "Avg. Time",
+                                    accessorKey: "avgTimeOnPage",
+                                    className: "text-right",
+                                    cell: (item) => `${Math.floor(item.avgTimeOnPage)}s`
+                                },
+                                {
+                                    header: "Bounce Rate",
+                                    accessorKey: "bounceRate",
+                                    className: "text-right",
+                                    cell: (item) => `${(item.bounceRate * 100).toFixed(1)}%`
+                                },
+                            ]}
+                        />
+                    </LinearGraphCard>
+                </div>
+            )}
         </LinearShell>
     )
 }

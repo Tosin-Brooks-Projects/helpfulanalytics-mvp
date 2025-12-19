@@ -56,36 +56,8 @@ export function DownloadReportButton() {
         }
     }
 
-    const handleEmail = async () => {
-        if (!data) return toast.error("Report data not ready")
-
-        setLoading(true)
-        try {
-            const pdf = await generatePDF()
-            const pdfBlob = pdf.output('blob')
-
-            const formData = new FormData()
-            formData.append('file', pdfBlob, 'report.pdf')
-
-            const res = await fetch('/api/email/send-report', {
-                method: 'POST',
-                body: formData
-            })
-
-            const responseData = await res.json()
-            if (responseData.error) throw new Error(responseData.error)
-
-            toast.success("Report sent to your email")
-        } catch (error) {
-            console.error(error)
-            toast.error("Failed to email report")
-        } finally {
-            setLoading(false)
-        }
-    }
-
     return (
-        <div className="flex gap-2 relative">
+        <div className="relative">
             {/* Hidden Report Template */}
             <div style={{ position: 'absolute', top: 0, left: '-10000px', width: '800px' }}>
                 <div id="report-container">
@@ -95,23 +67,13 @@ export function DownloadReportButton() {
 
             <Button
                 variant="outline"
-                size="sm"
+                size="icon"
                 onClick={handleDownload}
                 disabled={loading || fetchingData}
-                className="bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300"
+                className="h-8 w-8 shrink-0 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-900 shadow-sm transition-colors flex items-center justify-center p-0 rounded-md"
+                title="Export PDF"
             >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-                Export PDF
-            </Button>
-            <Button
-                variant="outline"
-                size="sm"
-                onClick={handleEmail}
-                disabled={loading || fetchingData}
-                className="bg-white/5 border-white/10 hover:bg-white/10 text-zinc-300"
-            >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
-                Email Report
+                {loading ? <Loader2 className="h-4 w-4 animate-spin text-amber-500" /> : <Download className="h-4 w-4" />}
             </Button>
         </div>
     )

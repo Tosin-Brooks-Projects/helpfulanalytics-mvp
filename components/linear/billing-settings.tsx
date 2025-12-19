@@ -41,8 +41,8 @@ export function BillingSettings() {
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h3 className="text-lg font-medium text-zinc-100">Subscription Plans</h3>
-                    <p className="text-sm text-zinc-400">Upgrade to unlock more properties and features.</p>
+                    <h3 className="text-lg font-bold text-zinc-900">Subscription Plans</h3>
+                    <p className="text-sm text-zinc-500">Upgrade to unlock more properties and features.</p>
                 </div>
             </div>
 
@@ -56,13 +56,13 @@ export function BillingSettings() {
                             className={cn(
                                 "flex flex-col justify-between rounded-xl border p-6 transition-all",
                                 isCurrent
-                                    ? "border-amber-500/50 bg-amber-500/5 shadow-[0_0_20px_-12px_rgba(245,158,11,0.5)]"
-                                    : "border-white/5 bg-white/5 hover:border-white/10"
+                                    ? "border-amber-500/50 bg-amber-50/50 shadow-sm"
+                                    : "border-zinc-200 bg-white hover:border-zinc-300 shadow-sm"
                             )}
                         >
                             <div>
                                 <div className="flex items-center justify-between">
-                                    <h4 className="font-medium text-zinc-100">{tier.title}</h4>
+                                    <h4 className="font-bold text-zinc-900">{tier.title}</h4>
                                     {isCurrent && (
                                         <span className="flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-medium text-amber-400">
                                             <Star className="h-3 w-3 fill-current" /> Current
@@ -70,13 +70,13 @@ export function BillingSettings() {
                                     )}
                                 </div>
                                 <div className="mt-2 flex items-baseline gap-1">
-                                    <span className="text-2xl font-bold text-zinc-100">{tier.price}</span>
+                                    <span className="text-2xl font-bold text-zinc-900">{tier.price}</span>
                                     {!tier.isCustom && <span className="text-sm text-zinc-500">/mo</span>}
                                 </div>
                                 <ul className="mt-4 space-y-2">
                                     {tier.features.map((feature) => (
-                                        <li key={feature} className="flex items-start gap-2 text-xs text-zinc-400">
-                                            <Check className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                                        <li key={feature} className="flex items-start gap-2 text-xs text-zinc-600">
+                                            <Check className="h-3.5 w-3.5 shrink-0 text-amber-500" />
                                             {feature}
                                         </li>
                                     ))}
@@ -87,7 +87,7 @@ export function BillingSettings() {
                                 {isCurrent ? (
                                     <button
                                         disabled
-                                        className="w-full rounded-md border border-amber-500/30 bg-amber-500/10 py-2 text-xs font-medium text-amber-400 cursor-default"
+                                        className="w-full rounded-md border border-amber-500/20 bg-amber-500/10 py-2 text-xs font-semibold text-amber-600 cursor-default"
                                     >
                                         Current Plan
                                     </button>

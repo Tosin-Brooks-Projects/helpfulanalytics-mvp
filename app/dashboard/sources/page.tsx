@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { LinearShell } from "@/components/linear/linear-shell"
-import { LinearGraphCard, LinearDataTable } from "@/components/linear"
+import { LinearGraphCard, LinearDataTable, NoPropertyPlaceholder } from "@/components/linear"
 import { useDashboard } from "@/components/linear/dashboard-context"
 
 interface SourceData {
@@ -36,48 +36,49 @@ export default function SourcesPage() {
         fetchData()
     }, [selectedProperty])
 
-    if (loading) {
-        return (
-            <LinearShell>
-                <div className="flex items-center justify-center h-96 text-zinc-500">
-                    Loading sources data...
-                </div>
-            </LinearShell>
-        )
-    }
-
     const acquisitionData: SourceData[] = data?.sources || []
 
     return (
         <LinearShell>
-            <div className="flex flex-col gap-8">
-                <div>
-                    <h1 className="text-2xl font-medium tracking-tight text-zinc-100">Traffic Sources</h1>
-                    <p className="text-sm text-zinc-400">Where your users are coming from.</p>
+            {!selectedProperty ? (
+                <NoPropertyPlaceholder
+                    title="Traffic Sources"
+                    description="Select a property to see where your traffic is coming from and which channels perform best."
+                />
+            ) : loading ? (
+                <div className="flex items-center justify-center h-96 text-zinc-500 animate-pulse">
+                    Loading sources data...
                 </div>
+            ) : (
+                <div className="flex flex-col gap-8">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Traffic Sources</h1>
+                        <p className="text-sm text-zinc-500">Where your users are coming from.</p>
+                    </div>
 
-                <LinearGraphCard title="Acquisition Channels">
-                    <LinearDataTable<SourceData>
-                        data={acquisitionData}
-                        columns={[
-                            {
-                                header: "Source / Medium",
-                                accessorKey: "source",
-                                className: "font-medium",
-                                cell: (item) => `${item.source} / ${item.medium}`
-                            },
-                            { header: "Users", accessorKey: "users", className: "text-right" },
-                            { header: "Sessions", accessorKey: "sessions", className: "text-right" },
-                            {
-                                header: "Bounce Rate",
-                                accessorKey: "bounceRate",
-                                className: "text-right text-zinc-500",
-                                cell: (item) => `${(item.bounceRate * 100).toFixed(1)}%`
-                            },
-                        ]}
-                    />
-                </LinearGraphCard>
-            </div>
+                    <LinearGraphCard title="Acquisition Channels">
+                        <LinearDataTable<SourceData>
+                            data={acquisitionData}
+                            columns={[
+                                {
+                                    header: "Source / Medium",
+                                    accessorKey: "source",
+                                    className: "font-medium",
+                                    cell: (item) => `${item.source} / ${item.medium}`
+                                },
+                                { header: "Users", accessorKey: "users", className: "text-right" },
+                                { header: "Sessions", accessorKey: "sessions", className: "text-right" },
+                                {
+                                    header: "Bounce Rate",
+                                    accessorKey: "bounceRate",
+                                    className: "text-right text-zinc-500",
+                                    cell: (item) => `${(item.bounceRate * 100).toFixed(1)}%`
+                                },
+                            ]}
+                        />
+                    </LinearGraphCard>
+                </div>
+            )}
         </LinearShell>
     )
 }

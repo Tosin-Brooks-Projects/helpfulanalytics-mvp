@@ -60,10 +60,10 @@ export function AddPropertyModal({ children }: { children: React.ReactNode }) {
             <DialogTrigger asChild>
                 {children}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-[#09090b] border-white/10 text-white">
+            <DialogContent className="sm:max-w-[425px] bg-white border-zinc-200 text-zinc-900 shadow-lg">
                 <DialogHeader>
-                    <DialogTitle>Add Property</DialogTitle>
-                    <DialogDescription className="text-zinc-400">
+                    <DialogTitle className="font-bold">Add Property</DialogTitle>
+                    <DialogDescription className="text-zinc-500">
                         Select a Google Analytics 4 property to add to your dashboard.
                     </DialogDescription>
                 </DialogHeader>
@@ -76,25 +76,25 @@ export function AddPropertyModal({ children }: { children: React.ReactNode }) {
                     ) : availableProperties.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-8 text-center">
                             <p className="text-zinc-500 mb-4 text-sm">No new properties found.</p>
-                            <p className="text-xs text-zinc-600">All available GA4 properties have been added.</p>
+                            <p className="text-xs text-zinc-400">All available GA4 properties have been added.</p>
                         </div>
                     ) : (
                         availableProperties.map((prop: any) => (
                             <div
                                 key={prop.id}
                                 onClick={() => !submitting && handleSelect(prop)}
-                                className={`group flex items-center justify-between rounded-md border border-white/5 bg-white/5 p-3 cursor-pointer transition-colors hover:bg-white/10 ${submitting ? 'opacity-50 pointer-events-none' : ''}`}
+                                className={`group flex items-center justify-between rounded-md border border-zinc-100 bg-zinc-50 p-3 cursor-pointer transition-colors hover:bg-zinc-100 ${submitting ? 'opacity-50 pointer-events-none' : ''} shadow-sm`}
                             >
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                    <div className="h-8 w-8 rounded bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs shrink-0">
+                                    <div className="h-8 w-8 rounded bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
                                         {prop.name.charAt(0)}
                                     </div>
                                     <div className="min-w-0">
-                                        <div className="font-medium truncate text-sm text-zinc-200 group-hover:text-white transition-colors">{prop.name}</div>
-                                        <div className="text-[10px] text-zinc-500">ID: {prop.id.split('/')[1]}</div>
+                                        <div className="font-bold truncate text-sm text-zinc-900 group-hover:text-amber-600 transition-colors uppercase tracking-tight">{prop.name}</div>
+                                        <div className="text-[10px] text-zinc-400 font-mono">ID: {prop.id.split('/')[1]}</div>
                                     </div>
                                 </div>
-                                {submitting ? <Loader2 className="h-4 w-4 animate-spin text-zinc-500" /> : <ChevronRight className="h-4 w-4 text-zinc-600 group-hover:text-zinc-300" />}
+                                {submitting ? <Loader2 className="h-4 w-4 animate-spin text-zinc-400" /> : <ChevronRight className="h-4 w-4 text-zinc-300 group-hover:text-amber-500 transition-all group-hover:translate-x-0.5" />}
                             </div>
                         ))
                     )}

@@ -33,29 +33,43 @@ export async function POST(req: Request) {
     }
 
     try {
-        // 2. Fetch User Properties
-        // We'll sync data for ALL properties this user has access to.
-        const propertiesRes = await fetch("https://analyticsadmin.googleapis.com/v1beta/accountSummaries", {
-            headers: { Authorization: `Bearer ${accessToken}` },
-        })
-        const propertiesData = await propertiesRes.json()
+        // 2. Fetch Targeted or All Properties
+        const { searchParams } = new URL(req.url)
+        const propertyIdOverride = searchParams.get("propertyId")
 
-        const properties = []
-        if (propertiesData.accountSummaries) {
-            for (const account of propertiesData.accountSummaries) {
-                if (account.propertySummaries) {
-                    for (const prop of account.propertySummaries) {
-                        properties.push({
-                            id: prop.property,
-                            name: prop.displayName
-                        })
+        let properties = []
+
+        if (propertyIdOverride) {
+            // Targeted sync for a single property
+            if (propertyIdOverride === "demo-property") {
+                properties = [{ id: "demo-property", name: "Demo Property" }]
+            } else {
+                // We still need the display name, but for now we'll just use the ID as name
+                // or fetch account summaries if needed.
+                properties = [{ id: propertyIdOverride, name: "Selected Property" }]
+            }
+        } else {
+            // Full sync: Fetch User Properties
+            const propertiesRes = await fetch("https://analyticsadmin.googleapis.com/v1beta/accountSummaries", {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            })
+            const propertiesData = await propertiesRes.json()
+
+            if (propertiesData.accountSummaries) {
+                for (const account of propertiesData.accountSummaries) {
+                    if (account.propertySummaries) {
+                        for (const prop of account.propertySummaries) {
+                            properties.push({
+                                id: prop.property,
+                                name: prop.displayName
+                            })
+                        }
                     }
                 }
             }
+            // Add Demo Property to list
+            properties.push({ id: "demo-property", name: "Demo Property" })
         }
-
-        // Add Demo Property to list appropriately
-        properties.push({ id: "demo-property", name: "Demo Property" })
 
         // 3. Define Date Range (Yesterday)
         const yesterday = subDays(new Date(), 1)

@@ -37,22 +37,19 @@ export async function POST(request: Request) {
         const systemPrompt = `You are an expert Data Analyst for a web analytics dashboard. 
         Your goal is to provide concise, high-impact insights based on the provided metrics.
         
-        Focus on generating exactly two items:
-        1. "Insight": A key observation about traffic, users, or trends. (e.g., "Traffic is up 12%...")
-        2. "Suggestion": An actionable recommendation based on the insight. (e.g., "Consider promoting...")
+        Focus on generating 3-4 distinct items:
+        - "Insight": A key observation about traffic or behavior.
+        - "Trend": A high-impact trend (e.g., "Trending: X is up Y%").
+        - "Suggestion": An actionable recommendation.
+        - "Alert": A critical point of attention (optional).
         
         Output format must be strictly JSON:
         {
             "insights": [
                 {
-                    "type": "Insight",
-                    "title": "Key Observation",
-                    "description": "One concise sentence."
-                },
-                {
-                    "type": "Suggestion",
-                    "title": "Action Item",
-                    "description": "One concise sentence."
+                    "type": "Insight" | "Trend" | "Suggestion" | "Alert",
+                    "title": "Short Title",
+                    "description": "One concise, punchy sentence."
                 }
             ]
         }`
