@@ -3,7 +3,8 @@ import { type SubscriptionTier } from "@/types/subscription"
 export const pricingData: SubscriptionTier[] = [
     {
         title: "Starter",
-        price: "$19", // Display price
+        priceMonthly: "$19",
+        priceYearly: "$182", // ~20% off ($15.2/mo)
         description: "Perfect for getting started",
         features: [
             "1 GA4 property",
@@ -11,14 +12,15 @@ export const pricingData: SubscriptionTier[] = [
             "Basic Analytics",
         ],
         highlight: false,
-        // TODO: Update these with your real Stripe Price IDs in .env
-        priceId: process.env.STRIPE_PRICE_ID_STARTER || "price_1SeZSPGuYUi194RaHzbFW6Nd",
+        priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_STARTER || "price_1SeZSPGuYUi194RaHzbFW6Nd",
+        priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_STARTER_YEARLY || "",
         maxProperties: 1,
         trialDays: 30,
     },
     {
         title: "Pro",
-        price: "$99",
+        priceMonthly: "$99",
+        priceYearly: "$950", // ~20% off ($79.2/mo)
         description: "For growing businesses",
         features: [
             "Up to 7 GA4 properties",
@@ -26,12 +28,14 @@ export const pricingData: SubscriptionTier[] = [
             "Priority Email Support",
         ],
         highlight: true,
-        priceId: process.env.STRIPE_PRICE_ID_PRO || "price_1SeZUWGuYUi194RawLZzNd7L",
+        priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO || "price_1SeZUWGuYUi194RawLZzNd7L",
+        priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_YEARLY || "",
         maxProperties: 7,
     },
     {
         title: "Agency",
-        price: "$299",
+        priceMonthly: "$299",
+        priceYearly: "$2,870", // ~20% off ($239.2/mo)
         description: "For agencies and large teams",
         features: [
             "Up to 30 GA4 properties",
@@ -39,12 +43,14 @@ export const pricingData: SubscriptionTier[] = [
             "Dedicated Support",
         ],
         highlight: false,
-        priceId: process.env.STRIPE_PRICE_ID_AGENCY || "price_1SeZVRGuYUi194RaRfV6Npu8",
+        priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_AGENCY || "price_1SeZVRGuYUi194RaRfV6Npu8",
+        priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_AGENCY_YEARLY || "",
         maxProperties: 30,
     },
     {
         title: "Enterprise",
-        price: "Custom",
+        priceMonthly: "Custom",
+        priceYearly: "Custom",
         description: "For large scale organizations",
         features: [
             "30+ GA4 properties",
@@ -52,7 +58,8 @@ export const pricingData: SubscriptionTier[] = [
             "Priority Phone Support",
         ],
         highlight: false,
-        priceId: "", // Contact sales
+        priceIdMonthly: "",
+        priceIdYearly: "",
         maxProperties: Infinity,
         isCustom: true,
     },

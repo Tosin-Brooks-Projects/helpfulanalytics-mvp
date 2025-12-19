@@ -14,7 +14,9 @@ export async function POST(req: Request) {
         }
 
         const { priceId } = await req.json()
-        const tier = pricingData.find((t) => t.priceId === priceId)
+        const tier = pricingData.find(
+            (t) => t.priceIdMonthly === priceId || t.priceIdYearly === priceId
+        )
 
         if (!tier) {
             return new NextResponse("Invalid price ID", { status: 400 })
@@ -56,8 +58,8 @@ export async function POST(req: Request) {
         })
 
         return NextResponse.json({ url: stripeSession.url })
-    } catch (error) {
+    } catch (error: any) {
         console.error("[STRIPE_CHECKOUT]", error)
-        return new NextResponse("Internal Error", { status: 500 })
+        return new NextResponse(error.message || "Internal Error", { status: error.statusCode || 500 })
     }
 }

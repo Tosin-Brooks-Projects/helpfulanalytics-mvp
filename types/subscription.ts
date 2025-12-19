@@ -1,10 +1,12 @@
 export interface SubscriptionTier {
     title: string
-    price: string
+    priceMonthly: string
+    priceYearly: string
     description: string
     features: string[]
     highlight: boolean
-    priceId: string
+    priceIdMonthly: string
+    priceIdYearly: string
     maxProperties: number
     trialDays?: number
     isCustom?: boolean

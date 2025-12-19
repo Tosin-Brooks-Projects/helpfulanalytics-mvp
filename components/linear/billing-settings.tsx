@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 export function BillingSettings() {
     const { subscription } = useDashboard()
     const [isLoading, setIsLoading] = useState<string | null>(null)
+    const [isAnnual, setIsAnnual] = useState(false)
 
     const handleSubscribe = async (priceId: string, isCustom: boolean) => {
         if (isCustom) {
@@ -42,13 +43,37 @@ export function BillingSettings() {
             <div className="flex items-center justify-between">
                 <div>
                     <h3 className="text-lg font-bold text-zinc-900">Subscription Plans</h3>
-                    <p className="text-sm text-zinc-500">Upgrade to unlock more properties and features.</p>
+                    <p className="text-sm text-zinc-500">Upgrade to unlock more properties and features. Save 20% with annual billing.</p>
+                </div>
+                {/* Billing Toggle */}
+                <div className="flex items-center gap-3 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
+                    <button
+                        onClick={() => setIsAnnual(false)}
+                        className={cn(
+                            "px-3 py-1 text-xs font-medium rounded-md transition-all",
+                            !isAnnual ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+                        )}
+                    >
+                        Monthly
+                    </button>
+                    <button
+                        onClick={() => setIsAnnual(true)}
+                        className={cn(
+                            "px-3 py-1 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                            isAnnual ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+                        )}
+                    >
+                        Annual
+                        <span className="text-[10px] text-amber-600 font-bold bg-amber-50 px-1 rounded">-20%</span>
+                    </button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 {pricingData.map((tier) => {
-                    const isCurrent = subscription?.tier?.toLowerCase() === tier.title.toLowerCase()
+                    const priceId = isAnnual ? tier.priceIdYearly : tier.priceIdMonthly
+                    const price = isAnnual ? tier.priceYearly : tier.priceMonthly
+                    const isCurrent = subscription?.stripePriceId === priceId || (subscription?.tier?.toLowerCase() === tier.title.toLowerCase() && !subscription.stripePriceId)
 
                     return (
                         <div
@@ -70,8 +95,8 @@ export function BillingSettings() {
                                     )}
                                 </div>
                                 <div className="mt-2 flex items-baseline gap-1">
-                                    <span className="text-2xl font-bold text-zinc-900">{tier.price}</span>
-                                    {!tier.isCustom && <span className="text-sm text-zinc-500">/mo</span>}
+                                    <span className="text-2xl font-bold text-zinc-900">{price}</span>
+                                    {!tier.isCustom && <span className="text-sm text-zinc-500">/{isAnnual ? 'yr' : 'mo'}</span>}
                                 </div>
                                 <ul className="mt-4 space-y-2">
                                     {tier.features.map((feature) => (
@@ -93,11 +118,11 @@ export function BillingSettings() {
                                     </button>
                                 ) : (
                                     <ShinyButton
-                                        onClick={() => handleSubscribe(tier.priceId, tier.isCustom || false)}
+                                        onClick={() => handleSubscribe(priceId, tier.isCustom || false)}
                                         disabled={!!isLoading}
                                         className="w-full py-2 text-xs"
                                     >
-                                        {isLoading === tier.priceId ? "Processing..." : tier.isCustom ? "Contact Sales" : "Upgrade"}
+                                        {isLoading === priceId ? "Processing..." : tier.isCustom ? "Contact Sales" : "Upgrade"}
                                     </ShinyButton>
                                 )}
                             </div>

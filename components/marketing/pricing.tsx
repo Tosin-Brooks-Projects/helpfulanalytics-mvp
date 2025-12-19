@@ -9,6 +9,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 export function Pricing() {
     const { data: session } = useSession()
     const [isLoading, setIsLoading] = useState<string | null>(null)
+    const [isAnnual, setIsAnnual] = useState(false)
     const searchParams = useSearchParams()
     const router = useRouter()
 
@@ -74,48 +75,76 @@ export function Pricing() {
                     <p className="mt-2 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
                         Pricing plans for teams of&nbsp;all&nbsp;sizes
                     </p>
+                    <p className="mt-6 text-lg leading-8 text-muted-foreground">
+                        Choose the plan that's right for you. Save 20% with annual billing.
+                    </p>
                 </div>
-                <div className="isolate mx-auto mt-16 grid max-w-md grid-cols-1 gap-y-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-x-8">
-                    {pricingData.map((tier) => (
-                        <div
-                            key={tier.title}
-                            className={`flex flex-col justify-between rounded-3xl p-8 ring-1 ring-inset ${tier.highlight
-                                ? "bg-secondary/50 ring-primary/50 lg:z-10 lg:scale-105"
-                                : "bg-background ring-foreground/10"
-                                }`}
-                        >
-                            <div>
-                                <div className="flex items-center justify-between gap-x-4">
-                                    <h3
-                                        className={`text-lg font-semibold leading-8 ${tier.highlight ? "text-primary" : "text-foreground"
-                                            }`}
-                                    >
-                                        {tier.title}
-                                    </h3>
-                                </div>
-                                <p className="mt-4 text-sm leading-6 text-muted-foreground">{tier.description}</p>
-                                <p className="mt-6 flex items-baseline gap-x-1">
-                                    <span className="text-4xl font-bold tracking-tight text-foreground">{tier.price}</span>
-                                    {!tier.isCustom && <span className="text-sm font-semibold leading-6 text-muted-foreground">/month</span>}
-                                </p>
-                                <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-muted-foreground">
-                                    {tier.features.map((feature) => (
-                                        <li key={feature} className="flex gap-x-3">
-                                            <Check className="h-6 w-5 flex-none text-primary" aria-hidden="true" />
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <ShinyButton
-                                className="mt-8 block w-full"
-                                onClick={() => handleSubscribe(tier.priceId, tier.isCustom || false)}
-                                disabled={!!isLoading}
+
+                {/* Billing Toggle */}
+                <div className="mt-12 flex justify-center items-center gap-4">
+                    <span className={`text-sm ${!isAnnual ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>Monthly</span>
+                    <button
+                        onClick={() => setIsAnnual(!isAnnual)}
+                        className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-zinc-200 dark:bg-zinc-800"
+                        role="switch"
+                        aria-checked={isAnnual}
+                    >
+                        <span
+                            aria-hidden="true"
+                            className={`${isAnnual ? 'translate-x-5' : 'translate-x-0'} pointer-events-none inline-block h-5 w-5 transform rounded-full bg-primary shadow ring-0 transition duration-200 ease-in-out`}
+                        />
+                    </button>
+                    <span className={`text-sm ${isAnnual ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>
+                        Annual <span className="text-primary font-bold">(Save 20%)</span>
+                    </span>
+                </div>
+
+                <div className="isolate mx-auto mt-12 grid max-w-md grid-cols-1 gap-y-8 sm:mt-16 lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-x-8">
+                    {pricingData.map((tier) => {
+                        const priceId = isAnnual ? tier.priceIdYearly : tier.priceIdMonthly
+                        const price = isAnnual ? tier.priceYearly : tier.priceMonthly
+
+                        return (
+                            <div
+                                key={tier.title}
+                                className={`flex flex-col justify-between rounded-3xl p-8 ring-1 ring-inset ${tier.highlight
+                                    ? "bg-secondary/50 ring-primary/50 lg:z-10 lg:scale-105"
+                                    : "bg-background ring-foreground/10"
+                                    }`}
                             >
-                                {isLoading === tier.priceId ? "Processing..." : tier.isCustom ? "Contact Sales" : "Subscribe"}
-                            </ShinyButton>
-                        </div>
-                    ))}
+                                <div>
+                                    <div className="flex items-center justify-between gap-x-4">
+                                        <h3
+                                            className={`text-lg font-semibold leading-8 ${tier.highlight ? "text-primary" : "text-foreground"
+                                                }`}
+                                        >
+                                            {tier.title}
+                                        </h3>
+                                    </div>
+                                    <p className="mt-4 text-sm leading-6 text-muted-foreground">{tier.description}</p>
+                                    <p className="mt-6 flex items-baseline gap-x-1">
+                                        <span className="text-4xl font-bold tracking-tight text-foreground">{price}</span>
+                                        {!tier.isCustom && <span className="text-sm font-semibold leading-6 text-muted-foreground">/{isAnnual ? 'year' : 'month'}</span>}
+                                    </p>
+                                    <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-muted-foreground">
+                                        {tier.features.map((feature) => (
+                                            <li key={feature} className="flex gap-x-3">
+                                                <Check className="h-6 w-5 flex-none text-primary" aria-hidden="true" />
+                                                {feature}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                                <ShinyButton
+                                    className="mt-8 block w-full"
+                                    onClick={() => handleSubscribe(priceId, tier.isCustom || false)}
+                                    disabled={!!isLoading}
+                                >
+                                    {isLoading === priceId ? "Processing..." : tier.isCustom ? "Contact Sales" : "Subscribe"}
+                                </ShinyButton>
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
         </div>
