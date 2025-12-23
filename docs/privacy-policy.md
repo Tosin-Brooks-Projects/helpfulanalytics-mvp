@@ -2,7 +2,7 @@
 
 **Last Updated:** December 14, 2024
 
-**Effective Date:** December 14, 2024
+**Effective Date:** December 23, 2025
 
 ## 1. Introduction
 
