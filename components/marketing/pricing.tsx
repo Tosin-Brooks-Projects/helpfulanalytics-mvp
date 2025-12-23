@@ -124,6 +124,9 @@ export function Pricing() {
                                     <p className="mt-4 text-sm leading-6 text-muted-foreground">{tier.description}</p>
                                     <p className="mt-6 flex items-baseline gap-x-1">
                                         <span className="text-4xl font-bold tracking-tight text-foreground">{price}</span>
+                                        {tier.title === "Starter" && !isAnnual && (
+                                            <span className="text-lg font-bold text-muted-foreground line-through decoration-amber-500/50 decoration-2 ml-1">$29</span>
+                                        )}
                                         {!tier.isCustom && <span className="text-sm font-semibold leading-6 text-muted-foreground">/{isAnnual ? 'year' : 'month'}</span>}
                                     </p>
                                     <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-muted-foreground">
