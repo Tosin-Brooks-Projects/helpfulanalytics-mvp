@@ -16,12 +16,58 @@ interface LinearStatCardProps {
     chartData?: number[]
     className?: string
     description?: string
+    variant?: "default" | "indigo" | "amber" | "emerald" | "rose"
 }
 
-export function LinearStatCard({ title, value, icon: Icon, trend, chartData, className, description }: LinearStatCardProps) {
+export function LinearStatCard({
+    title,
+    value,
+    icon: Icon,
+    trend,
+    chartData,
+    className,
+    description,
+    variant = "default"
+}: LinearStatCardProps) {
+    const variants = {
+        default: {
+            container: "bg-white hover:border-zinc-300",
+            iconBg: "bg-zinc-50 group-hover:bg-zinc-100",
+            iconColor: "text-zinc-400 group-hover:text-zinc-600",
+            sparkline: "#71717a"
+        },
+        indigo: {
+            container: "bg-gradient-to-br from-indigo-50/40 via-white to-white border-indigo-100 hover:border-indigo-200 hover:shadow-indigo-500/5",
+            iconBg: "bg-indigo-50 group-hover:bg-indigo-100",
+            iconColor: "text-indigo-500",
+            sparkline: "#6366f1"
+        },
+        amber: {
+            container: "bg-gradient-to-br from-amber-50/40 via-white to-white border-amber-100 hover:border-amber-200 hover:shadow-amber-500/5",
+            iconBg: "bg-amber-50 group-hover:bg-amber-100",
+            iconColor: "text-amber-500",
+            sparkline: "#f59e0b"
+        },
+        emerald: {
+            container: "bg-gradient-to-br from-emerald-50/40 via-white to-white border-emerald-100 hover:border-emerald-200 hover:shadow-emerald-500/5",
+            iconBg: "bg-emerald-50 group-hover:bg-emerald-100",
+            iconColor: "text-emerald-500",
+            sparkline: "#10b981"
+        },
+        rose: {
+            container: "bg-gradient-to-br from-rose-50/40 via-white to-white border-rose-100 hover:border-rose-200 hover:shadow-rose-500/5",
+            iconBg: "bg-rose-50 group-hover:bg-rose-100",
+            iconColor: "text-rose-500",
+            sparkline: "#f43f5e"
+        }
+    }
+
+    const currentVariant = variants[variant]
+
     return (
         <div className={cn(
-            "group relative overflow-hidden rounded-lg border border-zinc-200 bg-white p-5 transition-all duration-300 hover:shadow-md hover:border-zinc-300",
+            "group relative overflow-hidden rounded-xl border p-5 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+            currentVariant.container,
             className
         )}>
             <div className="relative z-10 flex flex-col justify-between h-full gap-4">
@@ -31,7 +77,7 @@ export function LinearStatCard({ title, value, icon: Icon, trend, chartData, cla
                             <TooltipTrigger asChild>
                                 <div className="flex items-center gap-1.5 cursor-help">
                                     <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{title}</span>
-                                    {description && <Info className="h-3 w-3 text-zinc-300 group-hover:text-amber-500 transition-colors" />}
+                                    {description && <Info className="h-3 w-3 text-zinc-300 group-hover:text-zinc-400 transition-colors" />}
                                 </div>
                             </TooltipTrigger>
                             {description && (
@@ -41,7 +87,12 @@ export function LinearStatCard({ title, value, icon: Icon, trend, chartData, cla
                             )}
                         </Tooltip>
                     </TooltipProvider>
-                    <Icon className="h-4 w-4 text-zinc-400 transition-colors group-hover:text-zinc-600" />
+                    <div className={cn(
+                        "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
+                        currentVariant.iconBg
+                    )}>
+                        <Icon className={cn("h-4 w-4 transition-colors", currentVariant.iconColor)} />
+                    </div>
                 </div>
 
                 <div className="flex items-end justify-between">
@@ -68,7 +119,7 @@ export function LinearStatCard({ title, value, icon: Icon, trend, chartData, cla
                                 data={chartData}
                                 width={64}
                                 height={32}
-                                color={trend?.value && trend.value < 0 ? "#e11d48" : "#059669"}
+                                color={currentVariant.sparkline}
                             />
                         </div>
                     )}

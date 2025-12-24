@@ -16,7 +16,7 @@ export function LinearShell({ children }: LinearShellProps) {
     const { sidebarCollapsed } = useDashboard()
 
     return (
-        <div className="flex min-h-screen bg-zinc-50 text-zinc-900 selection:bg-amber-500/30">
+        <div className="flex w-full bg-transparent text-zinc-900 selection:bg-amber-500/30">
             {/* Desktop Sidebar */}
             <aside className={cn(
                 "fixed left-0 top-0 z-40 h-screen border-r border-zinc-200 bg-white hidden lg:block transition-all duration-300 ease-in-out",
@@ -43,7 +43,7 @@ export function LinearShell({ children }: LinearShellProps) {
                 sidebarCollapsed ? "lg:pl-16" : "lg:pl-64"
             )}>
                 <LinearHeader />
-                <main id="main-dashboard-content" className="p-4 lg:p-10 max-w-[1600px] mx-auto animate-in fade-in duration-500 pt-16 lg:pt-10">
+                <main id="main-dashboard-content" className="p-4 lg:p-10 max-w-[1600px] mx-auto animate-in fade-in duration-500 pt-16 lg:pt-10 pb-4">
                     {children}
                 </main>
             </div>

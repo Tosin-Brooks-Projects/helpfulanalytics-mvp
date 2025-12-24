@@ -97,6 +97,39 @@ export async function getMockOverviewData() {
             { source: "Referral", sessions: 1500, percentage: 11.9 },
             { source: "Email", sessions: 643, percentage: 5.1 },
         ],
+        topPages: [
+            { path: "/", title: "Home | Linear Analytics", views: 12000, percentage: 35 },
+            { path: "/features", title: "Features - Powerful Insights", views: 8500, percentage: 25 },
+            { path: "/pricing", title: "Pricing & Plans", views: 6200, percentage: 18 },
+            { path: "/blog/analytics-tips", title: "5 Tips for Better Analytics", views: 4100, percentage: 12 },
+            { path: "/docs", title: "Documentation", views: 3500, percentage: 10 },
+        ],
+        topCountries: [
+            { country: "United States", sessions: 5400, percentage: 43 },
+            { country: "United Kingdom", sessions: 1800, percentage: 14.3 },
+            { country: "Germany", sessions: 1200, percentage: 9.5 },
+            { country: "Canada", sessions: 950, percentage: 7.5 },
+            { country: "India", sessions: 850, percentage: 6.7 },
+            { country: "France", sessions: 700, percentage: 5.5 },
+        ],
+        sessionsOverTime: Array.from({ length: 30 }, (_, i) => {
+            const d = new Date()
+            d.setDate(d.getDate() - (29 - i))
+            const dateStr = d.toISOString().split('T')[0].replace(/-/g, '')
+            return {
+                date: dateStr,
+                sessions: Math.floor(Math.random() * 500) + 100
+            }
+        }),
+        deviceBreakdown: [
+            { device: "Desktop", sessions: 7800, fill: "hsl(var(--chart-1))" },
+            { device: "Mobile", sessions: 4200, fill: "#6366f1" },
+            { device: "Tablet", sessions: 543, fill: "#10b981" },
+        ],
+        userRetention: Array.from({ length: 6 }, (_, i) => ({
+            week: `Week ${i + 1}`,
+            retention: Math.floor(100 * Math.pow(0.85, i))
+        })),
     }
 }
 
@@ -219,7 +252,7 @@ export async function runReport(accessToken: string, propertyId: string, request
 }
 
 export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
-    const [metricsResponse, trafficResponse, pagesResponse, locationsResponse] = await Promise.all([
+    const [metricsResponse, trafficResponse, pagesResponse, locationsResponse, dailyResponse] = await Promise.all([
         runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             metrics: [
@@ -252,12 +285,19 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
             orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
             limit: 10,
         }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "date" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ dimension: { dimensionName: "date" }, desc: false }],
+        }),
     ])
 
     const metrics = metricsResponse.rows?.[0]?.metricValues || []
     const trafficSources = trafficResponse.rows || []
     const pageRows = pagesResponse.rows || []
     const countryRows = locationsResponse.rows || []
+    const dailyRows = dailyResponse.rows || []
 
     const totalSessions = Number.parseInt(metrics[0]?.value || "0")
     const totalPageViews = Number.parseInt(metrics[2]?.value || "0")
@@ -287,6 +327,10 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
             country: row.dimensionValues?.[0]?.value || "Unknown",
             sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
             percentage: totalSessions > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalSessions) * 100 : 0,
+        })),
+        sessionsOverTime: dailyRows.map((row: any) => ({
+            date: row.dimensionValues?.[0]?.value || "",
+            sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
         })),
     }
 }

@@ -26,7 +26,7 @@ export function LinearHeader() {
     ]
 
     return (
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-zinc-200 bg-white/80 px-4 pl-14 lg:px-10 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-white/20 bg-white/60 px-4 pl-14 lg:px-10 backdrop-blur-md">
             <div className="flex items-center gap-6">
                 <CommandPalette />
 
@@ -61,7 +61,7 @@ export function LinearHeader() {
 
                 {!loading && properties.length > 0 && (
                     <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-                        <SelectTrigger className="h-8 min-w-[160px] border-zinc-200 bg-white hover:bg-zinc-50 text-[11px] font-medium text-zinc-900 focus:ring-0 rounded-md shadow-sm transition-all px-2.5">
+                        <SelectTrigger className="h-8 min-w-[160px] border-white/20 bg-white/50 hover:bg-white/80 text-[11px] font-medium text-zinc-900 focus:ring-0 rounded-md shadow-sm transition-all px-2.5 backdrop-blur-sm">
                             <SelectValue placeholder="Select Property" className="truncate" />
                         </SelectTrigger>
                         <SelectContent className="border-zinc-200 bg-white text-zinc-700 shadow-2xl rounded-lg min-w-[220px]">
