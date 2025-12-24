@@ -9,6 +9,7 @@ import {
     Users,
     Settings,
     Zap,
+    Smartphone,
     Globe,
     Layers,
     LogOut,
@@ -26,8 +27,8 @@ import {
 
 const items = [
     { title: "Overview", href: "/dashboard", icon: LayoutGrid },
-    { title: "Realtime", href: "/dashboard/realtime", icon: Zap },
-    { title: "Reports", href: "/dashboard/reports", icon: BarChart3 },
+    { title: "Devices", href: "/dashboard/devices", icon: Smartphone },
+    { title: "Top Pages", href: "/dashboard/reports", icon: BarChart3 },
     { title: "Audience", href: "/dashboard/audience", icon: Users },
     { title: "Sources", href: "/dashboard/sources", icon: Globe },
 ]

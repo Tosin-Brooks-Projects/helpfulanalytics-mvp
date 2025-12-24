@@ -107,6 +107,25 @@ export function CommandPalette() {
                         ))}
                     </CommandGroup>
                     <CommandSeparator />
+                    <CommandGroup heading="Date Range">
+                        <CommandItem onSelect={() => runCommand(() => document.dispatchEvent(new CustomEvent("set-date-preset", { detail: 7 })))}>
+                            <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-zinc-200 text-[10px] font-bold text-zinc-500">7</div>
+                            <span>Last 7 Days</span>
+                        </CommandItem>
+                        <CommandItem onSelect={() => runCommand(() => document.dispatchEvent(new CustomEvent("set-date-preset", { detail: 30 })))}>
+                            <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-zinc-200 text-[10px] font-bold text-zinc-500">30</div>
+                            <span>Last 30 Days</span>
+                        </CommandItem>
+                        <CommandItem onSelect={() => runCommand(() => document.dispatchEvent(new CustomEvent("set-date-preset", { detail: 90 })))}>
+                            <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-zinc-200 text-[10px] font-bold text-zinc-500">90</div>
+                            <span>Last 90 Days</span>
+                        </CommandItem>
+                        <CommandItem onSelect={() => runCommand(() => document.dispatchEvent(new CustomEvent("set-date-preset", { detail: "year" })))}>
+                            <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-zinc-200 text-[10px] font-bold text-zinc-500">Y</div>
+                            <span>Year to Date</span>
+                        </CommandItem>
+                    </CommandGroup>
+                    <CommandSeparator />
                     <CommandGroup heading="Settings">
                         <CommandItem onSelect={() => runCommand(() => router.push("/dashboard/settings"))}>
                             <Settings className="mr-2 h-4 w-4" />

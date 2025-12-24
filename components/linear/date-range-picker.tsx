@@ -40,6 +40,33 @@ export function DatePickerWithRange({
         setOpen(false)
     }
 
+    React.useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "d" && !e.metaKey && !e.ctrlKey && !e.altKey && document.activeElement?.tagName !== 'INPUT') {
+                // Toggle open if closed, or just open
+                setOpen((prev) => !prev)
+            }
+        }
+
+        const handlePresetEvent = (e: CustomEvent) => {
+            const days = e.detail
+            if (days === "year") {
+                setDate({ from: startOfYear(new Date()), to: new Date() })
+            } else if (typeof days === 'number') {
+                setDate({ from: subDays(new Date(), days), to: new Date() })
+            }
+        }
+
+        document.addEventListener("keydown", handleKeyDown)
+        // @ts-ignore
+        document.addEventListener("set-date-preset", handlePresetEvent)
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown)
+            // @ts-ignore
+            document.removeEventListener("set-date-preset", handlePresetEvent)
+        }
+    }, [setDate])
+
     return (
         <div className={cn("grid gap-2", className)}>
             <Popover open={open} onOpenChange={setOpen}>

@@ -8,7 +8,7 @@ import { useDashboard } from "@/components/linear/dashboard-context"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePickerWithRange } from "./date-range-picker"
 import { SyncButton } from "./sync-button"
-import { DownloadReportButton } from "@/components/dashboard/download-report-button"
+import { ExportDialog } from "@/components/dashboard/export-dialog"
 import { pricingData } from "@/config/subscriptions"
 import { AddPropertyModal } from "@/components/dashboard/add-property-modal"
 import { CommandPalette } from "./command-palette"
@@ -20,13 +20,13 @@ export function LinearHeader() {
     const pathname = usePathname()
 
     const reportChips = [
-        { title: "Realtime", href: "/dashboard/realtime", icon: Zap },
+        { title: "Devices", href: "/dashboard/devices", icon: Zap },
         { title: "Audience", href: "/dashboard/audience", icon: Users },
         { title: "Sources", href: "/dashboard/sources", icon: Globe },
     ]
 
     return (
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-white/20 bg-white/60 px-4 pl-14 lg:px-10 backdrop-blur-md">
+        <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-white/20 bg-white/70 px-4 pl-14 lg:px-8 backdrop-blur-xl shadow-sm transition-all duration-300">
             <div className="flex items-center gap-6">
                 <CommandPalette />
 
@@ -39,10 +39,10 @@ export function LinearHeader() {
                                 key={chip.href}
                                 href={chip.href}
                                 className={cn(
-                                    "flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-200",
+                                    "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-medium transition-all duration-200 border border-transparent",
                                     active
-                                        ? "bg-amber-500/10 text-amber-600 shadow-sm"
-                                        : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900"
+                                        ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                        : "text-zinc-500 hover:bg-zinc-100/80 hover:text-zinc-900"
                                 )}
                             >
                                 <chip.icon className={cn("h-3 w-3", active ? "text-amber-500" : "text-zinc-400")} />
@@ -54,7 +54,7 @@ export function LinearHeader() {
             </div>
 
             <div className="flex items-center gap-3">
-                <DownloadReportButton />
+                <ExportDialog />
                 <div className="h-4 w-px bg-zinc-200 mx-1 hidden sm:block" />
                 <SyncButton />
                 <DatePickerWithRange date={dateRange} setDate={setDateRange} />

@@ -16,10 +16,10 @@ export function LinearShell({ children }: LinearShellProps) {
     const { sidebarCollapsed } = useDashboard()
 
     return (
-        <div className="flex w-full bg-transparent text-zinc-900 selection:bg-amber-500/30">
+        <div className="flex h-screen w-full bg-transparent text-zinc-900 selection:bg-amber-500/30 overflow-hidden">
             {/* Desktop Sidebar */}
             <aside className={cn(
-                "fixed left-0 top-0 z-40 h-screen border-r border-zinc-200 bg-white hidden lg:block transition-all duration-300 ease-in-out",
+                "fixed left-0 top-0 z-40 h-full border-r border-zinc-200 bg-white hidden lg:block transition-all duration-300 ease-in-out",
                 sidebarCollapsed ? "w-16" : "w-64"
             )}>
                 <LinearSidebar />
@@ -37,14 +37,17 @@ export function LinearShell({ children }: LinearShellProps) {
                 </SheetContent>
             </Sheet>
 
-            {/* Main Content */}
+            {/* Main Content Wrapper */}
             <div className={cn(
-                "flex-1 transition-all duration-300 ease-in-out",
+                "flex-1 flex flex-col h-full transition-all duration-300 ease-in-out",
                 sidebarCollapsed ? "lg:pl-16" : "lg:pl-64"
             )}>
                 <LinearHeader />
-                <main id="main-dashboard-content" className="p-4 lg:p-10 max-w-[1600px] mx-auto animate-in fade-in duration-500 pt-16 lg:pt-10 pb-4">
-                    {children}
+                {/* Scrollable Main Area */}
+                <main id="main-dashboard-content" className="flex-1 overflow-y-auto p-4 lg:p-10 pt-16 lg:pt-10 pb-20 animate-in fade-in duration-500">
+                    <div className="max-w-[1600px] mx-auto">
+                        {children}
+                    </div>
                 </main>
             </div>
         </div>

@@ -15,6 +15,9 @@ export async function GET(request: NextRequest) {
         const reportType = searchParams.get("reportType") || "overview"
         const startDate = searchParams.get("startDate") || "30daysAgo"
         const endDate = searchParams.get("endDate") || "today"
+        // Allow clients to request more data for exports, default to 1000 for robust exports, or component specific default
+        const limitParam = searchParams.get("limit")
+        const limit = limitParam ? parseInt(limitParam) : undefined
 
         if (!propertyId) {
             return NextResponse.json({ error: "Property ID is required" }, { status: 400 })
@@ -30,6 +33,8 @@ export async function GET(request: NextRequest) {
                 case "devices": response = await getMockDevicesData(); break;
                 case "locations": response = await getMockLocationsData(); break;
                 case "acquisition": response = await getMockAcquisitionData(); break;
+                case "audience": response = await getMockLocationsData(); break;
+                case "sources": response = await getMockAcquisitionData(); break;
                 case "realtime": response = await getMockRealtimeData(); break;
                 default:
                     return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
@@ -48,19 +53,25 @@ export async function GET(request: NextRequest) {
 
         switch (reportType) {
             case "overview":
-                response = await getOverviewData(accessToken, propertyId, startDate, endDate)
+                response = await getOverviewData(accessToken, propertyId, startDate, endDate, limit)
                 break
             case "pages":
-                response = await getTopPagesData(accessToken, propertyId, startDate, endDate)
+                response = await getTopPagesData(accessToken, propertyId, startDate, endDate, limit)
                 break
             case "devices":
-                response = await getDevicesData(accessToken, propertyId, startDate, endDate)
+                response = await getDevicesData(accessToken, propertyId, startDate, endDate, limit)
                 break
             case "locations":
-                response = await getLocationsData(accessToken, propertyId, startDate, endDate)
+                response = await getLocationsData(accessToken, propertyId, startDate, endDate, limit)
+                break
+            case "audience":
+                response = await getAudienceData(accessToken, propertyId, startDate, endDate, limit)
+                break
+            case "sources":
+                response = await getSourcesData(accessToken, propertyId, startDate, endDate, limit)
                 break
             case "acquisition":
-                response = await getAcquisitionData(accessToken, propertyId, startDate, endDate)
+                response = await getAcquisitionData(accessToken, propertyId, startDate, endDate, limit)
                 break
             case "realtime":
                 response = await getRealtimeData(accessToken, propertyId)
@@ -177,6 +188,20 @@ async function getMockDevicesData() {
             { browser: "Edge", sessions: 800, percentage: 6.3 },
             { browser: "Other", sessions: 243, percentage: 1.9 },
         ],
+        os: [
+            { name: "Windows", sessions: 4500, percentage: 35.8 },
+            { name: "iOS", sessions: 3800, percentage: 30.2 },
+            { name: "Macintosh", sessions: 2100, percentage: 16.7 },
+            { name: "Android", sessions: 1800, percentage: 14.3 },
+            { name: "Linux", sessions: 343, percentage: 2.7 },
+        ],
+        screens: [
+            { resolution: "1920x1080", sessions: 3200, percentage: 25.5 },
+            { resolution: "390x844", sessions: 2100, percentage: 16.7 },
+            { resolution: "1440x900", sessions: 1500, percentage: 11.9 },
+            { resolution: "375x812", sessions: 1200, percentage: 9.5 },
+            { resolution: "1366x768", sessions: 800, percentage: 6.3 },
+        ],
         totalSessions: 12543
     }
 }
@@ -251,8 +276,8 @@ export async function runReport(accessToken: string, propertyId: string, request
     return await response.json()
 }
 
-export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
-    const [metricsResponse, trafficResponse, pagesResponse, locationsResponse, dailyResponse] = await Promise.all([
+export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 10) {
+    const [metricsResponse, trafficResponse, pagesResponse, locationsResponse, dailyResponse, deviceResponse] = await Promise.all([
         runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             metrics: [
@@ -269,27 +294,34 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
             dimensions: [{ name: "sessionDefaultChannelGroup" }],
             metrics: [{ name: "sessions" }],
             orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-            limit: 10,
+            limit: limit,
         }),
         runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
             metrics: [{ name: "screenPageViews" }],
             orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
-            limit: 10,
+            limit: limit,
         }),
         runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             dimensions: [{ name: "country" }],
             metrics: [{ name: "sessions" }],
             orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-            limit: 10,
+            limit: limit,
         }),
         runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             dimensions: [{ name: "date" }],
             metrics: [{ name: "sessions" }],
             orderBys: [{ dimension: { dimensionName: "date" }, desc: false }],
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "deviceCategory" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit: 5,
         }),
     ])
 
@@ -298,9 +330,17 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
     const pageRows = pagesResponse.rows || []
     const countryRows = locationsResponse.rows || []
     const dailyRows = dailyResponse.rows || []
+    const deviceRows = deviceResponse.rows || []
 
     const totalSessions = Number.parseInt(metrics[0]?.value || "0")
     const totalPageViews = Number.parseInt(metrics[2]?.value || "0")
+
+    // Map device rows to match the mock format (using 'device' key and fill colors)
+    const deviceColors: Record<string, string> = {
+        "desktop": "hsl(var(--chart-1))",
+        "mobile": "#6366f1",
+        "tablet": "#10b981"
+    }
 
     return {
         metrics: {
@@ -332,10 +372,18 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
             date: row.dimensionValues?.[0]?.value || "",
             sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
         })),
+        deviceBreakdown: deviceRows.map((row: any) => {
+            const cat = (row.dimensionValues?.[0]?.value || "desktop").toLowerCase()
+            return {
+                device: row.dimensionValues?.[0]?.value || "Unknown", // standardized to 'device' for overview chart
+                sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
+                fill: deviceColors[cat] || "#94a3b8"
+            }
+        }),
     }
 }
 
-async function getTopPagesData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
+async function getTopPagesData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
     const response = await runReport(accessToken, propertyId, {
         dateRanges: [{ startDate, endDate }],
         dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
@@ -346,7 +394,7 @@ async function getTopPagesData(accessToken: string, propertyId: string, startDat
             { name: "bounceRate" },
         ],
         orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
-        limit: 20,
+        limit: limit,
     })
 
     const rows = response.rows || []
@@ -372,8 +420,8 @@ async function getTopPagesData(accessToken: string, propertyId: string, startDat
     }
 }
 
-async function getDevicesData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
-    const [devicesResponse, browsersResponse] = await Promise.all([
+async function getDevicesData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 10) {
+    const [devicesResponse, browsersResponse, osResponse, screenResponse] = await Promise.all([
         runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             dimensions: [{ name: "deviceCategory" }],
@@ -390,21 +438,36 @@ async function getDevicesData(accessToken: string, propertyId: string, startDate
             dimensions: [{ name: "browser" }],
             metrics: [{ name: "sessions" }],
             orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-            limit: 10,
+            limit: limit,
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "operatingSystem" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit: limit,
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "screenResolution" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit: limit,
         }),
     ])
 
     const deviceRows = devicesResponse.rows || []
     const browserRows = browsersResponse.rows || []
+    const osRows = osResponse.rows || []
+    const screenRows = screenResponse.rows || []
 
     const totalSessions = deviceRows.reduce(
         (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
         0,
     )
-    const totalBrowserSessions = browserRows.reduce(
-        (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
-        0,
-    )
+
+    // Helper for percentage calc
+    const calcPercentage = (val: number) => totalSessions > 0 ? (val / totalSessions) * 100 : 0
 
     return {
         devices: deviceRows.map((row: any) => {
@@ -415,7 +478,7 @@ async function getDevicesData(accessToken: string, propertyId: string, startDate
                 users: Number.parseInt(row.metricValues?.[1]?.value || "0"),
                 bounceRate: Number.parseFloat(row.metricValues?.[2]?.value || "0"),
                 avgSessionDuration: Number.parseFloat(row.metricValues?.[3]?.value || "0"),
-                percentage: totalSessions > 0 ? (sessions / totalSessions) * 100 : 0,
+                percentage: calcPercentage(sessions),
             }
         }),
         browsers: browserRows.map((row: any) => {
@@ -423,14 +486,30 @@ async function getDevicesData(accessToken: string, propertyId: string, startDate
             return {
                 browser: row.dimensionValues?.[0]?.value || "Unknown",
                 sessions,
-                percentage: totalBrowserSessions > 0 ? (sessions / totalBrowserSessions) * 100 : 0,
+                percentage: calcPercentage(sessions),
+            }
+        }),
+        os: osRows.map((row: any) => {
+            const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
+            return {
+                name: row.dimensionValues?.[0]?.value || "Unknown",
+                sessions,
+                percentage: calcPercentage(sessions),
+            }
+        }),
+        screens: screenRows.map((row: any) => {
+            const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
+            return {
+                resolution: row.dimensionValues?.[0]?.value || "Unknown",
+                sessions,
+                percentage: calcPercentage(sessions),
             }
         }),
         totalSessions,
     }
 }
 
-async function getLocationsData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
+async function getLocationsData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
     const response = await runReport(accessToken, propertyId, {
         dateRanges: [{ startDate, endDate }],
         dimensions: [{ name: "country" }, { name: "countryId" }],
@@ -441,7 +520,7 @@ async function getLocationsData(accessToken: string, propertyId: string, startDa
             { name: "averageSessionDuration" },
         ],
         orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-        limit: 20,
+        limit: limit,
     })
 
     const rows = response.rows || []
@@ -467,7 +546,7 @@ async function getLocationsData(accessToken: string, propertyId: string, startDa
     }
 }
 
-async function getAcquisitionData(accessToken: string, propertyId: string, startDate: string, endDate: string) {
+async function getAcquisitionData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
     const response = await runReport(accessToken, propertyId, {
         dateRanges: [{ startDate, endDate }],
         dimensions: [{ name: "sessionSource" }, { name: "sessionMedium" }],
@@ -479,7 +558,7 @@ async function getAcquisitionData(accessToken: string, propertyId: string, start
             { name: "averageSessionDuration" },
         ],
         orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-        limit: 20,
+        limit: limit,
     })
 
     const rows = response.rows || []
@@ -539,4 +618,14 @@ async function getRealtimeData(accessToken: string, propertyId: string) {
             title: row.dimensionValues?.[0]?.value || "Unknown", // Realtime API is limited on dimensions
         })),
     }
+}
+
+async function getAudienceData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
+    // Reusing getLocationsData logic as it returns countries
+    return getLocationsData(accessToken, propertyId, startDate, endDate, limit)
+}
+
+async function getSourcesData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
+    // Reusing getAcquisitionData logic as it returns sources
+    return getAcquisitionData(accessToken, propertyId, startDate, endDate, limit)
 }
