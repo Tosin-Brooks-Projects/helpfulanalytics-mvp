@@ -11,6 +11,8 @@ declare module "next-auth" {
         user: {
             id: string
             isOnboarded?: boolean
+            createdAt?: string
+            subscriptionStatus?: string
         } & DefaultSession["user"]
     }
 
@@ -29,5 +31,7 @@ declare module "next-auth/jwt" {
         error?: string
         userId?: string
         isOnboarded?: boolean
+        createdAt?: string
+        subscriptionStatus?: string
     }
 }

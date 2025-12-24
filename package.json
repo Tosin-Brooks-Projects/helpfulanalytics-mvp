@@ -46,6 +46,7 @@
     "clsx": "^2.1.1",
     "cmdk": "latest",
     "date-fns": "latest",
+    "driver.js": "^1.4.0",
     "embla-carousel-react": "latest",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.6.0",

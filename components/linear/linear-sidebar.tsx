@@ -39,7 +39,7 @@ export function LinearSidebar() {
 
     return (
         <TooltipProvider delayDuration={0}>
-            <div className="flex h-full flex-col justify-between p-4 bg-white transition-all duration-300">
+            <div id="sidebar-container" className="flex h-full flex-col justify-between p-4 bg-white transition-all duration-300">
                 <div className="space-y-6">
                     <div className={cn("flex items-center gap-2 px-2 py-1 transition-all", sidebarCollapsed ? "justify-center" : "")}>
                         <div className="flex h-6 w-6 items-center justify-center rounded bg-amber-500/10 text-amber-500 shrink-0">

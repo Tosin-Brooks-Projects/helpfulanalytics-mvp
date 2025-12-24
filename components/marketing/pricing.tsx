@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Check } from "lucide-react";
+import { Check, AlertCircle } from "lucide-react";
 import { ShinyButton } from "@/components/ui/shiny-button";
 import { pricingData } from "@/config/subscriptions";
 import { useSession } from "next-auth/react";
@@ -12,6 +12,8 @@ export function Pricing() {
     const [isAnnual, setIsAnnual] = useState(false)
     const searchParams = useSearchParams()
     const router = useRouter()
+
+    const reason = searchParams?.get("reason")
 
     useEffect(() => {
         const planId = searchParams?.get("plan")
@@ -70,6 +72,18 @@ export function Pricing() {
     return (
         <div className="py-24 sm:py-32" id="pricing">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                {reason === "trial_expired" && (
+                    <div className="mx-auto max-w-4xl mb-12 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start sm:items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                        <div className="p-2 bg-red-100 rounded-full shrink-0">
+                            <AlertCircle className="text-red-600 h-6 w-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-red-900 font-bold text-lg">Your Free Trial Has Expired</h3>
+                            <p className="text-red-700 text-sm mt-1">You've enjoyed your 30 days of complimentary access. Please upgrade to a paid plan below to continue using the dashboard.</p>
+                        </div>
+                    </div>
+                )}
+
                 <div className="mx-auto max-w-4xl text-center">
                     <h2 className="text-base font-semibold leading-7 text-primary">Pricing</h2>
                     <p className="mt-2 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">

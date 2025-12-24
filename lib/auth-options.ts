@@ -73,6 +73,8 @@ export const authOptions: NextAuthOptions = {
                                 name: user.name,
                                 image: user.image,
                                 lastSeen: new Date(),
+                                createdAt: new Date(), // Start 30-day trial
+                                subscriptionStatus: 'free',
                                 isOnboarded: false, // Flag as new
                                 tokens: {
                                     google: {
@@ -85,7 +87,8 @@ export const authOptions: NextAuthOptions = {
                         )
                     } else {
                         // Existing user - update tokens/meta
-                        await userRef.set({
+                        const data = doc.data()
+                        const updates: any = {
                             lastSeen: new Date(),
                             name: user.name,
                             image: user.image,
@@ -96,7 +99,14 @@ export const authOptions: NextAuthOptions = {
                                     expiresAt: account.expires_at,
                                 }
                             }
-                        }, { merge: true })
+                        }
+
+                        // Backfill trial start for existing users
+                        if (!data?.createdAt) {
+                            updates.createdAt = new Date()
+                        }
+
+                        await userRef.set(updates, { merge: true })
                     }
                 } catch (error) {
                     console.error("Error saving user to Firestore", error)
@@ -109,16 +119,28 @@ export const authOptions: NextAuthOptions = {
             if (account && user) {
                 console.log("DEBUG: Auth JWT Callback - Sign In", { userId: user.id })
 
-                // Fetch onboarding status from DB to be sure
+                // Fetch onboarding status and trial info from DB
                 let isOnboarded = false
+                let subscriptionStatus = 'free'
+                let createdAt = new Date().toISOString()
+
                 try {
                     const { db } = await import("@/lib/firebase-admin")
                     const doc = await db.collection("users").doc(user.id).get()
                     if (doc.exists) {
-                        isOnboarded = doc.data()?.isOnboarded ?? false
+                        const data = doc.data()
+                        isOnboarded = data?.isOnboarded ?? false
+                        subscriptionStatus = data?.subscription?.status || 'free'
+                        // Convert Firestore specific date object to string if needed, or use directly if mapped
+                        // Usually timestamp.toDate()
+                        if (data?.createdAt && typeof data.createdAt.toDate === 'function') {
+                            createdAt = data.createdAt.toDate().toISOString()
+                        } else if (data?.createdAt) {
+                            createdAt = new Date(data.createdAt).toISOString()
+                        }
                     }
                 } catch (e) {
-                    console.error("Failed to fetch onboarding status", e)
+                    console.error("Failed to fetch user metadata", e)
                 }
 
                 return {
@@ -127,14 +149,20 @@ export const authOptions: NextAuthOptions = {
                     accessTokenExpires: account.expires_at! * 1000,
                     refreshToken: account.refresh_token,
                     userId: user.id,
-                    isOnboarded
+                    isOnboarded,
+                    subscriptionStatus,
+                    createdAt
                 }
             }
 
             // Handle session update (manual trigger from client)
-            if (trigger === "update" && session?.isOnboarded !== undefined) {
+            if (trigger === "update" && (session?.isOnboarded !== undefined || session?.subscriptionStatus !== undefined)) {
                 console.log("DEBUG: Auth JWT Callback - Update Triggered", session)
-                return { ...token, isOnboarded: session.isOnboarded }
+                return {
+                    ...token,
+                    ...(session.isOnboarded !== undefined && { isOnboarded: session.isOnboarded }),
+                    ...(session.subscriptionStatus !== undefined && { subscriptionStatus: session.subscriptionStatus })
+                }
             }
 
             // Return previous token if the access token has not expired yet
@@ -154,6 +182,8 @@ export const authOptions: NextAuthOptions = {
             if (session.user) {
                 session.user.id = (token.userId as string) || (token.sub as string)
                 session.user.isOnboarded = token.isOnboarded as boolean
+                session.user.createdAt = token.createdAt as string
+                session.user.subscriptionStatus = token.subscriptionStatus as string
             }
             // @ts-ignore
             session.userId = token.userId || token.sub
