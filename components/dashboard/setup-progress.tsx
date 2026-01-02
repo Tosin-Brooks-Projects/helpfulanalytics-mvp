@@ -15,16 +15,41 @@ export function SetupProgress() {
     const [viewedReports, setViewedReports] = useState(false)
 
     useEffect(() => {
-        // Check if user has navigated to reports before
-        if (typeof window !== 'undefined' && localStorage.getItem('hasViewedReports')) {
-            setViewedReports(true)
-        }
+        // Initialize state from local storage
+        if (typeof window !== 'undefined') {
+            const hasViewedReports = localStorage.getItem('hasViewedReports')
+            if (hasViewedReports) {
+                setViewedReports(true)
+            }
 
-        // Auto-minimize if everything is done
+            const storedIsOpen = localStorage.getItem('setupGuideOpen')
+            if (storedIsOpen !== null) {
+                setIsOpen(storedIsOpen === 'true')
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        // Auto-minimize if everything is done (only if explicitly checked, or maybe we don't want to auto-open if they closed it)
+        // If they completed everything, let's close it but respecting manual override is tricky. 
+        // Let's just say if everything is done, we close it, but only if we haven't forced a state yet? 
+        // Or simpler: Just respect the manual toggle primarily.
+
+        // Original logic: auto-minimize if complete.
         if (selectedProperty && subscription?.status === 'active' && viewedReports) {
             setIsOpen(false)
+            if (typeof window !== 'undefined') {
+                localStorage.setItem('setupGuideOpen', 'false')
+            }
         }
-    }, [selectedProperty, subscription])
+    }, [selectedProperty, subscription, viewedReports])
+
+    const toggleOpen = (open: boolean) => {
+        setIsOpen(open)
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('setupGuideOpen', String(open))
+        }
+    }
 
     const handleViewReports = () => {
         if (typeof window !== 'undefined') {
@@ -103,7 +128,7 @@ export function SetupProgress() {
                                     variant="ghost"
                                     size="icon"
                                     className="h-6 w-6 text-zinc-400 hover:text-zinc-600"
-                                    onClick={() => setIsOpen(false)}
+                                    onClick={() => toggleOpen(false)}
                                 >
                                     <X className="h-3.5 w-3.5" />
                                 </Button>
@@ -143,7 +168,7 @@ export function SetupProgress() {
                             exit={{ opacity: 0, scale: 0.8 }}
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={() => setIsOpen(true)}
+                            onClick={() => toggleOpen(true)}
                             className="flex h-12 w-12 items-center justify-center rounded-full bg-white border border-zinc-200 shadow-lg text-zinc-600 hover:text-amber-600 transition-colors relative"
                         >
                             {/* Circular Progress Indicator border could go here, but simple icon is cleaner for now */}

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { LinearShell } from "@/components/linear/linear-shell"
 import { LinearGraphCard, LinearDataTable, NoPropertyPlaceholder } from "@/components/linear"
+import { DateFilterBar } from "@/components/linear/date-filter-bar"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { useAnalytics } from "@/hooks/use-analytics"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -76,9 +77,12 @@ export default function DevicesPage() {
     return (
         <LinearShell>
             <div className="flex flex-col gap-8">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Devices & Tech</h1>
-                    <p className="text-sm text-zinc-500">Breakdown of user technology, OS, and platforms.</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Devices & Tech</h1>
+                        <p className="text-sm text-zinc-500">Breakdown of user technology, OS, and platforms.</p>
+                    </div>
+                    <DateFilterBar />
                 </div>
 
                 {/* KPI Overview Row */}
@@ -190,7 +194,7 @@ export default function DevicesPage() {
                                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                 />
                                 <Bar dataKey="sessions" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={24}>
-                                    {osData.map((entry: any, index: number) => (
+                                    {osData.slice(0, 6).map((entry: any, index: number) => (
                                         <Cell key={`cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
                                     ))}
                                 </Bar>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { LinearShell } from "@/components/linear/linear-shell"
 import { LinearGraphCard, LinearDataTable, NoPropertyPlaceholder } from "@/components/linear"
+import { DateFilterBar } from "@/components/linear/date-filter-bar"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowUpRight, Globe, MousePointerClick } from "lucide-react"
@@ -71,9 +72,12 @@ export default function SourcesPage() {
     return (
         <LinearShell>
             <div className="flex flex-col gap-8">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Traffic Sources</h1>
-                    <p className="text-sm text-zinc-500">Channel performance and user acquisition.</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Traffic Sources</h1>
+                        <p className="text-sm text-zinc-500">Channel performance and user acquisition.</p>
+                    </div>
+                    <DateFilterBar />
                 </div>
 
                 {/* KPI Cards */}
@@ -114,38 +118,40 @@ export default function SourcesPage() {
 
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Acquisition Chart */}
-                    <LinearGraphCard title="Top Acquisition Channels" className="h-[400px]">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                                data={chartData}
-                                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                                <XAxis
-                                    dataKey="source"
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tick={{ fontSize: 11, fill: '#71717a' }}
-                                    tickFormatter={(val) => val.length > 10 ? val.substring(0, 10) + '...' : val}
-                                    interval={0}
-                                />
-                                <YAxis
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tick={{ fontSize: 11, fill: '#71717a' }}
-                                />
-                                <Tooltip
-                                    cursor={{ fill: 'rgba(0,0,0,0.05)' }}
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                />
-                                <Bar dataKey="sessions" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={32}>
-                                    {chartData.map((entry: any, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
-                                    ))}
-                                </Bar>
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </LinearGraphCard>
+                    <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm flex flex-col h-[400px]">
+                        <h3 className="text-sm font-semibold text-zinc-900 mb-6 shrink-0">Top Acquisition Channels</h3>
+                        <div className="w-full flex-1 min-h-0">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart
+                                    data={chartData}
+                                    margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                                    <XAxis
+                                        dataKey="source"
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tick={{ fontSize: 11, fill: '#71717a' }}
+                                        tickFormatter={(val) => val.length > 10 ? val.substring(0, 10) + '...' : val}
+                                    />
+                                    <YAxis
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tick={{ fontSize: 11, fill: '#71717a' }}
+                                    />
+                                    <Tooltip
+                                        cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                    />
+                                    <Bar dataKey="sessions" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={32}>
+                                        {chartData.map((entry: any, index: number) => (
+                                            <Cell key={`cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
 
                     {/* Sources Data Table */}
                     <LinearGraphCard title="Source Breakdown">
