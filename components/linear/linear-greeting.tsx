@@ -84,8 +84,8 @@ export function LinearGreeting() {
                     </div>
                 </div>
 
-                {/* Quick Hits Desktop Grid */}
-                <div className="hidden lg:flex flex-col gap-3">
+                {/* Quick Hits Grid - Visible on all screens */}
+                <div className="flex flex-col gap-3">
                     {loading ? (
                         [...Array(2)].map((_, i) => (
                             <div key={i} className="h-[74px] rounded-xl border border-zinc-100 bg-zinc-50/50 animate-pulse" />

@@ -19,6 +19,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function LinearHeader() {
     const { data: session } = useSession()
@@ -188,13 +189,12 @@ export function LinearHeader() {
                     )}
 
                     <Link href="/dashboard/profile">
-                        <div className="h-7 w-7 rounded-full bg-gradient-to-tr from-amber-500 to-orange-500 ring-2 ring-white cursor-pointer hover:ring-amber-500/50 transition-all shadow-sm overflow-hidden flex items-center justify-center">
-                            {session?.user?.image ? (
-                                <img src={session.user.image} alt={session.user.name || "User"} className="h-full w-full object-cover" />
-                            ) : (
-                                <User className="h-4 w-4 text-white" />
-                            )}
-                        </div>
+                        <Avatar className="h-8 w-8 border border-zinc-200 shadow-sm cursor-pointer hover:ring-2 hover:ring-amber-500/20 transition-all">
+                            <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} className="object-cover" />
+                            <AvatarFallback className="bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-medium text-xs">
+                                {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
+                            </AvatarFallback>
+                        </Avatar>
                     </Link>
                 </div>
             </header>

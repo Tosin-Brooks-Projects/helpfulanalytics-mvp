@@ -12,8 +12,10 @@ export const useTypewriter = (text: string, speed = 30) => {
 
         const intervalId = setInterval(() => {
             if (i < text.length) {
-                setDisplayedText((prev) => prev + text.charAt(i))
+                // Use substring to ensure we never get "drect" instead of "direct"
+                // This is deterministic regardless of render timing.
                 i++
+                setDisplayedText(text.substring(0, i))
             } else {
                 clearInterval(intervalId)
             }
@@ -43,7 +45,7 @@ export function Typewriter({ text, speed = 30, className, cursor = true }: Typew
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-                    className="inline-block w-[2px] h-[1em] bg-primary ml-1 align-middle"
+                    className="inline-block w-[2px] h-[1em] bg-amber-500 ml-0.5 align-middle"
                 />
             )}
         </span>

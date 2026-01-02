@@ -11,10 +11,10 @@ export default function LinearDashboardPage() {
     return (
         <LinearShell>
             <div className="flex flex-col gap-8">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <LinearGreeting />
+                <div className="flex justify-end w-full">
                     <DateFilterBar />
                 </div>
+                <LinearGreeting />
 
                 {selectedProperty ? (
                     <LinearMetricsOverview propertyId={selectedProperty} />
