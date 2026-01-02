@@ -11,10 +11,10 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Download, FileJson, Loader2, FileText, LayoutTemplate, Briefcase, ServerCrash } from "lucide-react"
+import { Download, FileSpreadsheet, Loader2, FileText } from "lucide-react"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { downloadJSON } from "@/lib/export-utils"
 import { toast } from "sonner"
@@ -26,18 +26,25 @@ import autoTable from "jspdf-autotable"
 // Add declaration to fix typescript complaining about autoTable on jsPDF instance if needed, 
 // though importing it usually works. We'll use the imported function directly or apply it.
 
+const convertToCSVString = (data: any[], title?: string) => {
+    if (!data || !data.length) return ""
+    const headers = Object.keys(data[0])
+    const rows = data.map(row => headers.map(fieldName => {
+        const val = row[fieldName]
+        return typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val
+    }).join(","))
+
+    return (title ? `\n# ${title}\n` : "") + headers.join(",") + "\n" + rows.join("\n")
+}
+
 export function ExportDialog() {
     const [open, setOpen] = useState(false)
-    const [exportFormat, setExportFormat] = useState<"json" | "pdf">("pdf")
+    const [exportFormat, setExportFormat] = useState<"csv" | "pdf">("csv")
     const [loading, setLoading] = useState(false)
     const [loadingStep, setLoadingStep] = useState<string>("")
-    const [activeTab, setActiveTab] = useState("presets")
 
     // Custom selection state
     const [selectedScopes, setSelectedScopes] = useState<string[]>(["overview"])
-
-    // Preset selection state
-    const [selectedPreset, setSelectedPreset] = useState<string | null>(null)
 
     const { selectedProperty, dateRange } = useDashboard()
 
@@ -49,32 +56,7 @@ export function ExportDialog() {
         { id: "sources", label: "Traffic Sources", description: "Source/Medium acquisition data" },
     ]
 
-    const presets = [
-        {
-            id: "executive",
-            title: "Executive Summary",
-            description: "High-level kpis and top performing pages.",
-            icon: Briefcase,
-            scopes: ["overview", "pages"],
-            idealFormat: "pdf"
-        },
-        {
-            id: "tech",
-            title: "Technical Audit",
-            description: "Deep dive into device, browser & OS data.",
-            icon: ServerCrash,
-            scopes: ["devices"],
-            idealFormat: "json"
-        },
-        {
-            id: "full",
-            title: "Full Backup",
-            description: "Complete dump of all available analytics data.",
-            icon: LayoutTemplate,
-            scopes: ["overview", "devices", "pages", "audience", "sources"],
-            idealFormat: "json"
-        }
-    ]
+
 
     const handleScopeToggle = (id: string) => {
         setSelectedScopes(prev =>
@@ -82,11 +64,7 @@ export function ExportDialog() {
         )
     }
 
-    const handlePresetSelect = (preset: any) => {
-        setSelectedPreset(preset.id)
-        if (preset.idealFormat === "json") setExportFormat("json")
-        else setExportFormat("pdf")
-    }
+
 
     const fetchReportData = async (scope: string) => {
         let reportTypeParam = "overview"
@@ -181,7 +159,7 @@ export function ExportDialog() {
                     theme: 'striped',
                     headStyles: { fillColor: primaryColor },
                     styles: { fontSize: 12, cellPadding: 5 },
-                    columnStyles: { 0: { fontStyle: 'bold', width: 100 } }
+                    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 100 } }
                 })
 
                 // Add Traffic Sources Table if present in overview
@@ -360,24 +338,11 @@ export function ExportDialog() {
             const timestamp = new Date().toISOString().split('T')[0]
             const baseFilename = `analytics_${timestamp}`
 
-            let scopesToFetch: string[] = []
-            if (activeTab === "presets" && selectedPreset) {
-                const p = presets.find(x => x.id === selectedPreset)
-                if (p) scopesToFetch = p.scopes
-            } else {
-                scopesToFetch = selectedScopes
-            }
-
-            if (scopesToFetch.length === 0) {
-                setLoading(false)
-                return toast.error("Please select data to export")
-            }
-
             setLoadingStep("Fetching high-volume data...")
             toast.info("Fetching fresh data from Google Analytics...")
 
             const results = await Promise.all(
-                scopesToFetch.map(async (scope) => {
+                selectedScopes.map(async (scope) => {
                     const data = await fetchReportData(scope)
                     return { scope, data }
                 })
@@ -385,20 +350,33 @@ export function ExportDialog() {
 
             setLoadingStep("Processing export...")
 
-            if (exportFormat === "json") {
-                const fullData: any = {}
+            if (exportFormat === "csv") {
+                const { flattenAnalyticsData } = await import("@/lib/export-utils")
+
+                let combinedCSV = ""
                 results.forEach(({ scope, data }) => {
-                    fullData[scope] = data
+                    const flatData = flattenAnalyticsData(data)
+                    if (Array.isArray(flatData)) {
+                        combinedCSV += convertToCSVString(flatData, scope.toUpperCase()) + "\n\n"
+                    }
                 })
-                downloadJSON(fullData, `${baseFilename}_full`)
-                toast.success("JSON Export complete")
+
+                const blob = new Blob([combinedCSV], { type: 'text/csv;charset=utf-8;' })
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement("a")
+                link.setAttribute("href", url)
+                link.setAttribute("download", `${baseFilename}.csv`)
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+
+                toast.success("CSV Export complete")
             } else if (exportFormat === "pdf") {
                 generateDetailedPDF(results, baseFilename)
                 toast.success("PDF Export complete")
             }
 
             setOpen(false)
-
         } catch (error) {
             console.error(error)
             toast.error("Export failed. Please check your connection.")
@@ -424,18 +402,11 @@ export function ExportDialog() {
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="text-lg font-bold text-zinc-900">Export Analytics Data</DialogTitle>
                     <DialogDescription className="text-zinc-500 text-xs">
-                        Download raw data directly from the API. Choose a preset or customize.
+                        Download raw data directly from the API. Select the data you wish to export.
                     </DialogDescription>
                 </DialogHeader>
 
-                <Tabs defaultValue="presets" className="w-full" onValueChange={setActiveTab}>
-                    <div className="px-6">
-                        <TabsList className="grid w-full grid-cols-2 bg-zinc-100/80">
-                            <TabsTrigger value="presets" className="text-xs">Presets</TabsTrigger>
-                            <TabsTrigger value="custom" className="text-xs">Custom</TabsTrigger>
-                        </TabsList>
-                    </div>
-
+                <div className="p-0">
                     <div className="p-6 pt-4 min-h-[220px]">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center h-full py-8 space-y-4">
@@ -446,61 +417,32 @@ export function ExportDialog() {
                                 </div>
                             </div>
                         ) : (
-                            <>
-                                <TabsContent value="presets" className="mt-0 space-y-3">
-                                    {presets.map((preset) => {
-                                        const active = selectedPreset === preset.id
-                                        return (
-                                            <div
-                                                key={preset.id}
-                                                onClick={() => handlePresetSelect(preset)}
-                                                className={cn(
-                                                    "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all",
-                                                    active
-                                                        ? "bg-amber-50 border-amber-500/50 shadow-sm"
-                                                        : "bg-white border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
-                                                )}
-                                            >
-                                                <div className={cn("p-2 rounded-md", active ? "bg-amber-100 text-amber-600" : "bg-zinc-100 text-zinc-500")}>
-                                                    <preset.icon className="h-4 w-4" />
-                                                </div>
-                                                <div>
-                                                    <h4 className={cn("text-sm font-semibold", active ? "text-amber-900" : "text-zinc-900")}>{preset.title}</h4>
-                                                    <p className="text-[11px] text-zinc-500 leading-tight mt-0.5">{preset.description}</p>
-                                                </div>
-                                                {active && <div className="ml-auto flex h-2 w-2 rounded-full bg-amber-500 self-center" />}
+                            <div className="space-y-4">
+                                <div className="space-y-3">
+                                    <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Data Selection</Label>
+                                    {scopes.map((scope) => (
+                                        <div key={scope.id} className="flex items-start space-x-3">
+                                            <Checkbox
+                                                id={scope.id}
+                                                checked={selectedScopes.includes(scope.id)}
+                                                onCheckedChange={() => handleScopeToggle(scope.id)}
+                                                className="mt-0.5 border-zinc-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                                            />
+                                            <div className="grid gap-1.5 leading-none">
+                                                <Label
+                                                    htmlFor={scope.id}
+                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-700"
+                                                >
+                                                    {scope.label}
+                                                </Label>
+                                                <p className="text-[11px] text-zinc-500">
+                                                    {scope.description}
+                                                </p>
                                             </div>
-                                        )
-                                    })}
-                                </TabsContent>
-
-                                <TabsContent value="custom" className="mt-0 space-y-4">
-                                    <div className="space-y-3">
-                                        <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Data Selection</Label>
-                                        {scopes.map((scope) => (
-                                            <div key={scope.id} className="flex items-start space-x-3">
-                                                <Checkbox
-                                                    id={scope.id}
-                                                    checked={selectedScopes.includes(scope.id)}
-                                                    onCheckedChange={() => handleScopeToggle(scope.id)}
-                                                    className="mt-0.5 border-zinc-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
-                                                />
-                                                <div className="grid gap-1.5 leading-none">
-                                                    <Label
-                                                        htmlFor={scope.id}
-                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-700"
-                                                    >
-                                                        {scope.label}
-                                                    </Label>
-                                                    <p className="text-[11px] text-zinc-500">
-                                                        {scope.description}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </TabsContent>
-                            </>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         )}
                     </div>
 
@@ -519,29 +461,29 @@ export function ExportDialog() {
                                 PDF
                             </button>
                             <button
-                                onClick={() => setExportFormat("json")}
+                                onClick={() => setExportFormat("csv")}
                                 className={cn(
                                     "px-3 py-1.5 rounded-md text-[10px] font-bold border transition-all flex items-center gap-1.5",
-                                    exportFormat === "json"
+                                    exportFormat === "csv"
                                         ? "bg-white border-zinc-300 text-zinc-900 shadow-sm"
                                         : "bg-transparent border-transparent text-zinc-500 hover:text-zinc-700"
                                 )}
                             >
-                                <FileJson className="h-3 w-3" />
-                                JSON
+                                <FileSpreadsheet className="h-3 w-3" />
+                                CSV
                             </button>
                         </div>
 
                         <Button
                             onClick={handleExport}
-                            disabled={loading || (activeTab === "presets" && !selectedPreset) || (activeTab === "custom" && selectedScopes.length === 0)}
+                            disabled={loading || selectedScopes.length === 0}
                             className="bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/10 text-xs px-6"
                         >
                             {loading ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
                             {loading ? "Exporting..." : "Download Data"}
                         </Button>
                     </div>
-                </Tabs>
+                </div>
             </DialogContent>
         </Dialog>
     )

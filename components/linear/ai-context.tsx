@@ -7,6 +7,7 @@ interface InsightItem {
     type: string
     title?: string
     description: string
+    content?: string
 }
 
 interface AIContextType {
@@ -51,7 +52,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
             } else {
                 // Fallback for 429 handled by the API now returning valid JSON with error message, 
                 // but if it completely fails (500), we land here or catch block.
-                 setError("Unable to load insights")
+                setError("Unable to load insights")
             }
         } catch (err) {
             console.error(err)

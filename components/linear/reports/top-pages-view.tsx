@@ -4,6 +4,7 @@ import { useAnalytics } from "@/hooks/use-analytics"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import { ArrowUpRight, Eye, MousePointerClick, Clock, ArrowRight } from "lucide-react"
+import { DateFilterBar } from "@/components/linear/date-filter-bar"
 
 export function TopPagesView({ propertyId }: { propertyId: string }) {
     const { data, loading } = useAnalytics(propertyId)
@@ -15,7 +16,7 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
     // Sort pages by views for the chart
     const chartData = [...data.topPages].sort((a: any, b: any) => b.views - a.views).slice(0, 10).map((p: any, i: number) => ({
         ...p,
-        fill: i === 0 ? "hsl(var(--chart-1))" : "rgba(251, 191, 36, 0.3)" // Amber-500 for top, lighter for others
+        fill: i === 0 ? "#f59e0b" : "rgba(251, 191, 36, 0.3)" // Amber-500 for top, lighter for others
     }))
 
     const totalViews = data.metrics?.pageViews || 0
@@ -27,6 +28,7 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
                     <h2 className="text-2xl font-semibold text-zinc-900">Top Pages</h2>
                     <p className="text-zinc-500">Performance report by page path</p>
                 </div>
+                <DateFilterBar />
             </div>
 
             {/* KPI Cards */}

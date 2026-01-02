@@ -18,10 +18,16 @@ export async function GET() {
     const userId = session.userId
 
     try {
-        const propertiesSnap = await db.collection("users").doc(userId).collection("properties").get()
-        const properties = propertiesSnap.docs.map(doc => doc.data())
+        const [userDoc, propertiesSnap] = await Promise.all([
+            db.collection("users").doc(userId).get(),
+            db.collection("users").doc(userId).collection("properties").get()
+        ])
 
-        return NextResponse.json({ properties })
+        const properties = propertiesSnap.docs.map(doc => doc.data())
+        const userData = userDoc.data()
+        const deletionUsage = userData?.deletionRateLimit || { count: 0, resetAt: Date.now() + 30 * 24 * 60 * 60 * 1000 }
+
+        return NextResponse.json({ properties, deletionUsage })
     } catch (error) {
         console.error("Error fetching user properties:", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
@@ -57,6 +63,8 @@ export async function POST(request: Request) {
         const userDoc = await db.collection("users").doc(userId).get()
         const userData = userDoc.data()
         const subscription = userData?.subscription
+
+
 
         // Default to free tier if no subscription
         // Note: We might want to handle "canceled" status by reverting to free limits or blocking access.
@@ -110,11 +118,10 @@ export async function POST(request: Request) {
             // Initialize basic subscription if not present (only if it's completely missing)
             ...(!userData?.subscription ? {
                 subscription: {
-                    tier: "starter", // Default to starter
-                    status: "active", // Or "inactive" until they sign up? 
-                    // decided: set to active starter by default so they can use the free tier immediately
+                    tier: "starter",
+                    status: "active",
                 }
-            } : {})
+            } : {}),
         }, { merge: true })
 
         // Also add to a subcollection of properties if we want to support multiple later
@@ -129,6 +136,68 @@ export async function POST(request: Request) {
 
     } catch (error) {
         console.error("Error saving property:", error)
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    }
+}
+
+export async function DELETE(request: Request) {
+    const session = await getServerSession(authOptions)
+    const { searchParams } = new URL(request.url)
+    const propertyId = searchParams.get("propertyId")
+
+    // @ts-ignore
+    if (!session?.userId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    if (!propertyId) {
+        return NextResponse.json({ error: "Property ID required" }, { status: 400 })
+    }
+
+    // @ts-ignore
+    const userId = session.userId
+
+    try {
+        const propertyRef = db.collection("users").doc(userId).collection("properties").doc(propertyId)
+        const userRef = db.collection("users").doc(userId)
+
+        // Rate Limit Check for Deletion
+        // Run transaction or just optimistic check (doc read -> write)
+        const userDoc = await userRef.get()
+        const userData = userDoc.data()
+
+        const now = Date.now()
+        const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000
+        let delLimit = userData?.deletionRateLimit || { count: 0, resetAt: now + THIRTY_DAYS }
+
+        if (now > delLimit.resetAt) {
+            delLimit = { count: 0, resetAt: now + THIRTY_DAYS }
+        }
+
+        if (delLimit.count >= 5) {
+            return NextResponse.json({ error: "Monthly deletion limit reached (5/month)." }, { status: 429 })
+        }
+
+        // 1. Delete property
+        await propertyRef.delete()
+
+        // 2. Update Limit & Active Check
+        const updates: any = {
+            deletionRateLimit: {
+                count: delLimit.count + 1,
+                resetAt: delLimit.resetAt
+            }
+        }
+
+        if (userData?.activeProperty?.id === propertyId) {
+            updates.activeProperty = null
+        }
+
+        await userRef.update(updates)
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error("Error deleting property:", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }

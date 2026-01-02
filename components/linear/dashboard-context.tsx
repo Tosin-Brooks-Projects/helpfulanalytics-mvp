@@ -29,6 +29,7 @@ interface DashboardContextType {
     subscription: Subscription | null
     sidebarCollapsed: boolean
     setSidebarCollapsed: (collapsed: boolean) => void
+    deletionUsage: { count: number, resetAt: number } | null
 }
 
 const LinearDashboardContext = createContext<DashboardContextType | undefined>(undefined)
@@ -43,6 +44,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
         to: new Date(),
     })
     const [subscription, setSubscription] = useState<Subscription | null>(null)
+    const [deletionUsage, setDeletionUsage] = useState<{ count: number, resetAt: number } | null>(null)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const router = useRouter()
 
@@ -56,6 +58,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
                     const savedData = await savedPropsRes.json()
                     savedProps = savedData.properties || []
                     setProperties(savedProps)
+                    setDeletionUsage(savedData.deletionUsage || null)
                 }
 
                 // 2. Fetch all GA4 properties (Available)
@@ -123,7 +126,8 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
             setDateRange,
             subscription,
             sidebarCollapsed,
-            setSidebarCollapsed
+            setSidebarCollapsed,
+            deletionUsage
         }}>
             {children}
         </LinearDashboardContext.Provider>

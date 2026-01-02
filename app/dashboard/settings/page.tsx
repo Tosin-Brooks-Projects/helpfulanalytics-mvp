@@ -11,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
 
 export default function SettingsPage() {
-    const { properties, selectedProperty, loading: initialLoading } = useDashboard()
+    const { properties, selectedProperty, loading: initialLoading, deletionUsage } = useDashboard()
     const { toast } = useToast()
 
     // Find absolute active property object (safe if properties update)
@@ -146,6 +146,9 @@ export default function SettingsPage() {
                                 <div>
                                     <h4 className="text-sm font-semibold text-rose-600">Remove Property</h4>
                                     <p className="text-xs text-zinc-500 mt-1">Remove this property from your dashboard view.</p>
+                                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                                        Deletions remaining this month: <span className="font-medium text-zinc-600">{Math.max(0, 5 - ((deletionUsage && Date.now() < deletionUsage.resetAt) ? deletionUsage.count : 0))}</span>
+                                    </p>
                                 </div>
                                 <Button
                                     variant="destructive"
