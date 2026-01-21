@@ -1,0 +1,50 @@
+runConfig:
+  minInstances: 0
+  maxInstances: 1
+  concurrency: 80
+
+secrets:
+  - variable: GEMINI_API_KEY
+    secret: GEMINI_API_KEY
+  - variable: FIREBASE_PRIVATE_KEY
+    secret: FIREBASE_PRIVATE_KEY
+  - variable: GOOGLE_CLIENT_SECRET
+    secret: GOOGLE_CLIENT_SECRET
+  - variable: NEXTAUTH_SECRET
+    secret: NEXTAUTH_SECRET
+  - variable: STRIPE_SECRET_KEY
+    secret: STRIPE_SECRET_KEY
+  - variable: STRIPE_WEBHOOK_SECRET
+    secret: STRIPE_WEBHOOK_SECRET
+  - variable: RESEND_API_KEY
+    secret: RESEND_API_KEY
+
+environmentVariables:
+  - variable: FIREBASE_PROJECT_ID
+    value: "gen-lang-client-0785730442"
+  - variable: FIREBASE_CLIENT_EMAIL
+    value: "firebase-adminsdk-fbsvc@gen-lang-client-0785730442.iam.gserviceaccount.com"
+  - variable: GOOGLE_CLIENT_ID
+    value: "550909108668-rbalvso0ede9joib8j52oeqndj45u4pl.apps.googleusercontent.com"
+  - variable: NEXTAUTH_URL
+    value: "https://helpfulanalytics.com"
+  - variable: GOOGLE_REDIRECT_URI
+    value: "https://helpfulanalytics.com/api/auth/callback/google"
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: "AIzaSyCbGgtl_7PI-rOS2JzaMG0bvk7c-GzeO1w"
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: "gen-lang-client-0785730442.firebaseapp.com"
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: "gen-lang-client-0785730442"
+  - variable: NEXT_PUBLIC_STRIPE_PRICE_ID_STARTER
+    value: "price_1SriADAQjADCPHYIqAPRhqa8"
+  - variable: NEXT_PUBLIC_STRIPE_PRICE_ID_PRO
+    value: "price_1SriB2AQjADCPHYIpbJWXtDX"
+  - variable: NEXT_PUBLIC_STRIPE_PRICE_ID_AGENCY
+    value: "price_1SriBQAQjADCPHYIIt6vSpI4"
+  - variable: NEXT_PUBLIC_STRIPE_PRICE_ID_STARTER_YEARLY
+    value: "price_1SriC7AQjADCPHYIrjqmgW4V"
+  - variable: NEXT_PUBLIC_STRIPE_PRICE_ID_PRO_YEARLY
+    value: "price_1SriCcAQjADCPHYIYqYo4w54"
+  - variable: NEXT_PUBLIC_STRIPE_PRICE_ID_AGENCY_YEARLY
+    value: "price_1SriD8AQjADCPHYIcgy6i3tz"
