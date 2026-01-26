@@ -8,7 +8,11 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Helpful Analytics - The Best Google Analytics Dashboard & GA4 Alternative",
+  metadataBase: new URL("https://helpfulanalytics.com"),
+  title: {
+    default: "Helpful Analytics - The Best Google Analytics Dashboard & GA4 Alternative",
+    template: "%s | Helpful Analytics",
+  },
   description: "Learn how to use Google Analytics 4 (GA4) with our easy-to-use dashboard. The perfect Google Analytics alternative for small businesses, research, and setting up tracking. Understand your data without the confusion.",
   keywords: [
     "google analytics dashboard",
@@ -22,6 +26,34 @@ export const metadata: Metadata = {
     "google analytics metrics",
     "ga4 walkthrough"
   ],
+  authors: [{ name: "Brooks Conkle", url: "https://x.com/brooksconkle" }],
+  creator: "Brooks Conkle",
+  publisher: "Helphul Analytics",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://helpfulanalytics.com",
+    title: "Helpful Analytics - The Best Google Analytics Dashboard",
+    description: "Understand your data without the confusion. The perfect Google Analytics alternative for small businesses.",
+    siteName: "Helpful Analytics",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Helpful Analytics - The Best Google Analytics Dashboard",
+    description: "Understand your data without the confusion. The perfect Google Analytics alternative for small businesses.",
+    creator: "@brooksconkle",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   generator: "v0.dev",
 }
 

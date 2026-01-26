@@ -5,8 +5,22 @@ import { Button } from "@/components/ui/button"
 import { useSession } from "next-auth/react"
 import { motion } from "framer-motion"
 
+import { usePathname } from "next/navigation"
+
 export function Navbar() {
     const { data: session } = useSession()
+    const pathname = usePathname()
+    const isHome = pathname === "/"
+
+    const handleScroll = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, id: string) => {
+        if (isHome) {
+            e.preventDefault()
+            const element = document.getElementById(id)
+            if (element) {
+                element.scrollIntoView({ behavior: "smooth" })
+            }
+        }
+    }
 
     return (
         <motion.header
@@ -30,13 +44,15 @@ export function Navbar() {
                             About
                         </Link>
                         <Link
-                            href="#features"
+                            href="/#features"
+                            onClick={(e) => handleScroll(e, "features")}
                             className="transition-colors hover:text-primary"
                         >
                             Features
                         </Link>
                         <Link
-                            href="#pricing"
+                            href="/#pricing"
+                            onClick={(e) => handleScroll(e, "pricing")}
                             className="transition-colors hover:text-primary"
                         >
                             Pricing

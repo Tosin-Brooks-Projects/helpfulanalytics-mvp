@@ -53,7 +53,14 @@ export function Hero() {
                                 <ShinyButton className="h-12 px-8">Get Started</ShinyButton>
                             </Link>
                             <Link
-                                href="#features"
+                                href="/#features"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    const element = document.getElementById("features");
+                                    if (element) {
+                                        element.scrollIntoView({ behavior: "smooth" });
+                                    }
+                                }}
                                 className="text-sm font-semibold leading-6 text-slate-900 hover:text-primary transition-colors"
                             >
                                 Learn more <span aria-hidden="true">→</span>

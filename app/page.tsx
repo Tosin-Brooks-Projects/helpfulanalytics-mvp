@@ -1,28 +1,15 @@
-"use client"
+import { Metadata } from "next"
+import { LandingPageContent } from "@/components/marketing/landing-page-content"
 
-import { Navbar } from "@/components/marketing/navbar"
-import { Hero } from "@/components/marketing/hero"
-import { Features } from "@/components/marketing/features"
-import { Pricing } from "@/components/marketing/pricing"
-import { CTA } from "@/components/marketing/cta"
-import { FAQ } from "@/components/marketing/faq"
-import { Footer } from "@/components/marketing/footer"
-import { SmoothScroll } from "@/components/ui/smooth-scroll"
+export const metadata: Metadata = {
+    title: "Helpful Analytics - The Best Google Analytics Dashboard & GA4 Alternative",
+    description: "Simple, privacy-friendly Google Analytics alternative. Understand your traffic without the confusion of GA4.",
+    openGraph: {
+        title: "Helpful Analytics - The Best Google Analytics Dashboard & GA4 Alternative",
+        description: "Simple, privacy-friendly Google Analytics alternative. Understand your traffic without the confusion of GA4.",
+    }
+}
 
 export default function LandingPage() {
-    return (
-        <SmoothScroll>
-            <div className="min-h-screen bg-[#f0f4f8]">
-                <Navbar />
-                <main>
-                    <Hero />
-                    <Features />
-                    <Pricing />
-                    <FAQ />
-                    <CTA />
-                </main>
-                <Footer />
-            </div>
-        </SmoothScroll>
-    )
+    return <LandingPageContent />
 }

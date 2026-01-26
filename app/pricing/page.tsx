@@ -1,15 +1,15 @@
-"use client"
+import { Metadata } from "next"
+import { PricingPageContent } from "@/components/marketing/pricing-page-content"
 
-import { Pricing } from "@/components/marketing/pricing"
-import { Navbar } from "@/components/marketing/navbar"
-import { Footer } from "@/components/marketing/footer"
+export const metadata: Metadata = {
+    title: "Pricing - Helpful Analytics",
+    description: "Simple pricing for analytics that just works. Start for free.",
+    openGraph: {
+        title: "Pricing - Helpful Analytics",
+        description: "Simple pricing for analytics that just works. Start for free.",
+    }
+}
 
 export default function PricingPage() {
-    return (
-        <main className="bg-white dark:bg-zinc-950 min-h-screen">
-            <Navbar />
-            <Pricing />
-            <Footer />
-        </main>
-    )
+    return <PricingPageContent />
 }
