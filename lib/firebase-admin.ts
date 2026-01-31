@@ -28,5 +28,10 @@ if (!admin.apps.length) {
 }
 
 // Export lazily or conditionally to avoid build crashes if init failed
-export const db = admin.apps.length ? admin.firestore() : ({} as admin.firestore.Firestore)
+export const db = admin.apps.length ? admin.firestore() : new Proxy({} as admin.firestore.Firestore, {
+    get: (_target, prop) => {
+        if (prop === 'then') return undefined; // Make it not a Promise
+        throw new Error("Firebase Admin not initialized. Check server logs for failed initialization.");
+    }
+});
 export const auth = admin.apps.length ? admin.auth() : ({} as admin.auth.Auth)
