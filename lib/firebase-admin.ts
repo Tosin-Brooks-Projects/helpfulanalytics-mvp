@@ -9,15 +9,34 @@ const privateKey = process.env.FIREBASE_PRIVATE_KEY
 if (!admin.apps.length) {
     if (projectId && clientEmail && privateKey) {
         try {
+            // Robust private key parsing
+            let normalizedKey = privateKey;
+
+            // 1. Remove outer quotes if present
+            if (normalizedKey.startsWith('"') && normalizedKey.endsWith('"')) {
+                normalizedKey = normalizedKey.slice(1, -1);
+            }
+
+            // 2. Handle escaped newlines (e.g. from Vercel env vars)
+            normalizedKey = normalizedKey.replace(/\\n/g, '\n');
+
             admin.initializeApp({
                 credential: admin.credential.cert({
                     projectId,
                     clientEmail,
-                    privateKey: privateKey.replace(/\\n/g, "\n").replace(/"/g, ''),
+                    privateKey: normalizedKey,
                 }),
             })
+            console.log("✅ Firebase Admin initialized successfully.")
         } catch (error) {
-            console.error("Firebase Admin initialization failed:", error)
+            console.error("❌ Firebase Admin initialization failed:", error)
+            // Log key format details for debugging (masked)
+            if (privateKey) {
+                console.error("Debug - Private Key Length:", privateKey.length);
+                console.error("Debug - Starts with check:", privateKey.startsWith("-----BEGIN PRIVATE KEY-----"));
+                console.error("Debug - Ends with check:", privateKey.endsWith("-----END PRIVATE KEY-----"));
+                console.error("Debug - Contains \\n literal:", privateKey.includes("\\n"));
+            }
         }
     } else {
         // Only log warning in development or if explicitly debugged, to avoid noise in build logs if expected
