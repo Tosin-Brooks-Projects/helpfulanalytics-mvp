@@ -1,12 +1,10 @@
-```typescript
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
-import { google } from "googleapis"
 
 export const dynamic = "force-dynamic"
 
-export async function POST(request: Request) {
+export async function GET(request: NextRequest) {
     try {
         const session = await getServerSession(authOptions)
         // @ts-ignore
@@ -142,7 +140,7 @@ export async function getMockOverviewData() {
             { device: "Tablet", sessions: 543, fill: "#10b981" },
         ],
         userRetention: Array.from({ length: 6 }, (_, i) => ({
-            week: `Week ${ i + 1 } `,
+            week: `Week ${i + 1} `,
             retention: Math.floor(100 * Math.pow(0.85, i))
         })),
     }
@@ -261,23 +259,23 @@ export async function runReport(accessToken: string, propertyId: string, request
     // The API expects: https://analyticsdata.googleapis.com/v1beta/properties/12345:runReport
     // So if propertyId is 'properties/12345', we should use `.../v1beta/${ propertyId }: runReport`
 
-    const resourceName = propertyId.startsWith("properties/") ? propertyId : `properties / ${ propertyId } `
+    const resourceName = propertyId.startsWith("properties/") ? propertyId : `properties / ${propertyId} `
 
     const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/${resourceName}:runReport`, {
-method: "POST",
-    headers: {
-    Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json",
         },
-body: JSON.stringify(requestBody),
+        body: JSON.stringify(requestBody),
     })
 
-if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`GA4 API Error (${response.status}): ${errorText}`)
-}
+    if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`GA4 API Error (${response.status}): ${errorText}`)
+    }
 
-return await response.json()
+    return await response.json()
 }
 
 export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 10) {
