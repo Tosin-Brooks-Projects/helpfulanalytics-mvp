@@ -12,16 +12,16 @@ if (!admin.apps.length) {
             // Robust private key parsing
             let normalizedKey = privateKey;
 
-            // 1. Handle escaped newlines (e.g. from Vercel env vars, whether in quotes or not)
-            normalizedKey = normalizedKey.replace(/\\n/g, '\n');
+            // 1. Handle Vercel's potential double-escaping of newlines and carriage returns
+            normalizedKey = normalizedKey.replace(/\\n/g, '\n').replace(/\r/g, '');
 
-            // 2. Extract the PEM block explicitly using Regex (Nuclear option for "Unparsed DER bytes")
-            // This discards any leading/trailing garbage, quotes, or extra characters.
-            const pemMatch = normalizedKey.match(/-----BEGIN PRIVATE KEY-----[\s\S]+?-----END PRIVATE KEY-----/);
+            // 2. Extract PEM block with permissive regex (handles RSA or generic header)
+            const pemMatch = normalizedKey.match(/-----BEGIN(?: RSA)? PRIVATE KEY-----[\s\S]+?-----END(?: RSA)? PRIVATE KEY-----/);
+
             if (pemMatch) {
                 normalizedKey = pemMatch[0];
             } else {
-                // If regex fails (e.g. key is totally malformed), try simple quote stripping as fallback
+                console.warn("⚠️ Regex failed to match PEM block. Attempting fallback cleanup.");
                 if (normalizedKey.startsWith('"') && normalizedKey.endsWith('"')) {
                     normalizedKey = normalizedKey.slice(1, -1);
                 }
