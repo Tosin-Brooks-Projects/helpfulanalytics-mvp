@@ -12,13 +12,20 @@ if (!admin.apps.length) {
             // Robust private key parsing
             let normalizedKey = privateKey;
 
-            // 1. Remove outer quotes if present
-            if (normalizedKey.startsWith('"') && normalizedKey.endsWith('"')) {
-                normalizedKey = normalizedKey.slice(1, -1);
-            }
-
-            // 2. Handle escaped newlines (e.g. from Vercel env vars)
+            // 1. Handle escaped newlines (e.g. from Vercel env vars, whether in quotes or not)
             normalizedKey = normalizedKey.replace(/\\n/g, '\n');
+
+            // 2. Extract the PEM block explicitly using Regex (Nuclear option for "Unparsed DER bytes")
+            // This discards any leading/trailing garbage, quotes, or extra characters.
+            const pemMatch = normalizedKey.match(/-----BEGIN PRIVATE KEY-----[\s\S]+?-----END PRIVATE KEY-----/);
+            if (pemMatch) {
+                normalizedKey = pemMatch[0];
+            } else {
+                // If regex fails (e.g. key is totally malformed), try simple quote stripping as fallback
+                if (normalizedKey.startsWith('"') && normalizedKey.endsWith('"')) {
+                    normalizedKey = normalizedKey.slice(1, -1);
+                }
+            }
 
             admin.initializeApp({
                 credential: admin.credential.cert({
