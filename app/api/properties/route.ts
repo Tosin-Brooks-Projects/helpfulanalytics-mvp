@@ -8,6 +8,8 @@ import {
   type PropertyDetails,
 } from "@/config/properties"
 
+export const dynamic = "force-dynamic"
+
 export async function GET(request: NextRequest) {
   try {
     const accessToken = await getValidAccessToken()
