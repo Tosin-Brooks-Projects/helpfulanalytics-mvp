@@ -1,7 +1,6 @@
 {
   "name": "analytics-dashboard",
   "version": "0.1.0",
-  "private": true,
   "scripts": {
     "build": "NODE_OPTIONS='--no-deprecation' next build",
     "dev": "NODE_OPTIONS='--no-deprecation' next dev",
