@@ -1,11 +1,12 @@
 "use client"
 
-import { Bell, Lock, Plus, Zap, Users, Globe, BarChart3, User } from "lucide-react"
+import { Bell, Lock, Plus, Zap, Users, Globe, BarChart3, User, Swords } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { DatePickerWithRange } from "./date-range-picker"
 import { SyncButton } from "./sync-button"
 import { ExportDialog } from "@/components/dashboard/export-dialog"
@@ -23,7 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function LinearHeader() {
     const { data: session } = useSession()
-    const { properties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription } = useDashboard()
+    const { properties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription, isVersus, setIsVersus, compareDateRange, setCompareDateRange } = useDashboard()
     const pathname = usePathname()
 
     const reportChips = [
@@ -108,11 +109,37 @@ export function LinearHeader() {
 
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            {/* Wrapper specifically for the date picker if it doesn't forward ref properly, usually safe */}
-                            <div id="header-date-picker"><DatePickerWithRange date={dateRange} setDate={setDateRange} /></div>
+                            <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-white/20 shadow-sm px-2">
+                                <div className="flex items-center gap-2 mr-2 border-r border-zinc-200 pr-2">
+                                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", isVersus ? "text-amber-600" : "text-zinc-400")}>Versus</span>
+                                    <Switch
+                                        checked={isVersus}
+                                        onCheckedChange={setIsVersus}
+                                        className="h-4 w-7 data-[state=checked]:bg-amber-500"
+                                        thumbClassName="h-3 w-3 data-[state=checked]:translate-x-3"
+                                    />
+                                </div>
+
+                                <div id="header-date-picker">
+                                    <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                                </div>
+
+                                {isVersus && (
+                                    <>
+                                        <div className="text-[10px] font-bold text-zinc-400">VS</div>
+                                        <div id="header-compare-picker">
+                                            <DatePickerWithRange
+                                                date={compareDateRange}
+                                                setDate={setCompareDateRange}
+                                                className="border-amber-200 bg-amber-50/50"
+                                            />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="text-xs">
-                            Select Date Range
+                            {isVersus ? "Compare two time periods" : "Select Date Range"}
                         </TooltipContent>
                     </Tooltip>
 

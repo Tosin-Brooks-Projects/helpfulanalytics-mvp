@@ -18,14 +18,14 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json()
-        const { propertyId, startDate = "30daysAgo", endDate = "today" } = body
+        const { propertyId, startDate = "30daysAgo", endDate = "today", compareStartDate, compareEndDate } = body
 
         if (!propertyId) {
             return NextResponse.json({ error: "Property ID required" }, { status: 400 })
         }
 
         // --- CACHING STRATEGY ---
-        const cacheKey = `insights-${propertyId}-${startDate}-${endDate}`
+        const cacheKey = `insights-${propertyId}-${startDate}-${endDate}-${compareStartDate || 'no-comp'}-${compareEndDate || 'no-comp'}`
 
         // Only verify cache if not running in a strictly mock environment (though mock doesn't cost money)
         // But let's cache everything to simulate prod behavior.
@@ -50,10 +50,18 @@ export async function POST(request: Request) {
         }
         // ------------------------
 
-        // Fetch Analytics Data
         let analyticsData
+        let previousData = null
+
         if (propertyId === "demo-property") {
             analyticsData = await getMockOverviewData()
+            // Mock previous data for demo versus
+            if (compareStartDate) {
+                previousData = await getMockOverviewData()
+                // Artificially lower metrics to make the "current" look like a winner for demo
+                previousData.metrics.sessions = Math.floor(previousData.metrics.sessions * 0.8)
+                previousData.metrics.users = Math.floor(previousData.metrics.users * 0.85)
+            }
         } else {
             // @ts-ignore
             const accessToken = session.accessToken
@@ -61,6 +69,10 @@ export async function POST(request: Request) {
                 return NextResponse.json({ error: "Unauthorized - No Google Token" }, { status: 401 })
             }
             analyticsData = await getOverviewData(accessToken, propertyId, startDate, endDate)
+
+            if (compareStartDate && compareEndDate) {
+                previousData = await getOverviewData(accessToken, propertyId, compareStartDate, compareEndDate)
+            }
         }
 
         // Initialize Gemini
@@ -101,11 +113,26 @@ export async function POST(request: Request) {
             ]
         }`
 
-        const userPrompt = `Analyze this GA4 data and provide insights JSON:
-        Metrics: ${JSON.stringify(analyticsData.metrics)}
-        Top Traffic Sources: ${JSON.stringify(analyticsData.trafficSources)}
-        
-        Follow the system instructions for format.`
+        let userPrompt = ""
+
+        if (previousData) {
+            userPrompt = `Analyze this GA4 comparison data (Current vs Previous) and provide insights JSON.
+             Focus on WHY the current period won or lost against the previous period. Be the "Referee" or "Coach".
+             
+             Current Metrics: ${JSON.stringify(analyticsData.metrics)}
+             Previous Metrics: ${JSON.stringify(previousData.metrics)}
+             
+             Current Top Sources: ${JSON.stringify(analyticsData.trafficSources)}
+             Previous Top Sources: ${JSON.stringify(previousData.trafficSources)}
+             
+             Follow the system instructions for format. Titles should be fun/competitive like "Victory in Organic Search" or "Slump in Mobile".`
+        } else {
+            userPrompt = `Analyze this GA4 data and provide insights JSON:
+             Metrics: ${JSON.stringify(analyticsData.metrics)}
+             Top Traffic Sources: ${JSON.stringify(analyticsData.trafficSources)}
+             
+             Follow the system instructions for format.`
+        }
 
         // Call Gemini
         try {

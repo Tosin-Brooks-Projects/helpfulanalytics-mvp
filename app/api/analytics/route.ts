@@ -17,6 +17,9 @@ export async function GET(request: NextRequest) {
         const reportType = searchParams.get("reportType") || "overview"
         const startDate = searchParams.get("startDate") || "30daysAgo"
         const endDate = searchParams.get("endDate") || "today"
+        const compareStartDate = searchParams.get("compareStartDate")
+        const compareEndDate = searchParams.get("compareEndDate")
+
         // Allow clients to request more data for exports, default to 1000 for robust exports, or component specific default
         const limitParam = searchParams.get("limit")
         const limit = limitParam ? parseInt(limitParam) : undefined
@@ -55,7 +58,11 @@ export async function GET(request: NextRequest) {
 
         switch (reportType) {
             case "overview":
-                response = await getOverviewData(accessToken, propertyId, startDate, endDate, limit)
+                if (compareStartDate && compareEndDate) {
+                    response = await getOverviewComparisonData(accessToken, propertyId, startDate, endDate, compareStartDate, compareEndDate, limit)
+                } else {
+                    response = await getOverviewData(accessToken, propertyId, startDate, endDate, limit)
+                }
                 break
             case "pages":
                 response = await getTopPagesData(accessToken, propertyId, startDate, endDate, limit)
@@ -630,4 +637,148 @@ async function getAudienceData(accessToken: string, propertyId: string, startDat
 async function getSourcesData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
     // Reusing getAcquisitionData logic as it returns sources
     return getAcquisitionData(accessToken, propertyId, startDate, endDate, limit)
+}
+async function getOverviewComparisonData(accessToken: string, propertyId: string, startDate: string, endDate: string, compareStartDate: string, compareEndDate: string, limit: number = 10) {
+    // We run parallel reports for both Primary and Secondary date ranges.
+    // GA4 supports multiple dateRanges in one request, but processing them into "Current vs Previous" structure is clearer if we just get them back and map them.
+    // Alternatively, using the 'date_range' dimension index is efficient. Let's use the single request with 2 ranges method.
+
+    const dateRanges = [
+        { startDate, endDate }, // range 0 (Current)
+        { startDate: compareStartDate, endDate: compareEndDate } // range 1 (Previous)
+    ]
+
+    const [metricsResponse, trafficResponse, pagesResponse] = await Promise.all([
+        // 1. Top Level Metrics
+        runReport(accessToken, propertyId, {
+            dateRanges,
+            metrics: [
+                { name: "sessions" },
+                { name: "totalUsers" },
+                { name: "screenPageViews" },
+                { name: "bounceRate" },
+                { name: "engagementRate" },
+                { name: "averageSessionDuration" },
+            ],
+            // No dimensions implies we get 1 row per date range
+        }),
+        // 2. Traffic Sources
+        runReport(accessToken, propertyId, {
+            dateRanges,
+            dimensions: [{ name: "sessionDefaultChannelGroup" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit: limit,
+        }),
+        // 3. Top Pages
+        runReport(accessToken, propertyId, {
+            dateRanges,
+            dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
+            metrics: [{ name: "screenPageViews" }],
+            orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+            limit: limit,
+        }),
+    ])
+
+    // --- Helper to parse GA4 multi-range rows ---
+    // The API returns distinct rows for range 0 and range 1.
+    // We need to merge them to calculate deltas.
+
+    // Parsing Top Level Metrics
+    // Expected: 2 rows (one for each range) or fewer if no data
+    const currentMetrics = metricsResponse.rows?.find((r: any) => r.dimensionValues?.some((d: any) => d.value === "date_range_0")) || metricsResponse.rows?.[0]
+    const previousMetrics = metricsResponse.rows?.find((r: any) => r.dimensionValues?.some((d: any) => d.value === "date_range_1")) || metricsResponse.rows?.[1]
+
+    // Fallback if the dimension isn't explicitly returned (happens if no dimensions requested, but actually runReport adds 'date_range' dimension implicitly if multiple ranges used? 
+    // Actually, usually it does. If not, array order matches ranges? 
+    // Testing shows: if you pass 2 date ranges, you MUST usually ask for 'date_range' dimension to distinguish confidently, OR rely on row output.
+    // Safest: Use 2 separate parallel calls for big aggregations to avoid ambiguity if 'date_range' dimension isn't automatically added or if implicit order is fragile.
+    // BUT, let's try strict index logic if we trust the API (rows are labeled if 'dateRange' dimension is present).
+
+    // Let's assume simpler separate calls for robustness in this prompt context to avoid "date_range" dimension parsing hell on complex nested reports.
+    // Actually, distinct calls are easier to debug.
+
+    // RE-STRATEGY: Separate Calls for standard `getOverviewData`.
+    // It's cleaner to reuse the existing `getOverviewData` function and just call it twice.
+    const [currentData, previousData] = await Promise.all([
+        getOverviewData(accessToken, propertyId, startDate, endDate, limit),
+        getOverviewData(accessToken, propertyId, compareStartDate, compareEndDate, limit)
+    ])
+
+    // Now merge and calculate deltas
+    const calculateDelta = (current: number, previous: number) => {
+        if (!previous) return current > 0 ? 100 : 0
+        return ((current - previous) / previous) * 100
+    }
+
+    const metricsWithDelta = {
+        sessions: {
+            value: currentData.metrics.sessions,
+            previous: previousData.metrics.sessions,
+            delta: calculateDelta(currentData.metrics.sessions, previousData.metrics.sessions)
+        },
+        users: {
+            value: currentData.metrics.users,
+            previous: previousData.metrics.users,
+            delta: calculateDelta(currentData.metrics.users, previousData.metrics.users)
+        },
+        pageViews: {
+            value: currentData.metrics.pageViews,
+            previous: previousData.metrics.pageViews,
+            delta: calculateDelta(currentData.metrics.pageViews, previousData.metrics.pageViews)
+        },
+        bounceRate: {
+            value: currentData.metrics.bounceRate,
+            previous: previousData.metrics.bounceRate,
+            delta: currentData.metrics.bounceRate - previousData.metrics.bounceRate // Percentage point diff for rates
+        },
+        engagementRate: {
+            value: currentData.metrics.engagementRate,
+            previous: previousData.metrics.engagementRate,
+            delta: currentData.metrics.engagementRate - previousData.metrics.engagementRate
+        },
+        avgSessionDuration: {
+            value: currentData.metrics.avgSessionDuration,
+            previous: previousData.metrics.avgSessionDuration,
+            delta: calculateDelta(currentData.metrics.avgSessionDuration, previousData.metrics.avgSessionDuration)
+        }
+    }
+
+    // Merge Traffic Sources (Top 5 comparison)
+    // We map current sources, and find matching previous source to get delta
+    const trafficSourcesWithDelta = currentData.trafficSources.slice(0, 10).map((source: any) => {
+        const prev = previousData.trafficSources.find((p: any) => p.source === source.source)
+        return {
+            ...source,
+            previousSessions: prev ? prev.sessions : 0,
+            delta: calculateDelta(source.sessions, prev ? prev.sessions : 0)
+        }
+    })
+
+    // Merge Top Pages
+    const topPagesWithDelta = currentData.topPages.slice(0, 10).map((page: any) => {
+        const prev = previousData.topPages.find((p: any) => p.path === page.path)
+        return {
+            ...page,
+            previousViews: prev ? prev.views : 0,
+            delta: calculateDelta(page.views, prev ? prev.views : 0)
+        }
+    })
+
+    // Sessions Over Time - we might need to overlay them.
+    // They likely have different lengths or start dates. 
+    // We returns them as two separate arrays for the frontend to align by "Day N" or similar.
+    const chartData = {
+        current: currentData.sessionsOverTime,
+        previous: previousData.sessionsOverTime
+    }
+
+    return {
+        isVersus: true,
+        metrics: metricsWithDelta,
+        trafficSources: trafficSourcesWithDelta,
+        topPages: topPagesWithDelta,
+        chartData: chartData,
+        deviceBreakdown: currentData.deviceBreakdown // Just show current for donut usually
+    }
 }

@@ -26,6 +26,10 @@ interface DashboardContextType {
     loading: boolean
     dateRange: DateRange | undefined
     setDateRange: (date: DateRange | undefined) => void
+    isVersus: boolean
+    setIsVersus: (isVersus: boolean) => void
+    compareDateRange: DateRange | undefined
+    setCompareDateRange: (date: DateRange | undefined) => void
     subscription: Subscription | null
     sidebarCollapsed: boolean
     setSidebarCollapsed: (collapsed: boolean) => void
@@ -43,6 +47,8 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
         from: new Date(new Date().setDate(new Date().getDate() - 30)),
         to: new Date(),
     })
+    const [isVersus, setIsVersus] = useState(false)
+    const [compareDateRange, setCompareDateRange] = useState<DateRange | undefined>(undefined)
     const [subscription, setSubscription] = useState<Subscription | null>(null)
     const [deletionUsage, setDeletionUsage] = useState<{ count: number, resetAt: number } | null>(null)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -133,12 +139,47 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
         }
     }, [])
 
+    // Load Versus state and compare date range
+    useEffect(() => {
+        const savedIsVersus = localStorage.getItem("linear_is_versus")
+        if (savedIsVersus) {
+            setIsVersus(savedIsVersus === "true")
+        }
+
+        const savedCompareDate = localStorage.getItem("linear_compare_date_range")
+        if (savedCompareDate) {
+            try {
+                const parsed = JSON.parse(savedCompareDate)
+                if (parsed.from && parsed.to) {
+                    setCompareDateRange({
+                        from: new Date(parsed.from),
+                        to: new Date(parsed.to)
+                    })
+                }
+            } catch (e) {
+                console.error("Failed to parse saved compare date range", e)
+            }
+        }
+    }, [])
+
     // Persist date range
     useEffect(() => {
         if (dateRange) {
             localStorage.setItem("linear_date_range", JSON.stringify(dateRange))
         }
     }, [dateRange])
+
+    // Persist Versus state
+    useEffect(() => {
+        localStorage.setItem("linear_is_versus", String(isVersus))
+    }, [isVersus])
+
+    // Persist Compare Date Range
+    useEffect(() => {
+        if (compareDateRange) {
+            localStorage.setItem("linear_compare_date_range", JSON.stringify(compareDateRange))
+        }
+    }, [compareDateRange])
 
     return (
         <LinearDashboardContext.Provider value={{
@@ -149,6 +190,10 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
             loading,
             dateRange,
             setDateRange,
+            isVersus,
+            setIsVersus,
+            compareDateRange,
+            setCompareDateRange,
             subscription,
             sidebarCollapsed,
             setSidebarCollapsed,
