@@ -33,7 +33,13 @@ export async function GET(request: NextRequest) {
         // Check for Demo Property
         if (propertyId === "demo-property") {
             switch (reportType) {
-                case "overview": response = await getMockOverviewData(); break;
+                case "overview":
+                    if (compareStartDate && compareEndDate) {
+                        response = await getMockOverviewComparisonData()
+                    } else {
+                        response = await getMockOverviewData()
+                    }
+                    break;
                 case "pages": response = await getMockTopPagesData(); break;
                 case "devices": response = await getMockDevicesData(); break;
                 case "locations": response = await getMockLocationsData(); break;
@@ -256,6 +262,75 @@ async function getMockRealtimeData() {
             { path: "/blog/analytics-tips", title: "Blog Post", active: Math.floor(Math.random() * 4) + 1 },
             { path: "/docs", title: "Documentation", active: Math.floor(Math.random() * 3) + 1 },
         ]
+    }
+}
+
+export async function getMockOverviewComparisonData() {
+    // Generate Current Data (Winner)
+    const current = await getMockOverviewData()
+
+    // Generate Previous Data (Loser/Lower)
+    const factor = 0.85
+
+    const previous = {
+        metrics: {
+            sessions: Math.floor(current.metrics.sessions * factor),
+            users: Math.floor(current.metrics.users * factor),
+            pageViews: Math.floor(current.metrics.pageViews * factor),
+            bounceRate: current.metrics.bounceRate * 1.1,
+            engagementRate: current.metrics.engagementRate * 0.9,
+            avgSessionDuration: Math.floor(current.metrics.avgSessionDuration * 0.9),
+        },
+        sessionsOverTime: current.sessionsOverTime.map(d => ({
+            ...d,
+            sessions: Math.floor(d.sessions * (0.8 + Math.random() * 0.1))
+        }))
+    }
+
+    const calculateDelta = (curr: number, prev: number) => {
+        if (!prev) return 100
+        return ((curr - prev) / prev) * 100
+    }
+
+    return {
+        isVersus: true,
+        metrics: {
+            sessions: {
+                value: current.metrics.sessions,
+                previous: previous.metrics.sessions,
+                delta: calculateDelta(current.metrics.sessions, previous.metrics.sessions)
+            },
+            users: {
+                value: current.metrics.users,
+                previous: previous.metrics.users,
+                delta: calculateDelta(current.metrics.users, previous.metrics.users)
+            },
+            pageViews: {
+                value: current.metrics.pageViews,
+                previous: previous.metrics.pageViews,
+                delta: calculateDelta(current.metrics.pageViews, previous.metrics.pageViews)
+            },
+            bounceRate: {
+                value: current.metrics.bounceRate,
+                previous: previous.metrics.bounceRate,
+                delta: ((current.metrics.bounceRate - previous.metrics.bounceRate) / previous.metrics.bounceRate) * 100
+            },
+            engagementRate: {
+                value: current.metrics.engagementRate,
+                previous: previous.metrics.engagementRate,
+                delta: ((current.metrics.engagementRate - previous.metrics.engagementRate) / previous.metrics.engagementRate) * 100
+            },
+            avgSessionDuration: {
+                value: current.metrics.avgSessionDuration,
+                previous: previous.metrics.avgSessionDuration,
+                delta: calculateDelta(current.metrics.avgSessionDuration, previous.metrics.avgSessionDuration)
+            }
+        },
+        chartData: {
+            current: current.sessionsOverTime,
+            previous: previous.sessionsOverTime
+        },
+        deviceBreakdown: current.deviceBreakdown
     }
 }
 
