@@ -207,7 +207,10 @@ export function VersusOverview() {
 
 function MetricBattleCard({ title, metric, icon, isTime = false }: { title: string, metric: MetricComparison, icon: ReactNode, isTime?: boolean }) {
     const isWin = metric.delta > 0
-    const format = (val: number) => isTime ? `${val.toFixed(0)}s` : val.toLocaleString()
+    const format = (val: number | undefined | null) => {
+        const num = val ?? 0
+        return isTime ? `${num.toFixed(0)}s` : num.toLocaleString()
+    }
 
     return (
         <Card className="p-4 border-zinc-200 hover:border-amber-200 transition-all bg-white/60">
