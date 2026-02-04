@@ -59,7 +59,13 @@ export function VersusOverview() {
 
                 const res = await fetch(`/api/analytics?${params.toString()}`)
                 const json = await res.json()
-                setData(json)
+
+                if (json.error) {
+                    console.error("API Error:", json.error)
+                    setData(null)
+                } else {
+                    setData(json)
+                }
             } catch (error) {
                 console.error("Failed to fetch versus data", error)
             } finally {
@@ -147,9 +153,9 @@ export function VersusOverview() {
             {/* Chart Overlay */}
             <Card className="p-6 border-zinc-200 shadow-sm bg-white/50 backdrop-blur-sm">
                 <h3 className="text-sm font-semibold text-zinc-900 mb-6">Traffic Comparison</h3>
-                <div className="h-[300px] w-full">
+                <div className="h-[300px] w-full min-h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={mergeChartData(data.chartData.current, data.chartData.previous)}>
+                        <AreaChart data={mergeChartData(data?.chartData?.current || [], data?.chartData?.previous || [])}>
                             <defs>
                                 <linearGradient id="colorCurrent" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.1} />
