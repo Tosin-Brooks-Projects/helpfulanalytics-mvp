@@ -115,6 +115,31 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
         }
     }, [selectedProperty])
 
+    // Load date range from local storage
+    useEffect(() => {
+        const savedDateRange = localStorage.getItem("linear_date_range")
+        if (savedDateRange) {
+            try {
+                const parsed = JSON.parse(savedDateRange)
+                if (parsed.from && parsed.to) {
+                    setDateRange({
+                        from: new Date(parsed.from),
+                        to: new Date(parsed.to)
+                    })
+                }
+            } catch (e) {
+                console.error("Failed to parse saved date range", e)
+            }
+        }
+    }, [])
+
+    // Persist date range
+    useEffect(() => {
+        if (dateRange) {
+            localStorage.setItem("linear_date_range", JSON.stringify(dateRange))
+        }
+    }, [dateRange])
+
     return (
         <LinearDashboardContext.Provider value={{
             properties,
