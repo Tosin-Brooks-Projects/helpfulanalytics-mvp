@@ -3,7 +3,7 @@
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowDown, ArrowUp, Crown, Swords, Trophy, Medal } from "lucide-react"
+import { ArrowDown, ArrowUp, Crown, Swords, Trophy, Medal, Users, Globe, Zap } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Card } from "@/components/ui/card"
