@@ -38,7 +38,13 @@ export function VersusOverview() {
 
     useEffect(() => {
         async function fetchComparison() {
-            if (!dateRange?.from || !dateRange?.to || !compareDateRange?.from || !compareDateRange?.to || !selectedProperty) return
+            if (!selectedProperty) return
+
+            // If any date is missing, ensure we aren't loading and just show placeholder
+            if (!dateRange?.from || !dateRange?.to || !compareDateRange?.from || !compareDateRange?.to) {
+                setLoading(false)
+                return
+            }
 
             setLoading(true)
             try {
@@ -65,7 +71,21 @@ export function VersusOverview() {
     }, [dateRange, compareDateRange, selectedProperty])
 
     if (loading) return <VersusSkeleton />
-    if (!data) return null
+
+    // Empty State if no data or no comparison selected
+    if (!data || !compareDateRange?.from) {
+        return (
+            <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-200 bg-zinc-50/50 p-12 text-center">
+                <div className="mb-4 rounded-full bg-white p-3 shadow-sm">
+                    <Swords className="h-6 w-6 text-zinc-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-zinc-900">Select Comparison Dates</h3>
+                <p className="mt-2 text-sm text-zinc-500 max-w-sm">
+                    Please select a comparison date range from the header to start the Versus analysis.
+                </p>
+            </div>
+        )
+    }
 
     // Determine the overall winner (simply by sessions for now)
     const currentWins = data.metrics.sessions.delta > 0
