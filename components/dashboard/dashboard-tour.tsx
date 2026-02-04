@@ -71,7 +71,7 @@ export function DashboardTour() {
                     element: '#header-export',
                     popover: {
                         title: 'Export Reports',
-                        description: 'Download comprehensive PDF or JSON reports of your analytics data.',
+                        description: 'Download comprehensive PDF or CSV reports of your analytics data.',
                         side: "bottom",
                         align: 'end'
                     }
