@@ -24,7 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function LinearHeader() {
     const { data: session } = useSession()
-    const { properties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription, isVersus, setIsVersus, compareDateRange, setCompareDateRange } = useDashboard()
+    const { properties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription, compareDateRange, setCompareDateRange } = useDashboard()
     const pathname = usePathname()
 
     const reportChips = [
@@ -110,21 +110,11 @@ export function LinearHeader() {
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-white/20 shadow-sm px-2">
-                                <div className="flex items-center gap-2 mr-2 border-r border-zinc-200 pr-2">
-                                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", isVersus ? "text-amber-600" : "text-zinc-400")}>Versus</span>
-                                    <Switch
-                                        checked={isVersus}
-                                        onCheckedChange={setIsVersus}
-                                        className="h-4 w-7 data-[state=checked]:bg-amber-500"
-                                        thumbClassName="h-3 w-3 data-[state=checked]:translate-x-3"
-                                    />
-                                </div>
-
                                 <div id="header-date-picker">
                                     <DatePickerWithRange date={dateRange} setDate={setDateRange} />
                                 </div>
 
-                                {isVersus && (
+                                {pathname.includes("/versus") && (
                                     <>
                                         <div className="text-[10px] font-bold text-zinc-400">VS</div>
                                         <div id="header-compare-picker">
@@ -139,7 +129,7 @@ export function LinearHeader() {
                             </div>
                         </TooltipTrigger>
                         <TooltipContent side="bottom" className="text-xs">
-                            {isVersus ? "Compare two time periods" : "Select Date Range"}
+                            {pathname.includes("/versus") ? "Compare two time periods" : "Select Date Range"}
                         </TooltipContent>
                     </Tooltip>
 

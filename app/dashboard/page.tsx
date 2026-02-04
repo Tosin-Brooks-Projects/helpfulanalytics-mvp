@@ -2,12 +2,11 @@
 
 import { LinearShell } from "@/components/linear/linear-shell"
 import { LinearMetricsOverview, LinearGreeting, NoPropertyPlaceholder } from "@/components/linear"
-import { VersusOverview } from "@/components/linear/versus-overview"
 import { DateFilterBar } from "@/components/linear/date-filter-bar"
 import { useDashboard } from "@/components/linear/dashboard-context"
 
 export default function LinearDashboardPage() {
-    const { selectedProperty, loading, isVersus } = useDashboard()
+    const { selectedProperty, loading } = useDashboard()
 
     return (
         <LinearShell>
@@ -18,11 +17,7 @@ export default function LinearDashboardPage() {
                 <LinearGreeting />
 
                 {selectedProperty ? (
-                    isVersus ? (
-                        <VersusOverview />
-                    ) : (
-                        <LinearMetricsOverview propertyId={selectedProperty} />
-                    )
+                    <LinearMetricsOverview propertyId={selectedProperty} />
                 ) : (
                     <NoPropertyPlaceholder />
                 )}

@@ -14,7 +14,8 @@ import {
     Layers,
     LogOut,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Swords
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useDashboard } from "./dashboard-context"
@@ -27,6 +28,7 @@ import {
 
 const items = [
     { title: "Overview", href: "/dashboard", icon: LayoutGrid },
+    { title: "Versus", href: "/dashboard/versus", icon: Swords },
     { title: "Devices", href: "/dashboard/devices", icon: Smartphone },
     { title: "Top Pages", href: "/dashboard/reports", icon: BarChart3 },
     { title: "Audience", href: "/dashboard/audience", icon: Users },
