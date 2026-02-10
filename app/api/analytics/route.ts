@@ -40,12 +40,94 @@ export async function GET(request: NextRequest) {
                         response = await getMockOverviewData()
                     }
                     break;
-                case "pages": response = await getMockTopPagesData(); break;
-                case "devices": response = await getMockDevicesData(); break;
-                case "locations": response = await getMockLocationsData(); break;
-                case "acquisition": response = await getMockAcquisitionData(); break;
-                case "audience": response = await getMockLocationsData(); break;
-                case "sources": response = await getMockAcquisitionData(); break;
+                case "pages":
+                    if (compareStartDate && compareEndDate) {
+                        response = {
+                            pagesComparison: [
+                                { name: "/", value: 15400, previous: 12000, delta: 28.3 },
+                                { name: "/pricing", value: 4500, previous: 3800, delta: 18.4 },
+                                { name: "/blog/trends-2024", value: 3200, previous: 800, delta: 300 },
+                                { name: "/features", value: 2800, previous: 2900, delta: -3.4 },
+                                { name: "/contact", value: 1200, previous: 1100, delta: 9.1 }
+                            ]
+                        }
+                    } else {
+                        response = await getMockTopPagesData()
+                    }
+                    break;
+                case "devices":
+                    if (compareStartDate && compareEndDate) {
+                        response = {
+                            deviceComparison: [
+                                { name: "mobile", value: 12500, previous: 10000, delta: 25, users: 8000 },
+                                { name: "desktop", value: 8500, previous: 9000, delta: -5.5, users: 4000 },
+                                { name: "tablet", value: 1200, previous: 1100, delta: 9.1, users: 800 }
+                            ]
+                        }
+                    } else {
+                        response = await getMockDevicesData()
+                    }
+                    break;
+                case "locations":
+                    if (compareStartDate && compareEndDate) {
+                        response = {
+                            locationComparison: [
+                                { name: "United States", value: 8500, previous: 8000, delta: 6.25 },
+                                { name: "United Kingdom", value: 2100, previous: 1900, delta: 10.5 },
+                                { name: "Germany", value: 1800, previous: 2000, delta: -10 },
+                                { name: "Canada", value: 1200, previous: 1100, delta: 9.1 },
+                                { name: "India", value: 950, previous: 400, delta: 137.5 }
+                            ]
+                        }
+                    } else {
+                        response = await getMockLocationsData()
+                    }
+                    break;
+                case "acquisition":
+                    if (compareStartDate && compareEndDate) {
+                        response = {
+                            acquisitionComparison: [
+                                { name: "Organic Search", value: 12000, previous: 10000, delta: 20 },
+                                { name: "Direct", value: 5000, previous: 5200, delta: -3.8 },
+                                { name: "Referral", value: 3000, previous: 1500, delta: 100 },
+                                { name: "Organic Social", value: 2500, previous: 2000, delta: 25 },
+                                { name: "Email", value: 1500, previous: 1200, delta: 25 }
+                            ]
+                        }
+                    } else {
+                        response = await getMockAcquisitionData()
+                    }
+                    break;
+                case "audience":
+                    if (compareStartDate && compareEndDate) {
+                        response = {
+                            locationComparison: [
+                                { name: "United States", value: 8500, previous: 8000, delta: 6.25 },
+                                { name: "United Kingdom", value: 2100, previous: 1900, delta: 10.5 },
+                                { name: "Germany", value: 1800, previous: 2000, delta: -10 },
+                                { name: "Canada", value: 1200, previous: 1100, delta: 9.1 },
+                                { name: "India", value: 950, previous: 400, delta: 137.5 }
+                            ]
+                        }
+                    } else {
+                        response = await getMockLocationsData()
+                    }
+                    break;
+                case "sources":
+                    if (compareStartDate && compareEndDate) {
+                        response = {
+                            acquisitionComparison: [
+                                { name: "Organic Search", value: 12000, previous: 10000, delta: 20 },
+                                { name: "Direct", value: 5000, previous: 5200, delta: -3.8 },
+                                { name: "Referral", value: 3000, previous: 1500, delta: 100 },
+                                { name: "Organic Social", value: 2500, previous: 2000, delta: 25 },
+                                { name: "Email", value: 1500, previous: 1200, delta: 25 }
+                            ]
+                        }
+                    } else {
+                        response = await getMockAcquisitionData()
+                    }
+                    break;
                 case "realtime": response = await getMockRealtimeData(); break;
                 default:
                     return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
@@ -71,22 +153,46 @@ export async function GET(request: NextRequest) {
                 }
                 break
             case "pages":
-                response = await getTopPagesData(accessToken, propertyId, startDate, endDate, limit)
+                if (compareStartDate && compareEndDate) {
+                    response = await getTopPagesComparisonData(accessToken, propertyId, startDate, endDate, compareStartDate, compareEndDate, limit)
+                } else {
+                    response = await getTopPagesData(accessToken, propertyId, startDate, endDate, limit)
+                }
                 break
             case "devices":
-                response = await getDevicesData(accessToken, propertyId, startDate, endDate, limit)
+                if (compareStartDate && compareEndDate) {
+                    response = await getDevicesComparisonData(accessToken, propertyId, startDate, endDate, compareStartDate, compareEndDate, limit)
+                } else {
+                    response = await getDevicesData(accessToken, propertyId, startDate, endDate, limit)
+                }
                 break
             case "locations":
-                response = await getLocationsData(accessToken, propertyId, startDate, endDate, limit)
+                if (compareStartDate && compareEndDate) {
+                    response = await getLocationsComparisonData(accessToken, propertyId, startDate, endDate, compareStartDate, compareEndDate, limit)
+                } else {
+                    response = await getLocationsData(accessToken, propertyId, startDate, endDate, limit)
+                }
                 break
             case "audience":
-                response = await getAudienceData(accessToken, propertyId, startDate, endDate, limit)
+                if (compareStartDate && compareEndDate) {
+                    response = await getLocationsComparisonData(accessToken, propertyId, startDate, endDate, compareStartDate, compareEndDate, limit)
+                } else {
+                    response = await getAudienceData(accessToken, propertyId, startDate, endDate, limit)
+                }
                 break
             case "sources":
-                response = await getSourcesData(accessToken, propertyId, startDate, endDate, limit)
+                if (compareStartDate && compareEndDate) {
+                    response = await getAcquisitionComparisonData(accessToken, propertyId, startDate, endDate, compareStartDate, compareEndDate, limit)
+                } else {
+                    response = await getSourcesData(accessToken, propertyId, startDate, endDate, limit)
+                }
                 break
             case "acquisition":
-                response = await getAcquisitionData(accessToken, propertyId, startDate, endDate, limit)
+                if (compareStartDate && compareEndDate) {
+                    response = await getAcquisitionComparisonData(accessToken, propertyId, startDate, endDate, compareStartDate, compareEndDate, limit)
+                } else {
+                    response = await getAcquisitionData(accessToken, propertyId, startDate, endDate, limit)
+                }
                 break
             case "realtime":
                 response = await getRealtimeData(accessToken, propertyId)
@@ -856,4 +962,137 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
         chartData: chartData,
         deviceBreakdown: currentData.deviceBreakdown // Just show current for donut usually
     }
+}
+
+// --- Comparison Functions ---
+
+async function getDevicesComparisonData(accessToken: string, propertyId: string, startDate: string, endDate: string, compareStartDate: string, compareEndDate: string, limit: number = 10) {
+    if (propertyId === 'demo-property') {
+        return {
+            deviceComparison: [
+                { name: "mobile", value: 12500, previous: 10000, delta: 25, users: 8000 },
+                { name: "desktop", value: 8500, previous: 9000, delta: -5.5, users: 4000 },
+                { name: "tablet", value: 1200, previous: 1100, delta: 9.1, users: 800 }
+            ]
+        }
+    }
+
+    const [currentData, previousData] = await Promise.all([
+        getDevicesData(accessToken, propertyId, startDate, endDate, limit),
+        getDevicesData(accessToken, propertyId, compareStartDate, compareEndDate, limit)
+    ])
+
+    const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
+
+    const merged = currentData.devices.map((curr: any) => {
+        const prev = previousData.devices.find((p: any) => p.deviceCategory === curr.deviceCategory)
+        return {
+            name: curr.deviceCategory,
+            value: curr.sessions,
+            previous: prev?.sessions || 0,
+            delta: calculateDelta(curr.sessions, prev?.sessions || 0),
+            users: curr.users
+        }
+    })
+
+    return { deviceComparison: merged }
+}
+
+async function getTopPagesComparisonData(accessToken: string, propertyId: string, startDate: string, endDate: string, compareStartDate: string, compareEndDate: string, limit: number = 10) {
+    if (propertyId === 'demo-property') {
+        return {
+            pagesComparison: [
+                { name: "/", value: 15400, previous: 12000, delta: 28.3 },
+                { name: "/pricing", value: 4500, previous: 3800, delta: 18.4 },
+                { name: "/blog/trends-2024", value: 3200, previous: 800, delta: 300 },
+                { name: "/features", value: 2800, previous: 2900, delta: -3.4 },
+                { name: "/contact", value: 1200, previous: 1100, delta: 9.1 }
+            ]
+        }
+    }
+
+    const [currentData, previousData] = await Promise.all([
+        getTopPagesData(accessToken, propertyId, startDate, endDate, limit),
+        getTopPagesData(accessToken, propertyId, compareStartDate, compareEndDate, limit)
+    ])
+
+    const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
+
+    const merged = currentData.topPages.map((curr: any) => {
+        const prev = previousData.topPages.find((p: any) => p.path === curr.path)
+        return {
+            name: curr.path,
+            value: curr.views,
+            previous: prev?.views || 0,
+            delta: calculateDelta(curr.views, prev?.views || 0)
+        }
+    })
+
+    return { pagesComparison: merged }
+}
+
+async function getLocationsComparisonData(accessToken: string, propertyId: string, startDate: string, endDate: string, compareStartDate: string, compareEndDate: string, limit: number = 10) {
+    if (propertyId === 'demo-property') {
+        return {
+            locationComparison: [
+                { name: "United States", value: 8500, previous: 8000, delta: 6.25 },
+                { name: "United Kingdom", value: 2100, previous: 1900, delta: 10.5 },
+                { name: "Germany", value: 1800, previous: 2000, delta: -10 },
+                { name: "Canada", value: 1200, previous: 1100, delta: 9.1 },
+                { name: "India", value: 950, previous: 400, delta: 137.5 }
+            ]
+        }
+    }
+
+    const [currentData, previousData] = await Promise.all([
+        getLocationsData(accessToken, propertyId, startDate, endDate, limit),
+        getLocationsData(accessToken, propertyId, compareStartDate, compareEndDate, limit)
+    ])
+
+    const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
+
+    const merged = currentData.locations.map((curr: any) => {
+        const prev = previousData.locations.find((p: any) => p.country === curr.country)
+        return {
+            name: curr.country,
+            value: curr.users,
+            previous: prev?.users || 0,
+            delta: calculateDelta(curr.users, prev?.users || 0)
+        }
+    })
+
+    return { locationComparison: merged }
+}
+
+async function getAcquisitionComparisonData(accessToken: string, propertyId: string, startDate: string, endDate: string, compareStartDate: string, compareEndDate: string, limit: number = 10) {
+    if (propertyId === 'demo-property') {
+        return {
+            acquisitionComparison: [
+                { name: "Organic Search", value: 12000, previous: 10000, delta: 20 },
+                { name: "Direct", value: 5000, previous: 5200, delta: -3.8 },
+                { name: "Referral", value: 3000, previous: 1500, delta: 100 },
+                { name: "Organic Social", value: 2500, previous: 2000, delta: 25 },
+                { name: "Email", value: 1500, previous: 1200, delta: 25 }
+            ]
+        }
+    }
+
+    const [currentData, previousData] = await Promise.all([
+        getTrafficSourcesData(accessToken, propertyId, startDate, endDate, limit),
+        getTrafficSourcesData(accessToken, propertyId, compareStartDate, compareEndDate, limit)
+    ])
+
+    const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
+
+    const merged = currentData.trafficSources.map((curr: any) => {
+        const prev = previousData.trafficSources.find((p: any) => p.source === curr.source)
+        return {
+            name: curr.source,
+            value: curr.sessions,
+            previous: prev?.sessions || 0,
+            delta: calculateDelta(curr.sessions, prev?.sessions || 0)
+        }
+    })
+
+    return { acquisitionComparison: merged }
 }

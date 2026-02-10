@@ -13,13 +13,16 @@ interface Insight {
     content: string
 }
 
+import { DateRange } from "react-day-picker"
+
 interface CoachCommentaryProps {
     propertyId: string
-    dateRange: { from: Date; to: Date } | undefined
-    compareDateRange: { from: Date; to: Date } | undefined
+    dateRange: DateRange | undefined
+    compareDateRange: DateRange | undefined
+    reportType?: string
 }
 
-export function CoachCommentary({ propertyId, dateRange, compareDateRange }: CoachCommentaryProps) {
+export function CoachCommentary({ propertyId, dateRange, compareDateRange, reportType = "overview" }: CoachCommentaryProps) {
     const [insights, setInsights] = useState<Insight[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(false)
@@ -36,10 +39,11 @@ export function CoachCommentary({ propertyId, dateRange, compareDateRange }: Coa
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         propertyId,
+                        reportType,
                         startDate: dateRange.from.toISOString().split('T')[0],
-                        endDate: dateRange.to.toISOString().split('T')[0],
+                        endDate: (dateRange.to || dateRange.from).toISOString().split('T')[0],
                         compareStartDate: compareDateRange.from.toISOString().split('T')[0],
-                        compareEndDate: compareDateRange.to.toISOString().split('T')[0]
+                        compareEndDate: (compareDateRange.to || compareDateRange.from).toISOString().split('T')[0]
                     })
                 })
 
@@ -60,7 +64,7 @@ export function CoachCommentary({ propertyId, dateRange, compareDateRange }: Coa
         }
 
         fetchInsights()
-    }, [propertyId, dateRange, compareDateRange])
+    }, [propertyId, dateRange, compareDateRange, reportType])
 
     if (!dateRange?.from || !compareDateRange?.from) return null
 
@@ -70,7 +74,7 @@ export function CoachCommentary({ propertyId, dateRange, compareDateRange }: Coa
                 <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600">
                     <Bot className="h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-bold text-zinc-900">Coach's Corner</h3>
+                <h3 className="text-sm font-bold text-zinc-900">Coach&apos;s Corner</h3>
                 {loading && <span className="text-xs text-zinc-400 animate-pulse">Analyzing match footage...</span>}
             </div>
 
