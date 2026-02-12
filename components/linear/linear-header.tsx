@@ -93,7 +93,7 @@ export function LinearHeader() {
                                 </div>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="text-xs font-medium">
-                                New: Export PDF & JSON reports
+                                New: Export PDF & CSV reports
                             </TooltipContent>
                         </Tooltip>
 
