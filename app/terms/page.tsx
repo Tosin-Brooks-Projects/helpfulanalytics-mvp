@@ -14,7 +14,20 @@ export default function TermsPage() {
             <main className="flex-1 pt-32 pb-24">
                 <div className="mx-auto max-w-4xl px-6 lg:px-8">
                     <article className="prose prose-slate max-w-none prose-headings:text-slate-900 prose-p:text-slate-600 prose-li:text-slate-600 prose-strong:text-slate-900 prose-headings:font-bold prose-h1:text-4xl prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-6 prose-p:leading-8 prose-li:leading-8">
-                        <ReactMarkdown>{content}</ReactMarkdown>
+                        <ReactMarkdown
+                            components={{
+                                a: ({ node, ...props }) => (
+                                    <a
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline"
+                                        {...props}
+                                    />
+                                ),
+                            }}
+                        >
+                            {content}
+                        </ReactMarkdown>
                     </article>
                 </div>
             </main>

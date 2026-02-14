@@ -125,7 +125,7 @@ export function AboutPageContent() {
                             <div className="prose prose-lg prose-slate max-w-none mb-12">
                                 <h2 className="text-3xl font-bold text-slate-900">Let's Stay Connected</h2>
                                 <p>
-                                    I'm building this in public and sharing the journey. You can find me on Twitter/X at <a href="https://x.com/brooksconkle" className="text-primary hover:underline font-bold tracking-tight">@brooksconkle</a>.
+                                    I'm building this in public and sharing the journey. You can find me on Twitter/X at <a href="https://x.com/brooksconkle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold tracking-tight">@brooksconkle</a>.
                                 </p>
                             </div>
 
