@@ -1,12 +1,11 @@
 "use client"
 
-import { Bell, Lock, Plus, Zap, Users, Globe, BarChart3, User, Swords } from "lucide-react"
+import { Lock, Plus, Zap, Users, Globe, BarChart3 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { DatePickerWithRange } from "./date-range-picker"
 import { SyncButton } from "./sync-button"
 import { ExportDialog } from "@/components/dashboard/export-dialog"
@@ -96,9 +95,9 @@ export function LinearHeader() {
     return (
         <TooltipProvider>
             {/* ── Mobile Header ── */}
-            <header className="sticky top-0 z-30 lg:hidden border-b border-zinc-100 bg-white/80 backdrop-blur-xl shadow-sm">
-                {/* Row 1: Property selector + actions */}
-                <div className="flex h-12 items-center justify-between px-4 pl-12">
+            <header className="sticky top-0 z-30 lg:hidden border-b border-zinc-100 bg-white/90 backdrop-blur-xl">
+                <div className="flex h-12 items-center justify-between px-4">
+                    {/* Left: Property selector */}
                     <div className="flex-1 min-w-0 mr-3">
                         {propertySelector ? (
                             <div id="header-property-selector">
@@ -108,22 +107,12 @@ export function LinearHeader() {
                             <span className="text-sm font-semibold text-zinc-900 truncate">Analytics</span>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                        <div id="header-search">
-                            <CommandPalette />
-                        </div>
-                        <div className="relative" id="header-export">
-                            <div className="absolute -top-1 -right-1 z-10">
-                                <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                                </span>
-                            </div>
-                            <ExportDialog />
-                        </div>
+
+                    {/* Right: Minimal actions */}
+                    <div className="flex items-center gap-1.5 shrink-0">
                         <div id="header-sync"><SyncButton /></div>
                         <Link href="/dashboard/profile">
-                            <Avatar className="h-7 w-7 border border-zinc-200 shadow-sm">
+                            <Avatar className="h-7 w-7 border border-zinc-200">
                                 <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} className="object-cover" />
                                 <AvatarFallback className="bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-medium text-[10px]">
                                     {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
@@ -131,24 +120,6 @@ export function LinearHeader() {
                             </Avatar>
                         </Link>
                     </div>
-                </div>
-                {/* Row 2: Date picker (only when relevant) */}
-                <div className="flex items-center gap-2 px-4 pb-2 pl-12 overflow-x-auto">
-                    <div className="flex items-center gap-2 bg-zinc-50 p-1 rounded-lg border border-zinc-100 shrink-0" id="header-date-picker">
-                        <DatePickerWithRange date={dateRange} setDate={setDateRange} />
-                    </div>
-                    {pathname.includes("/versus") && (
-                        <>
-                            <span className="text-[10px] font-bold text-zinc-400 shrink-0">VS</span>
-                            <div className="shrink-0" id="header-compare-picker">
-                                <DatePickerWithRange
-                                    date={compareDateRange}
-                                    setDate={setCompareDateRange}
-                                    className="border-amber-200 bg-amber-50/50"
-                                />
-                            </div>
-                        </>
-                    )}
                 </div>
             </header>
 

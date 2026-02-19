@@ -14,11 +14,13 @@ import {
     LogOut,
     Ellipsis,
     Timer,
+    Search,
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { signOut } from "next-auth/react"
 import { useDashboard } from "./dashboard-context"
 import { useState, useEffect } from "react"
+import { ExportDialog } from "@/components/dashboard/export-dialog"
 
 const navItems = [
     { title: "Overview", href: "/dashboard", icon: LayoutGrid },
@@ -93,6 +95,23 @@ export function MobileBottomNav() {
                                     active={pathname.startsWith("/dashboard/settings")}
                                     onClick={() => setSheetOpen(false)}
                                 />
+
+                                <div className="border-t border-zinc-100 pt-2 mt-2 space-y-1">
+                                    <button
+                                        onClick={() => {
+                                            setSheetOpen(false)
+                                            setTimeout(() => {
+                                                document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))
+                                            }, 100)
+                                        }}
+                                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+                                    >
+                                        <Search className="h-4 w-4 text-zinc-400" />
+                                        <span>Search</span>
+                                        <span className="ml-auto text-[10px] text-zinc-400 font-mono">Cmd+K</span>
+                                    </button>
+                                    <ExportDialog />
+                                </div>
 
                                 {subscription && (
                                     <div className="mx-1 my-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3">
