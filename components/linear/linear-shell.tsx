@@ -1,9 +1,7 @@
 import { ReactNode, useState } from "react"
 import { LinearSidebar } from "@/components/linear/linear-sidebar"
 import { LinearHeader } from "@/components/linear/linear-header"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { MobileBottomNav } from "@/components/linear/mobile-bottom-nav"
 import { useDashboard } from "./dashboard-context"
 import { cn } from "@/lib/utils"
 import { DashboardTour } from "@/components/dashboard/dashboard-tour"
@@ -14,7 +12,6 @@ interface LinearShellProps {
 }
 
 export function LinearShell({ children }: LinearShellProps) {
-    const [open, setOpen] = useState(false)
     const { sidebarCollapsed } = useDashboard()
 
     return (
@@ -29,18 +26,6 @@ export function LinearShell({ children }: LinearShellProps) {
                 <LinearSidebar />
             </aside>
 
-            {/* Mobile Sidebar */}
-            <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" className="fixed left-4 top-3 z-50 lg:hidden text-zinc-500 hover:text-zinc-900">
-                        <Menu className="h-5 w-5" />
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="w-64 border-r border-zinc-200 bg-white p-0">
-                    <LinearSidebar />
-                </SheetContent>
-            </Sheet>
-
             {/* Main Content Wrapper */}
             <div className={cn(
                 "flex-1 flex flex-col h-full transition-all duration-300 ease-in-out",
@@ -48,12 +33,15 @@ export function LinearShell({ children }: LinearShellProps) {
             )}>
                 <LinearHeader />
                 {/* Scrollable Main Area */}
-                <main id="main-dashboard-content" className="flex-1 overflow-y-auto p-4 lg:p-10 pt-16 lg:pt-10 pb-20 animate-in fade-in duration-500">
+                <main id="main-dashboard-content" className="flex-1 overflow-y-auto p-4 lg:p-10 pt-4 lg:pt-10 pb-24 lg:pb-20 animate-in fade-in duration-500">
                     <div className="max-w-[1600px] mx-auto">
                         {children}
                     </div>
                 </main>
             </div>
+
+            {/* Mobile Bottom Navigation */}
+            <MobileBottomNav />
         </div>
     )
 }

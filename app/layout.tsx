@@ -36,12 +36,21 @@ export const metadata: Metadata = {
     title: "Helpful Analytics - The Best Google Analytics Dashboard",
     description: "Understand your data without the confusion. The perfect Google Analytics alternative for small businesses.",
     siteName: "Helpful Analytics",
+    images: [
+      {
+        url: "/landingpage.png",
+        width: 1200,
+        height: 630,
+        alt: "Helpful Analytics",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Helpful Analytics - The Best Google Analytics Dashboard",
     description: "Understand your data without the confusion. The perfect Google Analytics alternative for small businesses.",
     creator: "@brooksconkle",
+    images: ["/landingpage.png"],
   },
   robots: {
     index: true,

@@ -80,7 +80,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
     } satisfies ChartConfig
 
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6 mb-8">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 mb-8">
 
             {/* Main Area Chart - Sessions Over Time (Full Width) */}
             <Card className="col-span-full border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
@@ -102,7 +102,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                 <CardContent className="px-2 sm:px-6">
                     <ChartContainer
                         config={chartConfig}
-                        className="aspect-auto h-[300px] w-full"
+                        className="aspect-auto h-[200px] sm:h-[300px] w-full"
                     >
                         <AreaChart
                             accessibilityLayer
@@ -157,7 +157,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
             {/* Secondary Charts Row */}
 
             {/* Pie Chart - Traffic Sources */}
-            <Card className="col-span-2 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
+            <Card className="col-span-1 sm:col-span-2 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
                 <CardHeader className="items-center pb-0">
                     <CardTitle className="text-sm font-medium text-zinc-800">Traffic Source Distribution</CardTitle>
                     <CardDescription>Top sources by volume</CardDescription>
@@ -221,7 +221,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
             </Card>
 
             {/* Bar Chart - Acquisition Channels (Histogram-like) */}
-            <Card className="col-span-2 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
+            <Card className="col-span-1 sm:col-span-2 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
                 <CardHeader>
                     <CardTitle className="text-sm font-medium">Acquisition Channels</CardTitle>
                     <CardDescription>Sessions by channel</CardDescription>
@@ -256,7 +256,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
             </Card>
 
             {/* Bar Chart - Top Countries */}
-            <Card className="col-span-2 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
+            <Card className="col-span-1 sm:col-span-2 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
                 <CardHeader>
                     <CardTitle className="text-sm font-medium text-zinc-800">Top Locations</CardTitle>
                     <CardDescription>Sessions by country</CardDescription>
@@ -279,8 +279,8 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                                 tickLine={false}
                                 tickMargin={10}
                                 axisLine={false}
-                                width={80}
-                                style={{ fontSize: '11px' }}
+                                width={60}
+                                style={{ fontSize: '10px' }}
                             />
                             <XAxis dataKey="sessions" type="number" hide />
                             <ChartTooltip
@@ -298,10 +298,10 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
             </Card>
 
             {/* Third Row: Device, Retention, Top Pages */}
-            <div className="col-span-full grid gap-6 md:grid-cols-2 lg:grid-cols-6 grid-rows-1">
+            <div className="col-span-full grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
 
                 {/* Device Breakdown */}
-                <Card className="col-span-2 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
+                <Card className="col-span-1 sm:col-span-2 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
                     <CardHeader>
                         <CardTitle className="text-sm font-medium text-zinc-800">Device Breakdown</CardTitle>
                         <CardDescription>Sessions by device type</CardDescription>
@@ -321,8 +321,8 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                                     tickLine={false}
                                     tickMargin={10}
                                     axisLine={false}
-                                    width={70}
-                                    style={{ fontSize: '11px' }}
+                                    width={60}
+                                    style={{ fontSize: '10px' }}
                                 />
                                 <XAxis dataKey="sessions" type="number" hide />
                                 <ChartTooltip
@@ -346,7 +346,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                 </Card>
 
                 {/* Top Pages List */}
-                <Card className="col-span-2 lg:col-span-4 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
+                <Card className="col-span-1 sm:col-span-2 lg:col-span-4 border-white/20 shadow-lg shadow-zinc-500/5 flex flex-col bg-white/60 backdrop-blur-md hover:bg-white/70 transition-colors">
                     <CardHeader>
                         <CardTitle className="text-sm font-medium text-zinc-800">Top Pages</CardTitle>
                         <CardDescription>Most visited paths</CardDescription>
@@ -359,7 +359,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                                         {i + 1}
                                     </div>
                                     <div className="space-y-1 flex-1">
-                                        <p className="text-xs font-medium leading-none text-zinc-900 truncate max-w-[200px] sm:max-w-[300px]">
+                                        <p className="text-xs font-medium leading-none text-zinc-900 truncate max-w-[140px] sm:max-w-[300px]">
                                             {page.title}
                                         </p>
                                         <p className="text-[10px] text-zinc-500 truncate">{page.path}</p>

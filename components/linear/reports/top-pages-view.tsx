@@ -23,7 +23,7 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl font-semibold text-zinc-900">Top Pages</h2>
                     <p className="text-zinc-500">Performance report by page path</p>
@@ -71,15 +71,15 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
                     <CardTitle className="text-base text-zinc-800">Page View Distribution</CardTitle>
                     <CardDescription>Top 10 most visited pages</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[300px]">
+                <CardContent className="h-[250px] sm:h-[300px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 50 }}>
+                        <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 40 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
                             <XAxis
                                 dataKey="path"
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fontSize: 10, fill: '#71717a' }}
+                                tick={{ fontSize: 9, fill: '#71717a' }}
                                 angle={-45}
                                 textAnchor="end"
                                 interval={0}
@@ -87,7 +87,8 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
                             <YAxis
                                 tickLine={false}
                                 axisLine={false}
-                                tick={{ fontSize: 11, fill: '#a1a1aa' }}
+                                tick={{ fontSize: 10, fill: '#a1a1aa' }}
+                                width={35}
                             />
                             <Tooltip
                                 cursor={{ fill: 'rgba(0,0,0,0.05)' }}
@@ -109,29 +110,29 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
                     <table className="w-full text-sm text-left">
                         <thead className="text-xs text-zinc-500 uppercase bg-zinc-50/50 border-b border-zinc-100">
                             <tr>
-                                <th className="px-6 py-3 font-medium">Page Title / Path</th>
-                                <th className="px-6 py-3 font-medium text-right">Views</th>
-                                <th className="px-6 py-3 font-medium text-right">Unique</th>
-                                <th className="px-6 py-3 font-medium text-right">Avg. Time</th>
-                                <th className="px-6 py-3 font-medium text-right">% of Total</th>
+                                <th className="px-3 sm:px-6 py-3 font-medium">Page Title / Path</th>
+                                <th className="px-3 sm:px-6 py-3 font-medium text-right">Views</th>
+                                <th className="px-3 sm:px-6 py-3 font-medium text-right hidden sm:table-cell">Unique</th>
+                                <th className="px-3 sm:px-6 py-3 font-medium text-right hidden sm:table-cell">Avg. Time</th>
+                                <th className="px-3 sm:px-6 py-3 font-medium text-right">% of Total</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-100">
                             {data.topPages?.map((page: any, i: number) => (
                                 <tr key={i} className="hover:bg-amber-500/5 transition-colors group">
-                                    <td className="px-6 py-3">
+                                    <td className="px-3 sm:px-6 py-3">
                                         <div className="flex flex-col">
-                                            <span className="font-medium text-zinc-900 group-hover:text-amber-600 transition-colors">{page.title}</span>
-                                            <a href="#" className="text-[11px] text-zinc-400 hover:underline flex items-center gap-1">
+                                            <span className="font-medium text-zinc-900 group-hover:text-amber-600 transition-colors text-xs sm:text-sm truncate max-w-[150px] sm:max-w-none">{page.title}</span>
+                                            <a href="#" className="text-[11px] text-zinc-400 hover:underline flex items-center gap-1 truncate max-w-[120px] sm:max-w-none">
                                                 {page.path}
-                                                <ArrowUpRight className="h-2 w-2 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                <ArrowUpRight className="h-2 w-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
                                             </a>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-3 text-right font-medium text-zinc-700">{page.views.toLocaleString()}</td>
-                                    <td className="px-6 py-3 text-right text-zinc-500">{Math.floor(page.views * 0.75).toLocaleString()}</td>
-                                    <td className="px-6 py-3 text-right text-zinc-500">{Math.floor(Math.random() * 60 + 20)}s</td>
-                                    <td className="px-6 py-3 text-right">
+                                    <td className="px-3 sm:px-6 py-3 text-right font-medium text-zinc-700">{page.views.toLocaleString()}</td>
+                                    <td className="px-3 sm:px-6 py-3 text-right text-zinc-500 hidden sm:table-cell">{Math.floor(page.views * 0.75).toLocaleString()}</td>
+                                    <td className="px-3 sm:px-6 py-3 text-right text-zinc-500 hidden sm:table-cell">{Math.floor(Math.random() * 60 + 20)}s</td>
+                                    <td className="px-3 sm:px-6 py-3 text-right">
                                         <div className="flex items-center justify-end gap-2">
                                             <span className="text-zinc-600">{page.percentage.toFixed(1)}%</span>
                                             <div className="w-16 h-1.5 bg-zinc-100 rounded-full overflow-hidden">

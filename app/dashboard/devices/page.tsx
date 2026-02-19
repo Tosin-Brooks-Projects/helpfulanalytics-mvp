@@ -86,7 +86,7 @@ export default function DevicesPage() {
                 </div>
 
                 {/* KPI Overview Row */}
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                     {/* Top Device */}
                     <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -147,15 +147,15 @@ export default function DevicesPage() {
 
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Device Category Chart */}
-                    <LinearGraphCard title="Device Breakdown" className="h-[400px]">
+                    <LinearGraphCard title="Device Breakdown" className="h-[300px] sm:h-[400px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
                                     data={pieData}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={80}
-                                    outerRadius={110}
+                                    innerRadius="55%"
+                                    outerRadius="75%"
                                     paddingAngle={5}
                                     dataKey="value"
                                 >
@@ -172,12 +172,12 @@ export default function DevicesPage() {
                     </LinearGraphCard>
 
                     {/* Operating System Chart */}
-                    <LinearGraphCard title="Operating System" className="h-[400px]">
+                    <LinearGraphCard title="Operating System" className="h-[300px] sm:h-[400px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart
                                 layout="vertical"
                                 data={osData.slice(0, 6)}
-                                margin={{ top: 20, right: 30, left: 40, bottom: 5 }}
+                                margin={{ top: 10, right: 20, left: 0, bottom: 5 }}
                             >
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
                                 <XAxis type="number" hide />
@@ -186,8 +186,8 @@ export default function DevicesPage() {
                                     type="category"
                                     tickLine={false}
                                     axisLine={false}
-                                    tick={{ fontSize: 12, fill: '#71717a' }}
-                                    width={90}
+                                    tick={{ fontSize: 11, fill: '#71717a' }}
+                                    width={70}
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(0,0,0,0.05)' }}

@@ -60,8 +60,8 @@ export default function ProfilePage() {
                     <p className="text-sm text-zinc-400">Manage your account information.</p>
                 </div>
 
-                <div className="flex items-center gap-6 p-6 rounded-lg border border-white/5 bg-white/[0.02]">
-                    <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center ring-4 ring-[#09090b] overflow-hidden">
+                <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 p-4 sm:p-6 rounded-lg border border-white/5 bg-white/[0.02]">
+                    <div className="h-20 w-20 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center ring-4 ring-[#09090b] overflow-hidden shrink-0">
                         {user?.image ? (
                             <img src={user.image} alt={user.name || "User"} className="h-full w-full object-cover" />
                         ) : (
@@ -80,7 +80,7 @@ export default function ProfilePage() {
 
                 <LinearGraphCard title="Personal Information">
                     <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="name" className="text-zinc-300">Full Name</Label>
                                 <Input id="name" defaultValue={user?.name || ""} className="bg-white/5 border-white/10 text-zinc-200" />
