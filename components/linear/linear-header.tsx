@@ -33,14 +33,132 @@ export function LinearHeader() {
         { title: "Sources", href: "/dashboard/sources", icon: Globe },
     ]
 
+    const propertySelector = !loading && properties.length > 0 && (
+        <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+            <SelectTrigger className="h-8 border-white/20 bg-white/50 hover:bg-white/80 text-[11px] font-medium text-zinc-900 focus:ring-0 rounded-md shadow-sm transition-all px-2.5 backdrop-blur-sm">
+                <SelectValue placeholder="Select Property" className="truncate" />
+            </SelectTrigger>
+            <SelectContent className="border-zinc-200 bg-white text-zinc-700 shadow-2xl rounded-lg min-w-[220px]">
+                <div className="p-1">
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-2 py-1.5 block">Properties</span>
+                    {properties.map((prop) => (
+                        <SelectItem
+                            key={prop.id}
+                            value={prop.id}
+                            className="text-[11px] font-medium focus:bg-amber-500/10 focus:text-amber-600 cursor-pointer rounded-md py-1.5 transition-colors"
+                        >
+                            <div className="flex items-center gap-2">
+                                <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-zinc-100 text-[9px] font-bold text-zinc-500">
+                                    {prop.name.charAt(0)}
+                                </div>
+                                {prop.name}
+                            </div>
+                        </SelectItem>
+                    ))}
+                </div>
+
+                <div className="mt-1 border-t border-zinc-100 p-1 bg-zinc-50/50">
+                    {(() => {
+                        const currentTier = subscription?.tier || "Starter"
+                        const tierConfig = pricingData.find(t => t.title.toLowerCase() === currentTier.toLowerCase())
+                        const maxProps = tierConfig?.maxProperties || 1
+                        const usage = properties.length
+                        const freeSlots = Math.max(0, maxProps - usage)
+
+                        const slots = []
+                        if (freeSlots > 0) {
+                            slots.push(
+                                <AddPropertyModal key="add-new">
+                                    <div className="flex w-full cursor-pointer select-none items-center rounded-md py-1.5 px-2 text-[11px] font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
+                                        <Plus className="mr-2 h-3.5 w-3.5 text-zinc-400" />
+                                        <span>Add Property</span>
+                                        <span className="ml-auto text-[10px] text-zinc-400 bg-white border border-zinc-200 px-1 rounded">{freeSlots} left</span>
+                                    </div>
+                                </AddPropertyModal>
+                            )
+                        }
+
+                        if (maxProps < 30) {
+                            slots.push(
+                                <Link key="upgrade" href="/dashboard/settings" className="flex w-full cursor-pointer select-none items-center rounded-md py-1.5 px-2 text-[11px] font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors mt-0.5">
+                                    <Lock className="mr-2 h-3.5 w-3.5 text-zinc-400" />
+                                    <span>Upgrade Plan</span>
+                                </Link>
+                            )
+                        }
+                        return slots
+                    })()}
+                </div>
+            </SelectContent>
+        </Select>
+    )
+
     return (
         <TooltipProvider>
-            <header className="sticky top-0 z-30 flex h-14 items-center border-b border-white/20 bg-white/70 px-4 pl-14 lg:pl-10 lg:pr-10 backdrop-blur-xl shadow-sm transition-all duration-300">
+            {/* ── Mobile Header ── */}
+            <header className="sticky top-0 z-30 lg:hidden border-b border-zinc-100 bg-white/80 backdrop-blur-xl shadow-sm">
+                {/* Row 1: Property selector + actions */}
+                <div className="flex h-12 items-center justify-between px-4 pl-12">
+                    <div className="flex-1 min-w-0 mr-3">
+                        {propertySelector ? (
+                            <div id="header-property-selector">
+                                {propertySelector}
+                            </div>
+                        ) : (
+                            <span className="text-sm font-semibold text-zinc-900 truncate">Analytics</span>
+                        )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <div id="header-search">
+                            <CommandPalette />
+                        </div>
+                        <div className="relative" id="header-export">
+                            <div className="absolute -top-1 -right-1 z-10">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                </span>
+                            </div>
+                            <ExportDialog />
+                        </div>
+                        <div id="header-sync"><SyncButton /></div>
+                        <Link href="/dashboard/profile">
+                            <Avatar className="h-7 w-7 border border-zinc-200 shadow-sm">
+                                <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} className="object-cover" />
+                                <AvatarFallback className="bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-medium text-[10px]">
+                                    {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
+                                </AvatarFallback>
+                            </Avatar>
+                        </Link>
+                    </div>
+                </div>
+                {/* Row 2: Date picker (only when relevant) */}
+                <div className="flex items-center gap-2 px-4 pb-2 pl-12 overflow-x-auto">
+                    <div className="flex items-center gap-2 bg-zinc-50 p-1 rounded-lg border border-zinc-100 shrink-0" id="header-date-picker">
+                        <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                    </div>
+                    {pathname.includes("/versus") && (
+                        <>
+                            <span className="text-[10px] font-bold text-zinc-400 shrink-0">VS</span>
+                            <div className="shrink-0" id="header-compare-picker">
+                                <DatePickerWithRange
+                                    date={compareDateRange}
+                                    setDate={setCompareDateRange}
+                                    className="border-amber-200 bg-amber-50/50"
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+            </header>
+
+            {/* ── Desktop Header ── */}
+            <header className="sticky top-0 z-30 hidden lg:flex h-14 items-center border-b border-white/20 bg-white/70 px-4 lg:pl-10 lg:pr-10 backdrop-blur-xl shadow-sm transition-all duration-300">
                 <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div id="header-search"> {/* Wrapper div required for some triggers */}
+                                <div id="header-search">
                                     <CommandPalette />
                                 </div>
                             </TooltipTrigger>
@@ -78,11 +196,10 @@ export function LinearHeader() {
                         </nav>
                     </div>
 
-                    <div className="flex items-center gap-1.5 sm:gap-3">
+                    <div className="flex items-center gap-3">
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <div className="relative" id="header-export">
-                                    {/* Hotspot Beacon */}
                                     <div className="absolute -top-1 -right-1 z-10">
                                         <span className="relative flex h-2.5 w-2.5">
                                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -97,11 +214,11 @@ export function LinearHeader() {
                             </TooltipContent>
                         </Tooltip>
 
-                        <div className="h-4 w-px bg-zinc-200 mx-1 hidden sm:block" />
+                        <div className="h-4 w-px bg-zinc-200 mx-1" />
 
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div id="header-sync" className="hidden sm:block"><SyncButton /></div>
+                                <div id="header-sync"><SyncButton /></div>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="text-xs">
                                 Refresh Data
@@ -110,7 +227,7 @@ export function LinearHeader() {
 
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div className="hidden md:flex items-center gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-white/20 shadow-sm px-2">
+                                <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-white/20 shadow-sm px-2">
                                     <div id="header-date-picker">
                                         <DatePickerWithRange date={dateRange} setDate={setDateRange} />
                                     </div>
@@ -138,66 +255,7 @@ export function LinearHeader() {
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <div className="relative" id="header-property-selector">
-                                        <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-                                            <SelectTrigger className="h-8 w-[120px] sm:min-w-[160px] border-white/20 bg-white/50 hover:bg-white/80 text-[11px] font-medium text-zinc-900 focus:ring-0 rounded-md shadow-sm transition-all px-2.5 backdrop-blur-sm">
-                                                <SelectValue placeholder="Select Property" className="truncate" />
-                                            </SelectTrigger>
-                                            <SelectContent className="border-zinc-200 bg-white text-zinc-700 shadow-2xl rounded-lg min-w-[220px]">
-                                                <div className="p-1">
-                                                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-2 py-1.5 block">Properties</span>
-                                                    {properties.map((prop) => (
-                                                        <SelectItem
-                                                            key={prop.id}
-                                                            value={prop.id}
-                                                            className="text-[11px] font-medium focus:bg-amber-500/10 focus:text-amber-600 cursor-pointer rounded-md py-1.5 transition-colors"
-                                                        >
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-zinc-100 text-[9px] font-bold text-zinc-500">
-                                                                    {prop.name.charAt(0)}
-                                                                </div>
-                                                                {prop.name}
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))}
-                                                </div>
-
-                                                <div className="mt-1 border-t border-zinc-100 p-1 bg-zinc-50/50">
-                                                    {/* Logic for Free/Locked Slots */}
-                                                    {(() => {
-                                                        const currentTier = subscription?.tier || "Starter"
-                                                        const tierConfig = pricingData.find(t => t.title.toLowerCase() === currentTier.toLowerCase())
-                                                        const maxProps = tierConfig?.maxProperties || 1
-                                                        const usage = properties.length
-                                                        const freeSlots = Math.max(0, maxProps - usage)
-
-                                                        const slots = []
-                                                        // Add Property Action
-                                                        if (freeSlots > 0) {
-                                                            slots.push(
-                                                                <AddPropertyModal key="add-new">
-                                                                    <div className="flex w-full cursor-pointer select-none items-center rounded-md py-1.5 px-2 text-[11px] font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
-                                                                        <Plus className="mr-2 h-3.5 w-3.5 text-zinc-400" />
-                                                                        <span>Add Property</span>
-                                                                        <span className="ml-auto text-[10px] text-zinc-400 bg-white border border-zinc-200 px-1 rounded">{freeSlots} left</span>
-                                                                    </div>
-                                                                </AddPropertyModal>
-                                                            )
-                                                        }
-
-                                                        // Upgrade Action
-                                                        if (maxProps < 30) {
-                                                            slots.push(
-                                                                <Link key="upgrade" href="/dashboard/settings" className="flex w-full cursor-pointer select-none items-center rounded-md py-1.5 px-2 text-[11px] font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors mt-0.5">
-                                                                    <Lock className="mr-2 h-3.5 w-3.5 text-zinc-400" />
-                                                                    <span>Upgrade Plan</span>
-                                                                </Link>
-                                                            )
-                                                        }
-                                                        return slots
-                                                    })()}
-                                                </div>
-                                            </SelectContent>
-                                        </Select>
+                                        {propertySelector}
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom" className="text-xs">

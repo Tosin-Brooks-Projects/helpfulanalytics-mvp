@@ -8,6 +8,8 @@ interface Column<T> {
     accessorKey?: keyof T
     cell?: (item: T) => React.ReactNode
     className?: string
+    /** Hide this column on small screens */
+    mobileHidden?: boolean
 }
 
 interface LinearDataTableProps<T> {
@@ -24,7 +26,14 @@ export function LinearDataTable<T>({ data, columns, className, onRowClick }: Lin
                 <thead className="bg-zinc-50 text-zinc-500">
                     <tr>
                         {columns.map((col, i) => (
-                            <th key={i} className={cn("px-4 py-3 font-semibold", col.className)}>
+                            <th
+                                key={i}
+                                className={cn(
+                                    "px-3 sm:px-4 py-3 font-semibold text-xs sm:text-sm whitespace-nowrap",
+                                    col.mobileHidden && "hidden sm:table-cell",
+                                    col.className
+                                )}
+                            >
                                 {col.header}
                             </th>
                         ))}
@@ -37,12 +46,19 @@ export function LinearDataTable<T>({ data, columns, className, onRowClick }: Lin
                             key={rowIdx}
                             className={cn(
                                 "group transition-colors hover:bg-zinc-50",
-                                onRowClick && "cursor-pointer"
+                                onRowClick && "cursor-pointer active:bg-zinc-100"
                             )}
                             onClick={onRowClick ? () => onRowClick(item) : undefined}
                         >
                             {columns.map((col, colIdx) => (
-                                <td key={colIdx} className={cn("px-4 py-3 text-zinc-700", col.className)}>
+                                <td
+                                    key={colIdx}
+                                    className={cn(
+                                        "px-3 sm:px-4 py-3 text-zinc-700 text-xs sm:text-sm",
+                                        col.mobileHidden && "hidden sm:table-cell",
+                                        col.className
+                                    )}
+                                >
                                     {col.cell ? col.cell(item) : (item as any)[col.accessorKey!]}
                                 </td>
                             ))}

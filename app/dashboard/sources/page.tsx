@@ -43,10 +43,7 @@ export default function SourcesPage() {
 
     const acquisitionData: SourceData[] = data?.sources || []
     const topSource = acquisitionData.length > 0 ? acquisitionData[0] : null
-
-    // Group by source (ignoring medium for chart simplicity if duplicates exist, but API likely splits them)
-    // For chart we'll just take top 8
-    const chartData = acquisitionData.slice(0, 8)
+    const chartData = acquisitionData.slice(0, 6)
 
     if (!selectedProperty) {
         return (
@@ -71,17 +68,17 @@ export default function SourcesPage() {
 
     return (
         <LinearShell>
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-6 sm:gap-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Traffic Sources</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900">Traffic Sources</h1>
                         <p className="text-sm text-zinc-500">Channel performance and user acquisition.</p>
                     </div>
                     <DateFilterBar />
                 </div>
 
                 {/* KPI Cards */}
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
                     <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-zinc-600">Top Source</CardTitle>
@@ -116,43 +113,38 @@ export default function SourcesPage() {
                     </Card>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
-                    {/* Acquisition Chart */}
-                    <div className="rounded-lg border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm flex flex-col h-[300px] sm:h-[400px]">
-                        <h3 className="text-sm font-semibold text-zinc-900 mb-4 sm:mb-6 shrink-0">Top Acquisition Channels</h3>
-                        <div className="w-full flex-1 min-h-0">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart
-                                    data={chartData}
-                                    margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
-                                >
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-                                    <XAxis
-                                        dataKey="source"
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tick={{ fontSize: 10, fill: '#71717a' }}
-                                        tickFormatter={(val) => val.length > 8 ? val.substring(0, 8) + '..' : val}
-                                    />
-                                    <YAxis
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tick={{ fontSize: 10, fill: '#71717a' }}
-                                        width={35}
-                                    />
-                                    <Tooltip
-                                        cursor={{ fill: 'rgba(0,0,0,0.05)' }}
-                                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                    />
-                                    <Bar dataKey="sessions" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={32}>
-                                        {chartData.map((entry: any, index: number) => (
-                                            <Cell key={`cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
+                {/* Chart + Table — stacked on mobile, side-by-side on desktop */}
+                <div className="space-y-6 lg:space-y-0 lg:grid lg:gap-6 lg:grid-cols-2">
+                    {/* Acquisition Chart — horizontal bars on all sizes for readability */}
+                    <LinearGraphCard title="Top Acquisition Channels" className="h-[280px] sm:h-[380px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                                layout="vertical"
+                                data={chartData}
+                                margin={{ top: 5, right: 15, left: 0, bottom: 5 }}
+                            >
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
+                                <XAxis type="number" hide />
+                                <YAxis
+                                    dataKey="source"
+                                    type="category"
+                                    tickLine={false}
+                                    axisLine={false}
+                                    tick={{ fontSize: 11, fill: '#71717a' }}
+                                    width={75}
+                                />
+                                <Tooltip
+                                    cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                />
+                                <Bar dataKey="sessions" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={20}>
+                                    {chartData.map((entry: any, index: number) => (
+                                        <Cell key={`cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
+                                    ))}
+                                </Bar>
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </LinearGraphCard>
 
                     {/* Sources Data Table */}
                     <LinearGraphCard title="Source Breakdown">
@@ -168,12 +160,14 @@ export default function SourcesPage() {
                                     header: "Medium",
                                     accessorKey: "medium",
                                     className: "capitalize text-zinc-500",
+                                    mobileHidden: true,
                                 },
                                 { header: "Sessions", accessorKey: "sessions", className: "text-right" },
                                 {
                                     header: "Engagement",
                                     accessorKey: "bounceRate",
                                     className: "text-right text-zinc-500",
+                                    mobileHidden: true,
                                     cell: (item) => `${((1 - item.bounceRate) * 100).toFixed(1)}%`
                                 },
                                 {

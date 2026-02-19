@@ -102,7 +102,7 @@ export default function AudiencePage() {
 
         return (
             <LinearShell>
-                <div className="flex flex-col gap-8">
+                <div className="flex flex-col gap-6 sm:gap-8">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
                             <button
@@ -112,7 +112,7 @@ export default function AudiencePage() {
                                 <ChevronLeft className="h-4 w-4" />
                                 Back to Countries
                             </button>
-                            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{selectedCountry}</h1>
+                            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900">{selectedCountry}</h1>
                             <p className="text-sm text-zinc-500">City-level traffic breakdown.</p>
                         </div>
                         <DateFilterBar />
@@ -125,7 +125,7 @@ export default function AudiencePage() {
                     ) : (
                         <>
                             {/* City KPI Cards */}
-                            <div className="grid gap-4 md:grid-cols-3">
+                            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
                                 <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                         <CardTitle className="text-sm font-medium text-zinc-600">Top City</CardTitle>
@@ -162,14 +162,15 @@ export default function AudiencePage() {
                                 </Card>
                             </div>
 
-                            <div className="grid gap-6 lg:grid-cols-2">
+                            {/* Chart + Table — stacked on mobile, side-by-side on desktop */}
+                            <div className="space-y-6 lg:space-y-0 lg:grid lg:gap-6 lg:grid-cols-2">
                                 {/* Top Cities Bar Chart */}
-                                <LinearGraphCard title={`Top Cities in ${selectedCountry}`} className="h-[300px] sm:h-[400px]">
+                                <LinearGraphCard title={`Top Cities in ${selectedCountry}`} className="h-[280px] sm:h-[380px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart
                                             layout="vertical"
-                                            data={cities.slice(0, 8)}
-                                            margin={{ top: 10, right: 20, left: 0, bottom: 5 }}
+                                            data={cities.slice(0, 6)}
+                                            margin={{ top: 5, right: 15, left: 0, bottom: 5 }}
                                         >
                                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
                                             <XAxis type="number" hide />
@@ -179,14 +180,14 @@ export default function AudiencePage() {
                                                 tickLine={false}
                                                 axisLine={false}
                                                 tick={{ fontSize: 11, fill: '#71717a' }}
-                                                width={80}
+                                                width={75}
                                             />
                                             <Tooltip
                                                 cursor={{ fill: 'rgba(0,0,0,0.05)' }}
                                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                             />
-                                            <Bar dataKey="sessions" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={24}>
-                                                {cities.slice(0, 8).map((_: any, index: number) => (
+                                            <Bar dataKey="sessions" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={20}>
+                                                {cities.slice(0, 6).map((_: any, index: number) => (
                                                     <Cell key={`city-cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
                                                 ))}
                                             </Bar>
@@ -201,11 +202,12 @@ export default function AudiencePage() {
                                         columns={[
                                             { header: "City", accessorKey: "city" as any },
                                             { header: "Sessions", accessorKey: "sessions" as any, className: "text-right" },
-                                            { header: "Users", accessorKey: "users" as any, className: "text-right" },
+                                            { header: "Users", accessorKey: "users" as any, className: "text-right", mobileHidden: true },
                                             {
                                                 header: "Engagement",
                                                 accessorKey: "bounceRate" as any,
                                                 className: "text-right text-zinc-500",
+                                                mobileHidden: true,
                                                 cell: (item: any) => `${((1 - item.bounceRate) * 100).toFixed(1)}%`
                                             },
                                         ]}
@@ -222,17 +224,17 @@ export default function AudiencePage() {
     // Country view (default)
     return (
         <LinearShell>
-            <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-6 sm:gap-8">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-zinc-900">Audience</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900">Audience</h1>
                         <p className="text-sm text-zinc-500">Global reach and user demographics.</p>
                     </div>
                     <DateFilterBar />
                 </div>
 
                 {/* KPI Cards */}
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
                     <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-zinc-600">Top Country</CardTitle>
@@ -269,14 +271,15 @@ export default function AudiencePage() {
                     </Card>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-2">
+                {/* Chart + Table — stacked on mobile, side-by-side on desktop */}
+                <div className="space-y-6 lg:space-y-0 lg:grid lg:gap-6 lg:grid-cols-2">
                     {/* Top Countries Bar Chart */}
-                    <LinearGraphCard title="Top Countries by Traffic" className="h-[300px] sm:h-[400px]">
+                    <LinearGraphCard title="Top Countries by Traffic" className="h-[280px] sm:h-[380px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart
                                 layout="vertical"
-                                data={countries.slice(0, 8)}
-                                margin={{ top: 10, right: 20, left: 0, bottom: 5 }}
+                                data={countries.slice(0, 6)}
+                                margin={{ top: 5, right: 15, left: 0, bottom: 5 }}
                             >
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
                                 <XAxis type="number" hide />
@@ -286,7 +289,7 @@ export default function AudiencePage() {
                                     tickLine={false}
                                     axisLine={false}
                                     tick={{ fontSize: 11, fill: '#71717a' }}
-                                    width={70}
+                                    width={75}
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(0,0,0,0.05)' }}
@@ -296,13 +299,13 @@ export default function AudiencePage() {
                                     dataKey="sessions"
                                     fill="#6366f1"
                                     radius={[0, 4, 4, 0]}
-                                    barSize={24}
+                                    barSize={20}
                                     className="cursor-pointer"
                                     onClick={(data: any) => {
                                         if (data?.country) handleCountryClick(data.country)
                                     }}
                                 >
-                                    {chartData.map((entry: any, index: number) => (
+                                    {countries.slice(0, 6).map((entry: any, index: number) => (
                                         <Cell key={`cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
                                     ))}
                                 </Bar>
@@ -317,11 +320,12 @@ export default function AudiencePage() {
                             columns={[
                                 { header: "Country", accessorKey: "country" },
                                 { header: "Sessions", accessorKey: "sessions", className: "text-right" },
-                                { header: "Users", accessorKey: "users", className: "text-right" },
+                                { header: "Users", accessorKey: "users", className: "text-right", mobileHidden: true },
                                 {
                                     header: "Engagement",
                                     accessorKey: "bounceRate",
                                     className: "text-right text-zinc-500",
+                                    mobileHidden: true,
                                     cell: (item) => `${((1 - item.bounceRate) * 100).toFixed(1)}%`
                                 },
                             ]}
