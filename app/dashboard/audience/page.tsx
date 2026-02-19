@@ -164,12 +164,12 @@ export default function AudiencePage() {
 
                             <div className="grid gap-6 lg:grid-cols-2">
                                 {/* Top Cities Bar Chart */}
-                                <LinearGraphCard title={`Top Cities in ${selectedCountry}`} className="h-[400px]">
+                                <LinearGraphCard title={`Top Cities in ${selectedCountry}`} className="h-[300px] sm:h-[400px]">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart
                                             layout="vertical"
                                             data={cities.slice(0, 8)}
-                                            margin={{ top: 20, right: 30, left: 40, bottom: 5 }}
+                                            margin={{ top: 10, right: 20, left: 0, bottom: 5 }}
                                         >
                                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
                                             <XAxis type="number" hide />
@@ -178,8 +178,8 @@ export default function AudiencePage() {
                                                 type="category"
                                                 tickLine={false}
                                                 axisLine={false}
-                                                tick={{ fontSize: 12, fill: '#71717a' }}
-                                                width={110}
+                                                tick={{ fontSize: 11, fill: '#71717a' }}
+                                                width={80}
                                             />
                                             <Tooltip
                                                 cursor={{ fill: 'rgba(0,0,0,0.05)' }}
@@ -271,12 +271,12 @@ export default function AudiencePage() {
 
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Top Countries Bar Chart */}
-                    <LinearGraphCard title="Top Countries by Traffic" className="h-[400px]">
+                    <LinearGraphCard title="Top Countries by Traffic" className="h-[300px] sm:h-[400px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart
                                 layout="vertical"
                                 data={countries.slice(0, 8)}
-                                margin={{ top: 20, right: 30, left: 40, bottom: 5 }}
+                                margin={{ top: 10, right: 20, left: 0, bottom: 5 }}
                             >
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
                                 <XAxis type="number" hide />
@@ -285,8 +285,8 @@ export default function AudiencePage() {
                                     type="category"
                                     tickLine={false}
                                     axisLine={false}
-                                    tick={{ fontSize: 12, fill: '#71717a' }}
-                                    width={90}
+                                    tick={{ fontSize: 11, fill: '#71717a' }}
+                                    width={70}
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(0,0,0,0.05)' }}

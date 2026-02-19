@@ -118,26 +118,27 @@ export default function SourcesPage() {
 
                 <div className="grid gap-6 lg:grid-cols-2">
                     {/* Acquisition Chart */}
-                    <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm flex flex-col h-[400px]">
-                        <h3 className="text-sm font-semibold text-zinc-900 mb-6 shrink-0">Top Acquisition Channels</h3>
+                    <div className="rounded-lg border border-zinc-200 bg-white p-4 sm:p-6 shadow-sm flex flex-col h-[300px] sm:h-[400px]">
+                        <h3 className="text-sm font-semibold text-zinc-900 mb-4 sm:mb-6 shrink-0">Top Acquisition Channels</h3>
                         <div className="w-full flex-1 min-h-0">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart
                                     data={chartData}
-                                    margin={{ top: 20, right: 30, left: 10, bottom: 20 }}
+                                    margin={{ top: 10, right: 10, left: -10, bottom: 10 }}
                                 >
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
                                     <XAxis
                                         dataKey="source"
                                         tickLine={false}
                                         axisLine={false}
-                                        tick={{ fontSize: 11, fill: '#71717a' }}
-                                        tickFormatter={(val) => val.length > 10 ? val.substring(0, 10) + '...' : val}
+                                        tick={{ fontSize: 10, fill: '#71717a' }}
+                                        tickFormatter={(val) => val.length > 8 ? val.substring(0, 8) + '..' : val}
                                     />
                                     <YAxis
                                         tickLine={false}
                                         axisLine={false}
-                                        tick={{ fontSize: 11, fill: '#71717a' }}
+                                        tick={{ fontSize: 10, fill: '#71717a' }}
+                                        width={35}
                                     />
                                     <Tooltip
                                         cursor={{ fill: 'rgba(0,0,0,0.05)' }}

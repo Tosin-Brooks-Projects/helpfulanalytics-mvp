@@ -104,8 +104,8 @@ export function VersusOverview() {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
             <Tabs defaultValue="overview" className="w-full space-y-6">
-                <div className="flex items-center justify-between">
-                    <TabsList className="grid w-full grid-cols-5 lg:w-[600px]">
+                <div className="flex items-center justify-between overflow-x-auto">
+                    <TabsList className="grid w-full grid-cols-5 min-w-[400px] lg:w-[600px]">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="devices">Devices</TabsTrigger>
                         <TabsTrigger value="audience">Audience</TabsTrigger>

@@ -78,7 +78,7 @@ export function LinearHeader() {
                         </nav>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5 sm:gap-3">
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <div className="relative" id="header-export">
@@ -101,7 +101,7 @@ export function LinearHeader() {
 
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div id="header-sync"><SyncButton /></div>
+                                <div id="header-sync" className="hidden sm:block"><SyncButton /></div>
                             </TooltipTrigger>
                             <TooltipContent side="bottom" className="text-xs">
                                 Refresh Data
@@ -110,7 +110,7 @@ export function LinearHeader() {
 
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-white/20 shadow-sm px-2">
+                                <div className="hidden md:flex items-center gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-white/20 shadow-sm px-2">
                                     <div id="header-date-picker">
                                         <DatePickerWithRange date={dateRange} setDate={setDateRange} />
                                     </div>
@@ -139,7 +139,7 @@ export function LinearHeader() {
                                 <TooltipTrigger asChild>
                                     <div className="relative" id="header-property-selector">
                                         <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-                                            <SelectTrigger className="h-8 min-w-[160px] border-white/20 bg-white/50 hover:bg-white/80 text-[11px] font-medium text-zinc-900 focus:ring-0 rounded-md shadow-sm transition-all px-2.5 backdrop-blur-sm">
+                                            <SelectTrigger className="h-8 w-[120px] sm:min-w-[160px] border-white/20 bg-white/50 hover:bg-white/80 text-[11px] font-medium text-zinc-900 focus:ring-0 rounded-md shadow-sm transition-all px-2.5 backdrop-blur-sm">
                                                 <SelectValue placeholder="Select Property" className="truncate" />
                                             </SelectTrigger>
                                             <SelectContent className="border-zinc-200 bg-white text-zinc-700 shadow-2xl rounded-lg min-w-[220px]">

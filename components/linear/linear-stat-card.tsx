@@ -66,7 +66,7 @@ export function LinearStatCard({
 
     return (
         <div className={cn(
-            "group relative overflow-hidden rounded-xl border p-5 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+            "group relative overflow-hidden rounded-xl border p-4 sm:p-5 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
             currentVariant.container,
             className
         )}>
