@@ -15,6 +15,7 @@ interface Subscription {
     tier: string
     status: string
     trialEndsAt?: string // ISO date string
+    stripeCurrentPeriodEnd?: string // ISO date string from Stripe
     [key: string]: any
 }
 

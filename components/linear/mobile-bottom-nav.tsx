@@ -13,11 +13,12 @@ import {
     Settings,
     LogOut,
     Ellipsis,
+    Timer,
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { signOut } from "next-auth/react"
 import { useDashboard } from "./dashboard-context"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 const navItems = [
     { title: "Overview", href: "/dashboard", icon: LayoutGrid },
@@ -100,12 +101,13 @@ export function MobileBottomNav() {
                                                 {subscription.tier} Plan
                                             </span>
                                             <span className={cn(
-                                                "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px] font-medium",
+                                                "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium",
                                                 subscription.status === 'active' || subscription.status === 'trialing'
                                                     ? 'bg-emerald-500/10 text-emerald-600'
                                                     : 'bg-yellow-500/10 text-yellow-600'
                                             )}>
                                                 {subscription.status === 'trialing' ? 'Trial' : subscription.status}
+                                                <MobileCountdown subscription={subscription} />
                                             </span>
                                         </div>
                                     </div>
@@ -150,5 +152,35 @@ function SheetNavLink({ href, icon: Icon, label, active, onClick }: {
             <Icon className={cn("h-4 w-4", active ? "text-amber-500" : "text-zinc-400")} />
             <span>{label}</span>
         </Link>
+    )
+}
+
+function MobileCountdown({ subscription }: { subscription: { status: string; trialEndsAt?: string; stripeCurrentPeriodEnd?: string } }) {
+    const [now, setNow] = useState(new Date())
+
+    useEffect(() => {
+        const interval = setInterval(() => setNow(new Date()), 60000)
+        return () => clearInterval(interval)
+    }, [])
+
+    const endDate = subscription.status === 'trialing' && subscription.trialEndsAt
+        ? new Date(subscription.trialEndsAt)
+        : subscription.stripeCurrentPeriodEnd
+            ? new Date(subscription.stripeCurrentPeriodEnd)
+            : null
+
+    if (!endDate || endDate <= now) return null
+
+    const diffMs = endDate.getTime() - now.getTime()
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+    const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+
+    const label = days > 0 ? `${days}d ${hours}h` : `${hours}h`
+
+    return (
+        <span className="flex items-center gap-0.5 tabular-nums">
+            <Timer className="h-2.5 w-2.5" />
+            {label}
+        </span>
     )
 }
