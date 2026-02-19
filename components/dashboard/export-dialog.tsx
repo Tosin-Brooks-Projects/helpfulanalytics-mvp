@@ -37,7 +37,7 @@ const convertToCSVString = (data: any[], title?: string) => {
     return (title ? `\n# ${title}\n` : "") + headers.join(",") + "\n" + rows.join("\n")
 }
 
-export function ExportDialog() {
+export function ExportDialog({ children }: { children?: React.ReactNode } = {}) {
     const [open, setOpen] = useState(false)
     const [exportFormat, setExportFormat] = useState<"csv" | "pdf">("csv")
     const [loading, setLoading] = useState(false)
@@ -389,14 +389,16 @@ export function ExportDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 gap-2 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-900 shadow-sm transition-colors text-[11px] font-medium"
-                >
-                    <Download className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">Export Data</span>
-                </Button>
+                {children || (
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-2 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-900 shadow-sm transition-colors text-[11px] font-medium"
+                    >
+                        <Download className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Export Data</span>
+                    </Button>
+                )}
             </DialogTrigger>
             <DialogContent className="sm:max-w-[460px] bg-white text-zinc-900 border-zinc-100 shadow-2xl p-0 gap-0 overflow-hidden">
                 <DialogHeader className="p-6 pb-2">
