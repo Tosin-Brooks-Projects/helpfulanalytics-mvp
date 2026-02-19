@@ -20,6 +20,8 @@ export async function GET(request: NextRequest) {
         const compareStartDate = searchParams.get("compareStartDate")
         const compareEndDate = searchParams.get("compareEndDate")
 
+        const country = searchParams.get("country")
+
         // Allow clients to request more data for exports, default to 1000 for robust exports, or component specific default
         const limitParam = searchParams.get("limit")
         const limit = limitParam ? parseInt(limitParam) : undefined
@@ -128,6 +130,9 @@ export async function GET(request: NextRequest) {
                         response = await getMockAcquisitionData()
                     }
                     break;
+                case "cities":
+                    response = await getMockCitiesData(country || "United States")
+                    break;
                 case "realtime": response = await getMockRealtimeData(); break;
                 default:
                     return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
@@ -193,6 +198,9 @@ export async function GET(request: NextRequest) {
                 } else {
                     response = await getAcquisitionData(accessToken, propertyId, startDate, endDate, limit)
                 }
+                break
+            case "cities":
+                response = await getCitiesData(accessToken, propertyId, startDate, endDate, country || "United States", limit)
                 break
             case "realtime":
                 response = await getRealtimeData(accessToken, propertyId)
@@ -342,6 +350,53 @@ async function getMockLocationsData() {
             { country: "Netherlands", countryCode: "NL", sessions: 193, percentage: 1.5 },
         ],
         totalSessions: 12543
+    }
+}
+
+async function getMockCitiesData(country: string) {
+    const citiesByCountry: Record<string, Array<{ city: string; sessions: number; users: number; bounceRate: number; avgSessionDuration: number }>> = {
+        "United States": [
+            { city: "New York", sessions: 1200, users: 980, bounceRate: 0.38, avgSessionDuration: 195 },
+            { city: "Los Angeles", sessions: 850, users: 690, bounceRate: 0.42, avgSessionDuration: 175 },
+            { city: "Chicago", sessions: 620, users: 510, bounceRate: 0.40, avgSessionDuration: 185 },
+            { city: "Houston", sessions: 480, users: 390, bounceRate: 0.45, avgSessionDuration: 160 },
+            { city: "San Francisco", sessions: 450, users: 370, bounceRate: 0.35, avgSessionDuration: 210 },
+            { city: "Seattle", sessions: 380, users: 310, bounceRate: 0.36, avgSessionDuration: 200 },
+            { city: "Austin", sessions: 340, users: 280, bounceRate: 0.39, avgSessionDuration: 190 },
+            { city: "Miami", sessions: 280, users: 230, bounceRate: 0.44, avgSessionDuration: 155 },
+        ],
+        "United Kingdom": [
+            { city: "London", sessions: 720, users: 590, bounceRate: 0.37, avgSessionDuration: 200 },
+            { city: "Manchester", sessions: 310, users: 250, bounceRate: 0.41, avgSessionDuration: 180 },
+            { city: "Birmingham", sessions: 220, users: 180, bounceRate: 0.43, avgSessionDuration: 170 },
+            { city: "Edinburgh", sessions: 180, users: 145, bounceRate: 0.39, avgSessionDuration: 185 },
+            { city: "Bristol", sessions: 140, users: 115, bounceRate: 0.40, avgSessionDuration: 175 },
+            { city: "Leeds", sessions: 120, users: 98, bounceRate: 0.42, avgSessionDuration: 165 },
+        ],
+        "Germany": [
+            { city: "Berlin", sessions: 420, users: 340, bounceRate: 0.36, avgSessionDuration: 205 },
+            { city: "Munich", sessions: 280, users: 225, bounceRate: 0.38, avgSessionDuration: 195 },
+            { city: "Hamburg", sessions: 190, users: 155, bounceRate: 0.41, avgSessionDuration: 180 },
+            { city: "Frankfurt", sessions: 160, users: 130, bounceRate: 0.40, avgSessionDuration: 185 },
+            { city: "Cologne", sessions: 95, users: 78, bounceRate: 0.43, avgSessionDuration: 170 },
+        ],
+    }
+
+    const cities = citiesByCountry[country] || [
+        { city: "Capital City", sessions: 350, users: 285, bounceRate: 0.40, avgSessionDuration: 180 },
+        { city: "Second City", sessions: 200, users: 160, bounceRate: 0.42, avgSessionDuration: 170 },
+        { city: "Third City", sessions: 120, users: 98, bounceRate: 0.44, avgSessionDuration: 160 },
+        { city: "Fourth City", sessions: 80, users: 65, bounceRate: 0.46, avgSessionDuration: 150 },
+    ]
+
+    const totalSessions = cities.reduce((sum, c) => sum + c.sessions, 0)
+    return {
+        cities: cities.map(c => ({
+            ...c,
+            percentage: totalSessions > 0 ? (c.sessions / totalSessions) * 100 : 0,
+        })),
+        totalSessions,
+        country,
     }
 }
 
@@ -733,6 +788,52 @@ async function getLocationsData(accessToken: string, propertyId: string, startDa
             }
         }),
         totalSessions,
+    }
+}
+
+async function getCitiesData(accessToken: string, propertyId: string, startDate: string, endDate: string, country: string, limit: number = 20) {
+    const response = await runReport(accessToken, propertyId, {
+        dateRanges: [{ startDate, endDate }],
+        dimensions: [{ name: "city" }],
+        metrics: [
+            { name: "sessions" },
+            { name: "totalUsers" },
+            { name: "bounceRate" },
+            { name: "averageSessionDuration" },
+        ],
+        dimensionFilter: {
+            filter: {
+                fieldName: "country",
+                stringFilter: {
+                    matchType: "EXACT",
+                    value: country,
+                },
+            },
+        },
+        orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+        limit: limit,
+    })
+
+    const rows = response.rows || []
+    const totalSessions = rows.reduce(
+        (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
+        0,
+    )
+
+    return {
+        cities: rows.map((row: any) => {
+            const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
+            return {
+                city: row.dimensionValues?.[0]?.value || "Unknown",
+                sessions,
+                users: Number.parseInt(row.metricValues?.[1]?.value || "0"),
+                bounceRate: Number.parseFloat(row.metricValues?.[2]?.value || "0"),
+                avgSessionDuration: Number.parseFloat(row.metricValues?.[3]?.value || "0"),
+                percentage: totalSessions > 0 ? (sessions / totalSessions) * 100 : 0,
+            }
+        }),
+        totalSessions,
+        country,
     }
 }
 

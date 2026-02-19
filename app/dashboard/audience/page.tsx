@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { LinearShell } from "@/components/linear/linear-shell"
 import { LinearGraphCard, LinearDataTable, NoPropertyPlaceholder } from "@/components/linear"
 import { DateFilterBar } from "@/components/linear/date-filter-bar"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Users, Globe, MapPin } from "lucide-react"
+import { Users, Globe, MapPin, ChevronLeft } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts"
 
 export default function AudiencePage() {
@@ -14,6 +14,11 @@ export default function AudiencePage() {
     const [devicesData, setDevicesData] = useState<any>(null)
     const [locationsData, setLocationsData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
+
+    // City drill-down state
+    const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
+    const [citiesData, setCitiesData] = useState<any>(null)
+    const [citiesLoading, setCitiesLoading] = useState(false)
 
     useEffect(() => {
         async function fetchData() {
@@ -39,6 +44,29 @@ export default function AudiencePage() {
 
         fetchData()
     }, [selectedProperty])
+
+    const handleCountryClick = useCallback(async (countryName: string) => {
+        if (!selectedProperty) return
+        setSelectedCountry(countryName)
+        setCitiesLoading(true)
+        setCitiesData(null)
+        try {
+            const res = await fetch(
+                `/api/analytics?propertyId=${selectedProperty}&reportType=cities&country=${encodeURIComponent(countryName)}`
+            )
+            const json = await res.json()
+            setCitiesData(json)
+        } catch (error) {
+            console.error("Failed to fetch cities data", error)
+        } finally {
+            setCitiesLoading(false)
+        }
+    }, [selectedProperty])
+
+    const handleBackToCountries = useCallback(() => {
+        setSelectedCountry(null)
+        setCitiesData(null)
+    }, [])
 
     const COLORS = ["hsl(var(--chart-1))", "#6366f1", "#10b981", "#f43f5e", "#0ea5e9"]
 
@@ -67,8 +95,131 @@ export default function AudiencePage() {
     const topCountry = countries.length > 0 ? countries[0] : null
     const chartData = countries.slice(0, 10)
 
-    // Calculate total users for percentages if needed, though API provides 'percentage'
+    // City view
+    if (selectedCountry) {
+        const cities = citiesData?.cities || []
+        const topCity = cities.length > 0 ? cities[0] : null
 
+        return (
+            <LinearShell>
+                <div className="flex flex-col gap-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <button
+                                onClick={handleBackToCountries}
+                                className="flex items-center gap-1 text-sm text-zinc-500 hover:text-zinc-900 transition-colors mb-1"
+                            >
+                                <ChevronLeft className="h-4 w-4" />
+                                Back to Countries
+                            </button>
+                            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{selectedCountry}</h1>
+                            <p className="text-sm text-zinc-500">City-level traffic breakdown.</p>
+                        </div>
+                        <DateFilterBar />
+                    </div>
+
+                    {citiesLoading ? (
+                        <div className="flex items-center justify-center h-64 text-zinc-500 animate-pulse">
+                            Loading city data...
+                        </div>
+                    ) : (
+                        <>
+                            {/* City KPI Cards */}
+                            <div className="grid gap-4 md:grid-cols-3">
+                                <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium text-zinc-600">Top City</CardTitle>
+                                        <MapPin className="h-4 w-4 text-zinc-400" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-zinc-900">{topCity?.city || "--"}</div>
+                                        <p className="text-xs text-zinc-500 mt-1">
+                                            {topCity ? `${topCity.percentage.toFixed(1)}% of country sessions` : "No data"}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                                <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium text-zinc-600">Active Cities</CardTitle>
+                                        <Globe className="h-4 w-4 text-zinc-400" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-zinc-900">{cities.length}</div>
+                                        <p className="text-xs text-zinc-500 mt-1">Cities with traffic</p>
+                                    </CardContent>
+                                </Card>
+                                <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium text-zinc-600">Total Sessions</CardTitle>
+                                        <Users className="h-4 w-4 text-zinc-400" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold text-zinc-900">
+                                            {citiesData?.totalSessions?.toLocaleString() || 0}
+                                        </div>
+                                        <p className="text-xs text-zinc-500 mt-1">In {selectedCountry}</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            <div className="grid gap-6 lg:grid-cols-2">
+                                {/* Top Cities Bar Chart */}
+                                <LinearGraphCard title={`Top Cities in ${selectedCountry}`} className="h-[400px]">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart
+                                            layout="vertical"
+                                            data={cities.slice(0, 8)}
+                                            margin={{ top: 20, right: 30, left: 40, bottom: 5 }}
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
+                                            <XAxis type="number" hide />
+                                            <YAxis
+                                                dataKey="city"
+                                                type="category"
+                                                tickLine={false}
+                                                axisLine={false}
+                                                tick={{ fontSize: 12, fill: '#71717a' }}
+                                                width={110}
+                                            />
+                                            <Tooltip
+                                                cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+                                                contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                            />
+                                            <Bar dataKey="sessions" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={24}>
+                                                {cities.slice(0, 8).map((_: any, index: number) => (
+                                                    <Cell key={`city-cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
+                                                ))}
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </LinearGraphCard>
+
+                                {/* City Table */}
+                                <LinearGraphCard title="City Breakdown">
+                                    <LinearDataTable
+                                        data={cities}
+                                        columns={[
+                                            { header: "City", accessorKey: "city" as any },
+                                            { header: "Sessions", accessorKey: "sessions" as any, className: "text-right" },
+                                            { header: "Users", accessorKey: "users" as any, className: "text-right" },
+                                            {
+                                                header: "Engagement",
+                                                accessorKey: "bounceRate" as any,
+                                                className: "text-right text-zinc-500",
+                                                cell: (item: any) => `${((1 - item.bounceRate) * 100).toFixed(1)}%`
+                                            },
+                                        ]}
+                                    />
+                                </LinearGraphCard>
+                            </div>
+                        </>
+                    )}
+                </div>
+            </LinearShell>
+        )
+    }
+
+    // Country view (default)
     return (
         <LinearShell>
             <div className="flex flex-col gap-8">
@@ -141,7 +292,16 @@ export default function AudiencePage() {
                                     cursor={{ fill: 'rgba(0,0,0,0.05)' }}
                                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                 />
-                                <Bar dataKey="sessions" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={24}>
+                                <Bar
+                                    dataKey="sessions"
+                                    fill="#6366f1"
+                                    radius={[0, 4, 4, 0]}
+                                    barSize={24}
+                                    className="cursor-pointer"
+                                    onClick={(data: any) => {
+                                        if (data?.country) handleCountryClick(data.country)
+                                    }}
+                                >
                                     {chartData.map((entry: any, index: number) => (
                                         <Cell key={`cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
                                     ))}
@@ -165,6 +325,7 @@ export default function AudiencePage() {
                                     cell: (item) => `${((1 - item.bounceRate) * 100).toFixed(1)}%`
                                 },
                             ]}
+                            onRowClick={(item) => handleCountryClick(item.country)}
                         />
                     </LinearGraphCard>
                 </div>
