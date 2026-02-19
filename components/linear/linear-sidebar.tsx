@@ -180,13 +180,13 @@ function PlanCountdown({ subscription }: { subscription: { status: string; trial
         return () => clearInterval(interval)
     }, [])
 
-    const endDate = subscription.status === 'trialing' && subscription.trialEndsAt
-        ? new Date(subscription.trialEndsAt)
-        : subscription.stripeCurrentPeriodEnd
-            ? new Date(subscription.stripeCurrentPeriodEnd)
+    const endDate = subscription.stripeCurrentPeriodEnd
+        ? new Date(subscription.stripeCurrentPeriodEnd)
+        : subscription.trialEndsAt
+            ? new Date(subscription.trialEndsAt)
             : null
 
-    if (!endDate || endDate <= now) return null
+    if (!endDate || isNaN(endDate.getTime()) || endDate <= now) return null
 
     const diffMs = endDate.getTime() - now.getTime()
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))
