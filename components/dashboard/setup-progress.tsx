@@ -13,6 +13,7 @@ export function SetupProgress() {
     const { selectedProperty, subscription } = useDashboard()
     const [isOpen, setIsOpen] = useState(true)
     const [viewedReports, setViewedReports] = useState(false)
+    const [dismissed, setDismissed] = useState(false)
 
     useEffect(() => {
         // Initialize state from local storage
@@ -26,19 +27,21 @@ export function SetupProgress() {
             if (storedIsOpen !== null) {
                 setIsOpen(storedIsOpen === 'true')
             }
+
+            const wasDismissed = localStorage.getItem('setupGuideDismissed')
+            if (wasDismissed === 'true') {
+                setDismissed(true)
+            }
         }
     }, [])
 
     useEffect(() => {
-        // Auto-minimize if everything is done (only if explicitly checked, or maybe we don't want to auto-open if they closed it)
-        // If they completed everything, let's close it but respecting manual override is tricky. 
-        // Let's just say if everything is done, we close it, but only if we haven't forced a state yet? 
-        // Or simpler: Just respect the manual toggle primarily.
-
-        // Original logic: auto-minimize if complete.
-        if (selectedProperty && subscription?.status === 'active' && viewedReports) {
+        // Permanently dismiss when all steps are complete
+        if (selectedProperty && (subscription?.status === 'active' || subscription?.status === 'trialing') && viewedReports) {
+            setDismissed(true)
             setIsOpen(false)
             if (typeof window !== 'undefined') {
+                localStorage.setItem('setupGuideDismissed', 'true')
                 localStorage.setItem('setupGuideOpen', 'false')
             }
         }
@@ -102,6 +105,8 @@ export function SetupProgress() {
     const completedCount = steps.filter(s => s.isCompleted).length
     const progress = (completedCount / steps.length) * 100
     const isAllComplete = completedCount === steps.length
+
+    if (dismissed || isAllComplete) return null
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
