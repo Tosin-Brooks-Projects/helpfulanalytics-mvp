@@ -1,8 +1,14 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react"
+import { createContext, useContext, useEffect, useState, ReactNode, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { DateRange } from "react-day-picker"
+import useSWR from "swr"
+
+const fetcher = (url: string) => fetch(url).then((res) => {
+    if (!res.ok) throw new Error("Failed to fetch")
+    return res.json()
+})
 
 interface Property {
     id: string
@@ -38,79 +44,56 @@ interface DashboardContextType {
 const LinearDashboardContext = createContext<DashboardContextType | undefined>(undefined)
 
 export function LinearDashboardProvider({ children }: { children: ReactNode }) {
-    const [properties, setProperties] = useState<Property[]>([])
-    const [availableProperties, setAvailableProperties] = useState<Property[]>([])
     const [selectedProperty, setSelectedProperty] = useState<string>("")
-    const [loading, setLoading] = useState(true)
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: new Date(new Date().setDate(new Date().getDate() - 30)),
         to: new Date(),
     })
     const [compareDateRange, setCompareDateRange] = useState<DateRange | undefined>(undefined)
-    const [subscription, setSubscription] = useState<Subscription | null>(null)
-    const [deletionUsage, setDeletionUsage] = useState<{ count: number, resetAt: number } | null>(null)
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
     const router = useRouter()
 
+    // 1. Fetch saved properties (Active)
+    const { data: savedData, isLoading: isLoadingSaved } = useSWR("/api/user/properties", fetcher, {
+        revalidateOnFocus: false,
+        dedupingInterval: 60000,
+    })
+
+    // 2. Fetch all GA4 properties (Available)
+    const { data: allData, isLoading: isLoadingAll } = useSWR("/api/analytics/properties", fetcher, {
+        revalidateOnFocus: false,
+        dedupingInterval: 60000,
+    })
+
+    // 3. Fetch user subscription
+    const { data: userData, isLoading: isLoadingUser } = useSWR("/api/user/me", fetcher, {
+        revalidateOnFocus: false,
+        dedupingInterval: 60000,
+    })
+
+    const loading = isLoadingSaved || isLoadingAll || isLoadingUser
+
+    const properties = useMemo(() => savedData?.properties || [], [savedData])
+    const deletionUsage = useMemo(() => savedData?.deletionUsage || null, [savedData])
+    const subscription = useMemo(() => userData?.subscription || null, [userData])
+
+    const availableProperties = useMemo(() => {
+        const allProps = allData?.properties || []
+        const savedIds = new Set(properties.map((p: any) => p.id))
+        return allProps.filter((p: any) => !savedIds.has(p.id))
+    }, [allData, properties])
+
+    // Initial Selection Logic - only run once when properties load and we don't have a selection
     useEffect(() => {
-        async function fetchData() {
-            try {
-                // 1. Fetch saved properties (Active)
-                const savedPropsRes = await fetch("/api/user/properties")
-                let savedProps = []
-                if (savedPropsRes.ok) {
-                    const savedData = await savedPropsRes.json()
-                    savedProps = savedData.properties || []
-                    setProperties(savedProps)
-                    setDeletionUsage(savedData.deletionUsage || null)
-                }
-
-                // 2. Fetch all GA4 properties (Available)
-                const allPropsRes = await fetch("/api/analytics/properties")
-                if (allPropsRes.ok) {
-                    const allData = await allPropsRes.json()
-                    const allProps = allData.properties || []
-
-                    // Filter out already saved properties
-                    // We compare IDs. Note: saved properties have ID like "properties/123", check format.
-                    // API returns "properties/..." usually.
-                    const savedIds = new Set(savedProps.map((p: any) => p.id))
-                    const available = allProps.filter((p: any) => !savedIds.has(p.id))
-                    setAvailableProperties(available)
-
-                    // Initial Selection Logic
-                    if (savedProps.length > 0) {
-                        const saved = localStorage.getItem("linear_selected_property")
-                        if (saved && savedProps.find((p: Property) => p.id === saved)) {
-                            setSelectedProperty(saved)
-                        } else {
-                            setSelectedProperty(savedProps[0].id)
-                        }
-                    } else {
-                        // If no saved properties, we might redirect or show empty state
-                        // The component using this context handles empty state logic often
-                    }
-                }
-
-                // 3. Fetch user subscription
-                const userRes = await fetch("/api/user/me")
-                if (userRes.ok) {
-                    const userData = await userRes.json()
-                    setSubscription(userData.subscription || null)
-
-                    // Logic to redirect if absolutely no access? 
-                    // Maybe we just let them stay on dashboard to add properties.
-                }
-
-            } catch (error) {
-                console.error("Failed to fetch dashboard data", error)
-            } finally {
-                setLoading(false)
+        if (!selectedProperty && properties.length > 0) {
+            const saved = localStorage.getItem("linear_selected_property")
+            if (saved && properties.find((p: Property) => p.id === saved)) {
+                setSelectedProperty(saved)
+            } else {
+                setSelectedProperty(properties[0].id)
             }
         }
-
-        fetchData()
-    }, [router])
+    }, [properties, selectedProperty])
 
     // Persist selection
     useEffect(() => {
