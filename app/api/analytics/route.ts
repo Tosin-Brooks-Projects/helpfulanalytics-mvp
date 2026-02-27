@@ -837,7 +837,7 @@ async function getCitiesData(accessToken: string, propertyId: string, startDate:
     }
 }
 
-async function getAcquisitionData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
+export async function getAcquisitionData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
     const response = await runReport(accessToken, propertyId, {
         dateRanges: [{ startDate, endDate }],
         dimensions: [{ name: "sessionSource" }, { name: "sessionMedium" }],
