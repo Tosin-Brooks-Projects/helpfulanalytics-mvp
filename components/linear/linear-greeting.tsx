@@ -35,7 +35,13 @@ export function LinearGreeting() {
         <div className="mb-8">
             <div className="space-y-1 mb-6">
                 <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
-                    {greeting}, {firstName}
+                    {greeting},{" "}
+                    <span
+                        style={{ fontFamily: "var(--font-cormorant)" }}
+                        className="font-semibold italic text-amber-800"
+                    >
+                        {firstName}
+                    </span>
                 </h1>
                 <p className="text-zinc-500 text-sm">
                     Here's what's happening with your projects today.
