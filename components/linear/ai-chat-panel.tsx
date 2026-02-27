@@ -22,11 +22,17 @@ const WELCOME_MESSAGE: ChatMessage = {
 
 export function AIChatPanel() {
     const { selectedProperty, dateRange } = useDashboard()
-    const [open, setOpen] = useState(true)
+    // Open by default on desktop, closed on mobile
+    const [open, setOpen] = useState(false)
     const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE])
     const [input, setInput] = useState("")
     const [streaming, setStreaming] = useState(false)
     const [showScrollBtn, setShowScrollBtn] = useState(false)
+
+    // On desktop, open by default; on mobile, stay closed
+    useEffect(() => {
+        if (window.innerWidth >= 1024) setOpen(true)
+    }, [])
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -151,9 +157,10 @@ export function AIChatPanel() {
                 onClick={() => setOpen((v) => !v)}
                 aria-label="Open AI chat"
                 className={cn(
-                    "fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-300",
+                    "fixed right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-300",
                     "bg-gradient-to-br from-amber-400 to-amber-500 text-white hover:from-amber-500 hover:to-amber-600",
-                    "lg:bottom-8 lg:right-8",
+                    // Mobile: sit above bottom nav (h-14 = 56px), desktop: bottom-8
+                    "bottom-[4.5rem] lg:bottom-8 lg:right-8",
                     open && "opacity-0 pointer-events-none scale-75"
                 )}
             >
@@ -167,9 +174,10 @@ export function AIChatPanel() {
             {/* Chat Panel */}
             <div
                 className={cn(
-                    "fixed bottom-6 right-6 z-50 flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl transition-all duration-300 ease-out",
-                    "lg:bottom-8 lg:right-8",
-                    "w-[calc(100vw-3rem)] max-w-sm sm:w-96",
+                    "fixed right-4 z-50 flex flex-col overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-2xl transition-all duration-300 ease-out",
+                    // Mobile: sit above bottom nav + leave gap; desktop: bottom-8
+                    "bottom-[4.5rem] lg:bottom-8 lg:right-8",
+                    "w-[calc(100vw-2rem)] max-w-sm sm:w-96",
                     open
                         ? "h-[520px] opacity-100 translate-y-0 scale-100"
                         : "h-0 opacity-0 translate-y-4 scale-95 pointer-events-none"
