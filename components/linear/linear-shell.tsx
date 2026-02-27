@@ -1,11 +1,11 @@
-import { ReactNode, useState } from "react"
+import { ReactNode } from "react"
 import { LinearSidebar } from "@/components/linear/linear-sidebar"
 import { LinearHeader } from "@/components/linear/linear-header"
 import { MobileBottomNav } from "@/components/linear/mobile-bottom-nav"
 import { useDashboard } from "./dashboard-context"
 import { cn } from "@/lib/utils"
 import { DashboardTour } from "@/components/dashboard/dashboard-tour"
-import { SetupProgress } from "@/components/dashboard/setup-progress"
+import { AIChatPanel } from "@/components/linear/ai-chat-panel"
 
 interface LinearShellProps {
     children: ReactNode
@@ -17,7 +17,7 @@ export function LinearShell({ children }: LinearShellProps) {
     return (
         <div className="flex h-screen w-full bg-transparent text-zinc-900 selection:bg-amber-500/30 overflow-hidden">
             <DashboardTour />
-            <SetupProgress />
+            <AIChatPanel />
             {/* Desktop Sidebar */}
             <aside className={cn(
                 "fixed left-0 top-0 z-40 h-full border-r border-zinc-200 bg-white hidden lg:block transition-all duration-300 ease-in-out",
