@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useCallback } from "react"
 import { X, Send, RotateCcw, ChevronDown } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import { useDashboard } from "@/components/linear/dashboard-context"
+import { useChat } from "@ai-sdk/react"
+import type { Message } from "ai"
 import type { ChatMessage } from "@/types/chat"
 import { cn } from "@/lib/utils"
 
@@ -20,18 +22,42 @@ const WELCOME_MESSAGE: ChatMessage = {
         "Hey — I'm Kea. I've taken a look at your analytics and I'm ready to dig in with you. What do you want to understand about your site today?",
 }
 
+const INITIAL_MESSAGES: Message[] = [
+    { id: "welcome-message", role: "assistant", content: WELCOME_MESSAGE.content }
+]
+
 export function AIChatPanel() {
     const { selectedProperty, dateRange } = useDashboard()
-    // Open by default on desktop, closed on mobile
     const [open, setOpen] = useState(false)
-    const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE])
-    const [input, setInput] = useState("")
-    const [streaming, setStreaming] = useState(false)
     const [showScrollBtn, setShowScrollBtn] = useState(false)
+
+    const [isClient, setIsClient] = useState(false)
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+
+    const startDate = isClient && dateRange?.from ? dateRange.from.toISOString().split("T")[0] : "30daysAgo"
+    const endDate = isClient && dateRange?.to ? dateRange.to.toISOString().split("T")[0] : "today"
+
+    const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading, stop } = useChat({
+        api: "/api/ai/chat",
+        initialMessages: INITIAL_MESSAGES,
+        body: {
+            propertyId: selectedProperty || "demo-property",
+            startDate,
+            endDate
+        },
+        onError: (err) => {
+            console.error("Chat error:", err)
+        }
+    })
 
     // On desktop, open by default; on mobile, stay closed
     useEffect(() => {
-        if (window.innerWidth >= 1024) setOpen(true)
+        if (typeof window !== "undefined") {
+            if (window.innerWidth >= 1024) setOpen(true)
+        }
     }, [])
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -51,8 +77,8 @@ export function AIChatPanel() {
     }, [open, scrollToBottom])
 
     useEffect(() => {
-        if (streaming) scrollToBottom()
-    }, [messages, streaming, scrollToBottom])
+        if (isLoading) scrollToBottom()
+    }, [messages, isLoading, scrollToBottom])
 
     const handleScroll = () => {
         const el = scrollContainerRef.current
@@ -61,94 +87,19 @@ export function AIChatPanel() {
         setShowScrollBtn(distFromBottom > 120)
     }
 
-    const sendMessage = useCallback(
-        async (text: string) => {
-            const trimmed = text.trim()
-            if (!trimmed || streaming) return
-
-            const startDate = dateRange?.from?.toISOString().split("T")[0] ?? "30daysAgo"
-            const endDate = dateRange?.to?.toISOString().split("T")[0] ?? "today"
-
-            const userMsg: ChatMessage = { role: "user", content: trimmed }
-            const nextMessages = [...messages, userMsg]
-            setMessages(nextMessages)
-            setInput("")
-            setStreaming(true)
-
-            // Placeholder for streaming assistant response
-            const assistantPlaceholder: ChatMessage = { role: "assistant", content: "" }
-            setMessages((prev) => [...prev, assistantPlaceholder])
-
-            abortRef.current = new AbortController()
-
-            try {
-                const res = await fetch("/api/ai/chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        propertyId: selectedProperty || "demo-property",
-                        startDate,
-                        endDate,
-                        messages: nextMessages,
-                    }),
-                    signal: abortRef.current.signal,
-                })
-
-                if (!res.ok || !res.body) {
-                    throw new Error(`Request failed: ${res.status}`)
-                }
-
-                const reader = res.body.getReader()
-                const decoder = new TextDecoder()
-
-                while (true) {
-                    const { value, done } = await reader.read()
-                    if (done) break
-                    const chunk = decoder.decode(value, { stream: true })
-                    setMessages((prev) => {
-                        const updated = [...prev]
-                        const last = updated[updated.length - 1]
-                        if (last?.role === "assistant") {
-                            updated[updated.length - 1] = { ...last, content: last.content + chunk }
-                        }
-                        return updated
-                    })
-                }
-            } catch (err) {
-                if ((err as Error).name !== "AbortError") {
-                    setMessages((prev) => {
-                        const updated = [...prev]
-                        const last = updated[updated.length - 1]
-                        if (last?.role === "assistant" && last.content === "") {
-                            updated[updated.length - 1] = {
-                                ...last,
-                                content: "Sorry, I couldn't get a response. Please try again.",
-                            }
-                        }
-                        return updated
-                    })
-                }
-            } finally {
-                setStreaming(false)
-                abortRef.current = null
-            }
-        },
-        [messages, streaming, selectedProperty, dateRange]
-    )
-
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
-            sendMessage(input)
+            handleSubmit(e)
         }
     }
 
     const resetChat = () => {
-        abortRef.current?.abort()
-        setMessages([WELCOME_MESSAGE])
-        setInput("")
-        setStreaming(false)
+        stop()
+        setMessages([{ id: "welcome", role: "assistant", content: WELCOME_MESSAGE.content }])
     }
+
+    if (!isClient) return null
 
     return (
         <>
@@ -221,42 +172,60 @@ export function AIChatPanel() {
                     className="relative flex-1 overflow-y-auto px-4 py-4 space-y-4"
                 >
                     {messages.map((msg, i) => (
-                        <div
-                            key={i}
-                            className={cn(
-                                "flex",
-                                msg.role === "user" ? "justify-end" : "justify-start"
-                            )}
-                        >
-                            {msg.role === "assistant" && (
-                                <img
-                                    src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50"
-                                    alt="Kea"
-                                    className="mr-2 mt-1 h-7 w-7 shrink-0 rounded-full"
-                                />
-                            )}
+                        <div key={msg.id || i} className="flex flex-col gap-2">
                             <div
                                 className={cn(
-                                    "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
-                                    msg.role === "user"
-                                        ? "bg-amber-500 text-white rounded-tr-sm"
-                                        : "bg-zinc-100 text-zinc-800 rounded-tl-sm"
+                                    "flex",
+                                    msg.role === "user" ? "justify-end" : "justify-start"
                                 )}
                             >
-                                {msg.role === "assistant" && msg.content === "" ? (
-                                    <span className="flex gap-1 py-1">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
-                                        <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
-                                        <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
-                                    </span>
-                                ) : msg.role === "assistant" ? (
-                                    <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900">
-                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                    </div>
-                                ) : (
-                                    msg.content
+                                {msg.role === "assistant" && (
+                                    <img
+                                        src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50"
+                                        alt="Kea"
+                                        className="mr-2 mt-1 h-7 w-7 shrink-0 rounded-full shadow-sm"
+                                    />
                                 )}
+                                <div
+                                    className={cn(
+                                        "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
+                                        msg.role === "user"
+                                            ? "bg-amber-500 text-white rounded-tr-sm"
+                                            : "bg-white border border-zinc-100 text-zinc-800 rounded-tl-sm"
+                                    )}
+                                >
+                                    {msg.role === "assistant" && msg.content === "" && !msg.toolInvocations ? (
+                                        <span className="flex gap-1 py-1">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
+                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
+                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
+                                        </span>
+                                    ) : (
+                                        <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600">
+                                            <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
+
+                            {/* Tool Invocations UI */}
+                            {msg.toolInvocations?.map((toolInv) => (
+                                <div key={toolInv.toolCallId} className="flex justify-start pl-9">
+                                    <div className="flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-1.5 text-[10px] text-zinc-500 font-medium">
+                                        {'result' in toolInv ? (
+                                            <span className="flex items-center gap-1.5">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                                ✓ Fetched {toolInv.toolName === 'getTrafficSources' ? 'traffic data' : 'metrics'}
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1.5">
+                                                <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                                Fetching {toolInv.toolName === 'getTrafficSources' ? 'traffic data' : 'metrics'} from GA4...
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     ))}
 
@@ -266,7 +235,7 @@ export function AIChatPanel() {
                             {SUGGESTED_PROMPTS.map((prompt) => (
                                 <button
                                     key={prompt}
-                                    onClick={() => sendMessage(prompt)}
+                                    onClick={() => handleInputChange({ target: { value: prompt } } as any)}
                                     className="block w-full rounded-xl border border-zinc-200 px-3 py-2 text-left text-xs text-zinc-600 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 transition-colors"
                                 >
                                     {prompt}
@@ -289,16 +258,16 @@ export function AIChatPanel() {
                 )}
 
                 {/* Input */}
-                <div className="shrink-0 border-t border-zinc-100 bg-white px-3 py-3">
+                <form onSubmit={handleSubmit} className="shrink-0 border-t border-zinc-100 bg-white px-3 py-3">
                     <div className="flex items-end gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-100 transition-all">
                         <textarea
                             ref={inputRef}
                             value={input}
-                            onChange={(e) => setInput(e.target.value)}
+                            onChange={handleInputChange}
                             onKeyDown={handleKeyDown}
                             placeholder="Ask about your analytics..."
                             rows={1}
-                            disabled={streaming}
+                            disabled={isLoading}
                             className="flex-1 resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 outline-none max-h-28 disabled:opacity-50"
                             style={{ height: "auto", minHeight: "20px" }}
                             onInput={(e) => {
@@ -308,8 +277,8 @@ export function AIChatPanel() {
                             }}
                         />
                         <button
-                            onClick={() => sendMessage(input)}
-                            disabled={!input.trim() || streaming}
+                            type="submit"
+                            disabled={!input.trim() || isLoading}
                             aria-label="Send message"
                             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                         >
@@ -319,7 +288,7 @@ export function AIChatPanel() {
                     <p className="mt-1.5 text-center text-[10px] text-zinc-300">
                         Press Enter to send · Shift+Enter for new line
                     </p>
-                </div>
+                </form>
             </div>
         </>
     )
