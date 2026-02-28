@@ -133,6 +133,9 @@ export async function GET(request: NextRequest) {
                 case "cities":
                     response = await getMockCitiesData(country || "United States")
                     break;
+                case "states":
+                    response = await getMockStatesData(country || "United States")
+                    break;
                 case "realtime": response = await getMockRealtimeData(); break;
                 default:
                     return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
@@ -201,6 +204,9 @@ export async function GET(request: NextRequest) {
                 break
             case "cities":
                 response = await getCitiesData(accessToken, propertyId, startDate, endDate, country || "United States", limit)
+                break
+            case "states":
+                response = await getStatesData(accessToken, propertyId, startDate, endDate, country || "United States", limit)
                 break
             case "realtime":
                 response = await getRealtimeData(accessToken, propertyId)
@@ -394,6 +400,36 @@ async function getMockCitiesData(country: string) {
         cities: cities.map(c => ({
             ...c,
             percentage: totalSessions > 0 ? (c.sessions / totalSessions) * 100 : 0,
+        })),
+        totalSessions,
+        country,
+    }
+}
+
+async function getMockStatesData(country: string) {
+    const statesByCountry: Record<string, Array<{ state: string; sessions: number; users: number; bounceRate: number; avgSessionDuration: number }>> = {
+        "United States": [
+            { state: "California", sessions: 2500, users: 2100, bounceRate: 0.35, avgSessionDuration: 210 },
+            { state: "New York", sessions: 1800, users: 1500, bounceRate: 0.38, avgSessionDuration: 195 },
+            { state: "Texas", sessions: 1500, users: 1200, bounceRate: 0.40, avgSessionDuration: 180 },
+            { state: "Florida", sessions: 1200, users: 950, bounceRate: 0.42, avgSessionDuration: 175 },
+            { state: "Illinois", sessions: 900, users: 750, bounceRate: 0.39, avgSessionDuration: 185 },
+            { state: "Washington", sessions: 750, users: 600, bounceRate: 0.37, avgSessionDuration: 200 },
+            { state: "Pennsylvania", sessions: 600, users: 480, bounceRate: 0.41, avgSessionDuration: 165 },
+        ]
+    }
+
+    const states = statesByCountry[country] || [
+        { state: "Region 1", sessions: 1500, users: 1200, bounceRate: 0.38, avgSessionDuration: 180 },
+        { state: "Region 2", sessions: 900, users: 750, bounceRate: 0.40, avgSessionDuration: 175 },
+        { state: "Region 3", sessions: 600, users: 480, bounceRate: 0.42, avgSessionDuration: 165 },
+    ]
+
+    const totalSessions = states.reduce((sum, s) => sum + s.sessions, 0)
+    return {
+        states: states.map(s => ({
+            ...s,
+            percentage: totalSessions > 0 ? (s.sessions / totalSessions) * 100 : 0,
         })),
         totalSessions,
         country,
@@ -825,6 +861,52 @@ async function getCitiesData(accessToken: string, propertyId: string, startDate:
             const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
             return {
                 city: row.dimensionValues?.[0]?.value || "Unknown",
+                sessions,
+                users: Number.parseInt(row.metricValues?.[1]?.value || "0"),
+                bounceRate: Number.parseFloat(row.metricValues?.[2]?.value || "0"),
+                avgSessionDuration: Number.parseFloat(row.metricValues?.[3]?.value || "0"),
+                percentage: totalSessions > 0 ? (sessions / totalSessions) * 100 : 0,
+            }
+        }),
+        totalSessions,
+        country,
+    }
+}
+
+async function getStatesData(accessToken: string, propertyId: string, startDate: string, endDate: string, country: string, limit: number = 20) {
+    const response = await runReport(accessToken, propertyId, {
+        dateRanges: [{ startDate, endDate }],
+        dimensions: [{ name: "region" }],
+        metrics: [
+            { name: "sessions" },
+            { name: "totalUsers" },
+            { name: "bounceRate" },
+            { name: "averageSessionDuration" },
+        ],
+        dimensionFilter: {
+            filter: {
+                fieldName: "country",
+                stringFilter: {
+                    matchType: "EXACT",
+                    value: country,
+                },
+            },
+        },
+        orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+        limit: limit,
+    })
+
+    const rows = response.rows || []
+    const totalSessions = rows.reduce(
+        (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
+        0,
+    )
+
+    return {
+        states: rows.map((row: any) => {
+            const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0")
+            return {
+                state: row.dimensionValues?.[0]?.value || "Unknown",
                 sessions,
                 users: Number.parseInt(row.metricValues?.[1]?.value || "0"),
                 bounceRate: Number.parseFloat(row.metricValues?.[2]?.value || "0"),

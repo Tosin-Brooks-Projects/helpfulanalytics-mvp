@@ -116,6 +116,34 @@ export async function POST(request: Request) {
                     }
                 },
             }),
+            getTrafficByState: tool({
+                description: 'Fetch the top states/regions where users are coming from within a specific country (e.g., California, New York for United States). Defaults to United States if no country is specified.',
+                parameters: z.object({
+                    startDate: z.string().describe('The start date in YYYY-MM-DD format'),
+                    endDate: z.string().describe('The end date in YYYY-MM-DD format'),
+                    country: z.string().optional().describe('The country to filter states by. Defaults to "United States".'),
+                    limit: z.number().optional().describe('How many states to return. Default 20.')
+                }),
+                execute: async ({ startDate: queryStart, endDate: queryEnd, country = "United States", limit = 20 }) => {
+                    if (!accessToken || !propertyId) {
+                        return { error: "Requires active GA4 property and valid authentication" }
+                    }
+                    try {
+                        const res = await fetch(`${request.headers.get("origin") || "http://localhost:3000"}/api/analytics?propertyId=${propertyId}&reportType=states&startDate=${queryStart}&endDate=${queryEnd}&country=${encodeURIComponent(country)}&limit=${limit}`, {
+                            headers: {
+                                cookie: request.headers.get("cookie") || "",
+                            }
+                        })
+                        if (!res.ok) {
+                            return { error: 'Failed to fetch state traffic data.' }
+                        }
+                        const data = await res.json()
+                        return data.states
+                    } catch (e) {
+                        return { error: 'Failed to fetch state traffic data.' }
+                    }
+                }
+            }),
         }
     })
 

@@ -72,7 +72,7 @@ export function CoachCommentary({ propertyId, dateRange, compareDateRange, repor
         <Card className="p-6 border-zinc-200 bg-gradient-to-br from-zinc-50 to-white overflow-hidden relative">
             <div className="flex items-center gap-3 mb-4">
                 <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0">
-                    <img src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50" alt="Kea" className="h-8 w-8 rounded-full shadow-sm" />
+                    <img src="/kea.svg" alt="Kea" className="h-8 w-8 rounded-full shadow-sm" />
                 </div>
                 <h3 className="text-sm font-bold text-zinc-900 font-outfit">Kea&apos;s Commentary</h3>
                 {loading && <span className="text-xs text-zinc-400 animate-pulse font-outfit">Analyzing your metrics...</span>}
