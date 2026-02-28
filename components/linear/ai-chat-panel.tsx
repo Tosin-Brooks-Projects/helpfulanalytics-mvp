@@ -278,7 +278,7 @@ export function AIChatPanel() {
                         />
                         <button
                             type="submit"
-                            disabled={!input.trim() || isLoading}
+                            disabled={!input?.trim() || isLoading}
                             aria-label="Send message"
                             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                         >
