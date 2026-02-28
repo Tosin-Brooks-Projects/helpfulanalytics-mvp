@@ -90,7 +90,7 @@ export function AIChatPanel() {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
-            handleSubmit(e)
+            e.currentTarget.form?.requestSubmit()
         }
     }
 
