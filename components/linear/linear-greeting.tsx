@@ -64,7 +64,7 @@ export function LinearGreeting() {
                     )}
                     <div className="flex items-start gap-4">
                         <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full shadow-sm shrink-0">
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin text-amber-500" /> : <img src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50" alt="Kea" className="h-8 w-8 rounded-full" />}
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin text-amber-500" /> : <img src="/kea.svg" alt="Kea" className="h-8 w-8 rounded-full" />}
                         </div>
                         <div className="space-y-2 flex-1">
                             <div className="flex items-center gap-2">
@@ -137,7 +137,7 @@ export function LinearGreeting() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="font-outfit text-xl flex items-center gap-2">
-                            <img src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50" alt="Kea" className="h-6 w-6 rounded-full shrink-0" />
+                            <img src="/kea.svg" alt="Kea" className="h-6 w-6 rounded-full shrink-0" />
                             {selectedInsight?.title || selectedInsight?.type || "Insight Detail"}
                         </DialogTitle>
                         <DialogDescription>
