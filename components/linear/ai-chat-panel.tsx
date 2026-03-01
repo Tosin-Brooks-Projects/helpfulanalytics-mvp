@@ -199,13 +199,18 @@ export function AIChatPanel() {
                                     msg.role === "user" ? "justify-end" : "justify-start"
                                 )}
                             >
-                                {msg.role === "assistant" && (
-                                    <img
-                                        src="/kea.svg"
-                                        alt="Kea"
-                                        className="mr-2 mt-1 h-7 w-7 shrink-0 rounded-full shadow-sm"
-                                    />
-                                )}
+                                {(() => {
+                                    if (msg.role === "assistant") {
+                                        console.log("Rendering Assistant Message:", msg);
+                                    }
+                                    return msg.role === "assistant" && (
+                                        <img
+                                            src="/kea.svg"
+                                            alt="Kea"
+                                            className="mr-2 mt-1 h-7 w-7 shrink-0 rounded-full shadow-sm"
+                                        />
+                                    );
+                                })()}
                                 <div
                                     className={cn(
                                         "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm w-full",
@@ -214,18 +219,26 @@ export function AIChatPanel() {
                                             : "bg-white border border-zinc-100 text-zinc-800 rounded-tl-sm empty:hidden" // hides box if content is truly empty
                                     )}
                                 >
-                                    {msg.role === "assistant" && !msg.content && (!msg.toolInvocations || msg.toolInvocations.length === 0) ? (
+                                    {msg.role === "assistant" && (!msg.parts || msg.parts.length === 0) && (!msg.content) && (!msg.toolInvocations || msg.toolInvocations.length === 0) ? (
                                         <span className="flex gap-1 py-1">
                                             <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
                                             <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
                                             <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
                                         </span>
                                     ) : (
-                                        msg.content && (
-                                            <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600">
-                                                <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                            </div>
-                                        )
+                                        <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600">
+                                            {msg.parts && msg.parts.length > 0 ? (
+                                                msg.parts.map((part, partIdx) => {
+                                                    if (part.type === 'text') {
+                                                        return <ReactMarkdown key={partIdx}>{part.text}</ReactMarkdown>;
+                                                    }
+                                                    return null;
+                                                })
+                                            ) : (
+                                                // Fallback to msg.content just in case (e.g. for user messages)
+                                                msg.content && <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </div>

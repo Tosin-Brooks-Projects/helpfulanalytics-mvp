@@ -155,7 +155,7 @@ export async function POST(request: Request) {
                     endDate: z.string().describe('The end date in YYYY-MM-DD format'),
                 }),
                 execute: async ({ startDate: queryStart, endDate: queryEnd }) => {
-                    if (!accessToken || !propertyId || propertyId === "demo-property") {
+                    if (!accessToken || !propertyId) {
                         return { error: "Requires active GA4 property and valid authentication" }
                     }
                     try {
@@ -174,7 +174,7 @@ export async function POST(request: Request) {
                     limit: z.number().optional().describe('How many sources to return. Default 5.')
                 }),
                 execute: async ({ startDate: queryStart, endDate: queryEnd }) => {
-                    if (!accessToken || !propertyId || propertyId === "demo-property") {
+                    if (!accessToken || !propertyId) {
                         return { error: "Requires active GA4 property and valid authentication" }
                     }
                     try {
