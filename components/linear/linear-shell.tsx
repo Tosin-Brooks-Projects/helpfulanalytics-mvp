@@ -36,6 +36,7 @@ export function LinearShell({ children }: LinearShellProps) {
                 <main id="main-dashboard-content" className="flex-1 overflow-y-auto p-4 lg:p-10 pt-4 lg:pt-10 pb-24 lg:pb-20 animate-in fade-in duration-500">
                     <div className="max-w-[1600px] mx-auto">
                         {children}
+                        We typically see these go away after 2-4 hours. Check back later today or tomorrow to see if they&apos;ve resolved themselves.
                     </div>
                 </main>
             </div>

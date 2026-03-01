@@ -1,3 +1,5 @@
+import { getOverviewData, getMockOverviewData, getMockOverviewComparisonData } from "@/lib/analytics/ga4"
+
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
@@ -226,58 +228,6 @@ export async function GET(request: NextRequest) {
 }
 
 // Mock Data Generators for Demo Property
-export async function getMockOverviewData() {
-    return {
-        metrics: {
-            sessions: 12543,
-            users: 8932,
-            pageViews: 45210,
-            bounceRate: 0.42,
-            engagementRate: 0.58,
-            avgSessionDuration: 185,
-        },
-        trafficSources: [
-            { source: "Direct", sessions: 4500, percentage: 35.8 },
-            { source: "Organic Search", sessions: 3800, percentage: 30.2 },
-            { source: "Social", sessions: 2100, percentage: 16.7 },
-            { source: "Referral", sessions: 1500, percentage: 11.9 },
-            { source: "Email", sessions: 643, percentage: 5.1 },
-        ],
-        topPages: [
-            { path: "/", title: "Home | Linear Analytics", views: 12000, percentage: 35 },
-            { path: "/features", title: "Features - Powerful Insights", views: 8500, percentage: 25 },
-            { path: "/pricing", title: "Pricing & Plans", views: 6200, percentage: 18 },
-            { path: "/blog/analytics-tips", title: "5 Tips for Better Analytics", views: 4100, percentage: 12 },
-            { path: "/docs", title: "Documentation", views: 3500, percentage: 10 },
-        ],
-        topCountries: [
-            { country: "United States", sessions: 5400, percentage: 43 },
-            { country: "United Kingdom", sessions: 1800, percentage: 14.3 },
-            { country: "Germany", sessions: 1200, percentage: 9.5 },
-            { country: "Canada", sessions: 950, percentage: 7.5 },
-            { country: "India", sessions: 850, percentage: 6.7 },
-            { country: "France", sessions: 700, percentage: 5.5 },
-        ],
-        sessionsOverTime: Array.from({ length: 30 }, (_, i) => {
-            const d = new Date()
-            d.setDate(d.getDate() - (29 - i))
-            const dateStr = d.toISOString().split('T')[0].replace(/-/g, '')
-            return {
-                date: dateStr,
-                sessions: Math.floor(Math.random() * 500) + 100
-            }
-        }),
-        deviceBreakdown: [
-            { device: "Desktop", sessions: 7800, fill: "hsl(var(--chart-1))" },
-            { device: "Mobile", sessions: 4200, fill: "#6366f1" },
-            { device: "Tablet", sessions: 543, fill: "#10b981" },
-        ],
-        userRetention: Array.from({ length: 6 }, (_, i) => ({
-            week: `Week ${i + 1} `,
-            retention: Math.floor(100 * Math.pow(0.85, i))
-        })),
-    }
-}
 
 async function getMockTopPagesData() {
     const pages = [
@@ -462,74 +412,6 @@ async function getMockRealtimeData() {
     }
 }
 
-export async function getMockOverviewComparisonData() {
-    // Generate Current Data (Winner)
-    const current = await getMockOverviewData()
-
-    // Generate Previous Data (Loser/Lower)
-    const factor = 0.85
-
-    const previous = {
-        metrics: {
-            sessions: Math.floor(current.metrics.sessions * factor),
-            users: Math.floor(current.metrics.users * factor),
-            pageViews: Math.floor(current.metrics.pageViews * factor),
-            bounceRate: current.metrics.bounceRate * 1.1,
-            engagementRate: current.metrics.engagementRate * 0.9,
-            avgSessionDuration: Math.floor(current.metrics.avgSessionDuration * 0.9),
-        },
-        sessionsOverTime: current.sessionsOverTime.map(d => ({
-            ...d,
-            sessions: Math.floor(d.sessions * (0.8 + Math.random() * 0.1))
-        }))
-    }
-
-    const calculateDelta = (curr: number, prev: number) => {
-        if (!prev) return 100
-        return ((curr - prev) / prev) * 100
-    }
-
-    return {
-        isVersus: true,
-        metrics: {
-            sessions: {
-                value: current.metrics.sessions,
-                previous: previous.metrics.sessions,
-                delta: calculateDelta(current.metrics.sessions, previous.metrics.sessions)
-            },
-            users: {
-                value: current.metrics.users,
-                previous: previous.metrics.users,
-                delta: calculateDelta(current.metrics.users, previous.metrics.users)
-            },
-            pageViews: {
-                value: current.metrics.pageViews,
-                previous: previous.metrics.pageViews,
-                delta: calculateDelta(current.metrics.pageViews, previous.metrics.pageViews)
-            },
-            bounceRate: {
-                value: current.metrics.bounceRate,
-                previous: previous.metrics.bounceRate,
-                delta: ((current.metrics.bounceRate - previous.metrics.bounceRate) / previous.metrics.bounceRate) * 100
-            },
-            engagementRate: {
-                value: current.metrics.engagementRate,
-                previous: previous.metrics.engagementRate,
-                delta: ((current.metrics.engagementRate - previous.metrics.engagementRate) / previous.metrics.engagementRate) * 100
-            },
-            avgSessionDuration: {
-                value: current.metrics.avgSessionDuration,
-                previous: previous.metrics.avgSessionDuration,
-                delta: calculateDelta(current.metrics.avgSessionDuration, previous.metrics.avgSessionDuration)
-            }
-        },
-        chartData: {
-            current: current.sessionsOverTime,
-            previous: previous.sessionsOverTime
-        },
-        deviceBreakdown: current.deviceBreakdown
-    }
-}
 
 // Helper to run GA4 reports via fetch
 export async function runReport(accessToken: string, propertyId: string, requestBody: any) {
@@ -557,112 +439,6 @@ export async function runReport(accessToken: string, propertyId: string, request
     return await response.json()
 }
 
-export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 10) {
-    const [metricsResponse, trafficResponse, pagesResponse, locationsResponse, dailyResponse, deviceResponse] = await Promise.all([
-        runReport(accessToken, propertyId, {
-            dateRanges: [{ startDate, endDate }],
-            metrics: [
-                { name: "sessions" },
-                { name: "totalUsers" },
-                { name: "screenPageViews" },
-                { name: "bounceRate" },
-                { name: "engagementRate" },
-                { name: "averageSessionDuration" },
-            ],
-        }),
-        runReport(accessToken, propertyId, {
-            dateRanges: [{ startDate, endDate }],
-            dimensions: [{ name: "sessionDefaultChannelGroup" }],
-            metrics: [{ name: "sessions" }],
-            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-            limit: limit,
-        }),
-        runReport(accessToken, propertyId, {
-            dateRanges: [{ startDate, endDate }],
-            dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
-            metrics: [{ name: "screenPageViews" }],
-            orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
-            limit: limit,
-        }),
-        runReport(accessToken, propertyId, {
-            dateRanges: [{ startDate, endDate }],
-            dimensions: [{ name: "country" }],
-            metrics: [{ name: "sessions" }],
-            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-            limit: limit,
-        }),
-        runReport(accessToken, propertyId, {
-            dateRanges: [{ startDate, endDate }],
-            dimensions: [{ name: "date" }],
-            metrics: [{ name: "sessions" }],
-            orderBys: [{ dimension: { dimensionName: "date" }, desc: false }],
-        }),
-        runReport(accessToken, propertyId, {
-            dateRanges: [{ startDate, endDate }],
-            dimensions: [{ name: "deviceCategory" }],
-            metrics: [{ name: "sessions" }],
-            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
-            limit: 5,
-        }),
-    ])
-
-    const metrics = metricsResponse.rows?.[0]?.metricValues || []
-    const trafficSources = trafficResponse.rows || []
-    const pageRows = pagesResponse.rows || []
-    const countryRows = locationsResponse.rows || []
-    const dailyRows = dailyResponse.rows || []
-    const deviceRows = deviceResponse.rows || []
-
-    const totalSessions = Number.parseInt(metrics[0]?.value || "0")
-    const totalPageViews = Number.parseInt(metrics[2]?.value || "0")
-
-    // Map device rows to match the mock format (using 'device' key and fill colors)
-    const deviceColors: Record<string, string> = {
-        "desktop": "hsl(var(--chart-1))",
-        "mobile": "#6366f1",
-        "tablet": "#10b981"
-    }
-
-    return {
-        metrics: {
-            sessions: Number.parseInt(metrics[0]?.value || "0"),
-            users: Number.parseInt(metrics[1]?.value || "0"),
-            pageViews: Number.parseInt(metrics[2]?.value || "0"),
-            bounceRate: Number.parseFloat(metrics[3]?.value || "0"),
-            engagementRate: Number.parseFloat(metrics[4]?.value || "0"),
-            avgSessionDuration: Number.parseFloat(metrics[5]?.value || "0"),
-        },
-        trafficSources: trafficSources.map((row: any) => ({
-            source: row.dimensionValues?.[0]?.value || "Unknown",
-            sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
-            percentage:
-                totalSessions > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalSessions) * 100 : 0,
-        })),
-        topPages: pageRows.map((row: any) => ({
-            path: row.dimensionValues?.[0]?.value || "/",
-            title: row.dimensionValues?.[1]?.value || "Untitled",
-            views: Number.parseInt(row.metricValues?.[0]?.value || "0"),
-            percentage: totalPageViews > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalPageViews) * 100 : 0,
-        })),
-        topCountries: countryRows.map((row: any) => ({
-            country: row.dimensionValues?.[0]?.value || "Unknown",
-            sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
-            percentage: totalSessions > 0 ? (Number.parseInt(row.metricValues?.[0]?.value || "0") / totalSessions) * 100 : 0,
-        })),
-        sessionsOverTime: dailyRows.map((row: any) => ({
-            date: row.dimensionValues?.[0]?.value || "",
-            sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
-        })),
-        deviceBreakdown: deviceRows.map((row: any) => {
-            const cat = (row.dimensionValues?.[0]?.value || "desktop").toLowerCase()
-            return {
-                device: row.dimensionValues?.[0]?.value || "Unknown", // standardized to 'device' for overview chart
-                sessions: Number.parseInt(row.metricValues?.[0]?.value || "0"),
-                fill: deviceColors[cat] || "#94a3b8"
-            }
-        }),
-    }
-}
 
 async function getTopPagesData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
     const response = await runReport(accessToken, propertyId, {

@@ -1,10 +1,16 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { streamText, tool } from "ai"
-import { google } from "@ai-sdk/google"
+import { createGoogleGenerativeAI } from "@ai-sdk/google"
+import type { Message } from "ai"
 import { z } from "zod"
-import type { ChatMessage } from "@/types/chat"
-import { getOverviewData, getAcquisitionData } from "@/app/api/analytics/route"
+
+const google = createGoogleGenerativeAI({
+    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || "",
+})
+
+import { getOverviewData } from "@/lib/analytics/ga4"
+import { getAcquisitionData } from "@/app/api/analytics/route" // This one is still in route.ts for now
 
 function buildSystemPrompt(): string {
     return `You are Kea — a warm, sharp, and deeply human marketing analyst built into the Helpful Analytics dashboard by Kea Marketing.
@@ -38,12 +44,54 @@ To answer questions about their metrics, traffic, or user behavior, you MUST use
 - Always end with one forward-moving line: a recommendation, a next step, or a question.`
 }
 
-// Convert our custom ChatMessage format to Vercel AI SDK format
-function formatMessages(messages: ChatMessage[]) {
-    return messages.map((msg) => ({
-        role: msg.role === "assistant" ? "assistant" as const : "user" as const,
-        content: msg.content,
-    }))
+// Convert SDK UI Message[] to simpler AI Core Messages manually since older 'ai' package complains about convertToCoreMessages
+function parseMessages(messages: Message[]) {
+    const coreMessages: any[] = [];
+
+    for (const msg of messages) {
+        if (msg.role === 'user' || msg.role === 'system') {
+            coreMessages.push({ role: msg.role, content: msg.content });
+            continue;
+        }
+
+        if (msg.role === 'assistant') {
+            const content: any[] = [];
+            if (msg.content) {
+                content.push({ type: 'text', text: msg.content });
+            }
+            if (msg.toolInvocations && msg.toolInvocations.length > 0) {
+                for (const t of msg.toolInvocations) {
+                    content.push({
+                        type: 'tool-call',
+                        toolCallId: t.toolCallId,
+                        toolName: t.toolName,
+                        args: t.args
+                    });
+                }
+            }
+
+            coreMessages.push({
+                role: 'assistant',
+                content: content.length > 0 ? content : "",
+            });
+
+            // Append tool results immediately after
+            if (msg.toolInvocations && msg.toolInvocations.some(t => 'result' in t)) {
+                coreMessages.push({
+                    role: 'tool',
+                    content: msg.toolInvocations
+                        .filter(t => 'result' in t)
+                        .map(t => ({
+                            type: 'tool-result',
+                            toolCallId: t.toolCallId,
+                            toolName: t.toolName,
+                            result: t.result
+                        }))
+                });
+            }
+        }
+    }
+    return coreMessages;
 }
 
 export async function POST(request: Request) {
@@ -56,7 +104,7 @@ export async function POST(request: Request) {
         propertyId: string
         startDate: string
         endDate: string
-        messages: ChatMessage[]
+        messages: Message[]
     }
 
     try {
@@ -73,11 +121,32 @@ export async function POST(request: Request) {
 
     const accessToken = (session as { accessToken?: string }).accessToken
 
+    // Filter out empty assistant messages that the frontend might have appended
+    const validMessages = messages.filter(msg =>
+        !(msg.role === 'assistant' && (!msg.content || msg.content.trim() === '') && (!msg.toolInvocations || msg.toolInvocations.length === 0))
+    )
+
+    const parsedMessages = parseMessages(validMessages)
+    console.log("================ INCOMING MESSAGES ================")
+    console.log(JSON.stringify(validMessages, null, 2))
+    console.log("================ PARSED CORE MESSAGES ================")
+    console.log(JSON.stringify(parsedMessages, null, 2))
+    console.log("==================================================")
+
     const result = streamText({
-        model: google("gemini-1.5-flash-latest"),
+        model: google("gemini-2.5-flash"),
         system: buildSystemPrompt(),
-        messages: formatMessages(messages),
+        messages: parsedMessages,
         maxSteps: 5, // Allow Kea to call multiple tools automatically
+        onFinish: ({ text, toolCalls, toolResults, finishReason, usage }) => {
+            console.log("================ AI RESPONSE FINISHED ================")
+            console.log("Text:", text)
+            console.log("Tool Calls:", JSON.stringify(toolCalls, null, 2))
+            console.log("Tool Results:", JSON.stringify(toolResults, null, 2))
+            console.log("Finish Reason:", finishReason)
+            console.log("Usage:", usage)
+            console.log("======================================================")
+        },
         tools: {
             getMetricsOverview: tool({
                 description: 'Fetch high-level GA4 metrics like total sessions, users, pageviews, and bounce rate for a specific date range.',
@@ -147,5 +216,5 @@ export async function POST(request: Request) {
         }
     })
 
-    return result.toDataStreamResponse()
+    return result.toUIMessageStreamResponse()
 }

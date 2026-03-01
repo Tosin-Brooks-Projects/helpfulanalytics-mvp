@@ -54,7 +54,7 @@ export function LinearAIPanel() {
                                     <div className="space-y-1.5 w-full">
                                         <div className="rounded-2xl rounded-tl-none bg-zinc-50 p-4 text-sm text-zinc-700 leading-relaxed border border-zinc-100 transition-colors group-hover:bg-zinc-100 group-hover:border-zinc-200">
                                             <span className="font-outfit flex items-center gap-1.5 text-[10px] text-amber-600 mb-2 font-bold uppercase tracking-widest">
-                                                <img src="/kea.svg" alt="Kea" className="h-4 w-4 rounded-full" /> Kea's Insight
+                                                <img src="/kea.svg" alt="Kea" className="h-4 w-4 rounded-full" /> Kea&apos;s Insight
                                             </span>
                                             <Typewriter
                                                 text={insightItem.description || "Analyzing your data patterns..."}

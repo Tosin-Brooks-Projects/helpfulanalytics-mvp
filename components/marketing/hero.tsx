@@ -40,7 +40,7 @@ export function Hero() {
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="mt-8 text-lg leading-8 text-slate-600 max-w-xl mx-auto lg:mx-0"
                     >
-                        Connect your Google Analytics in 60 seconds and get the clear dashboard you've been wishing for. You're stuck with GA4. We get it. We don't replace it - we just make it actually useful.
+                        Connect your Google Analytics in 60 seconds and get the clear dashboard you&apos;ve been wishing for. You&apos;re stuck with GA4. We get it. We don&apos;t replace it - we just make it actually useful.
                     </motion.p>
                     {!session && (
                         <motion.div
