@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Sparkles, Bot, AlertTriangle, Lightbulb, TrendingUp } from "lucide-react"
+import { AlertTriangle, Lightbulb, TrendingUp, Activity } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
@@ -71,11 +71,11 @@ export function CoachCommentary({ propertyId, dateRange, compareDateRange, repor
     return (
         <Card className="p-6 border-zinc-200 bg-gradient-to-br from-zinc-50 to-white overflow-hidden relative">
             <div className="flex items-center gap-3 mb-4">
-                <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600">
-                    <Bot className="h-5 w-5" />
+                <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0">
+                    <img src="/kea-avatar.png" alt="Kea" className="h-8 w-8 rounded-full shadow-sm" />
                 </div>
-                <h3 className="text-sm font-bold text-zinc-900">Coach&apos;s Corner</h3>
-                {loading && <span className="text-xs text-zinc-400 animate-pulse">Analyzing match footage...</span>}
+                <h3 className="text-sm font-bold text-zinc-900 font-outfit">Kea&apos;s Commentary</h3>
+                {loading && <span className="text-xs text-zinc-400 animate-pulse font-outfit">Analyzing your metrics...</span>}
             </div>
 
             {loading ? (
@@ -86,7 +86,7 @@ export function CoachCommentary({ propertyId, dateRange, compareDateRange, repor
             ) : error ? (
                 <div className="text-sm text-red-500 flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
-                    Coach is currently unavailable (AI Error).
+                    Kea is currently unavailable (AI Error).
                 </div>
             ) : (
                 <div className="grid gap-3">
@@ -106,7 +106,7 @@ export function CoachCommentary({ propertyId, dateRange, compareDateRange, repor
                             <div className="flex items-center gap-2 mb-1">
                                 {insight.type === 'Trend' && <TrendingUp className="h-3 w-3" />}
                                 {insight.type === 'Suggestion' && <Lightbulb className="h-3 w-3" />}
-                                {insight.type === 'Insight' && <Sparkles className="h-3 w-3" />}
+                                {insight.type === 'Insight' && <Activity className="h-3 w-3" />}
                                 <span className="font-bold">{insight.title}</span>
                             </div>
                             <p className="opacity-90 leading-relaxed">{insight.description}</p>
@@ -115,7 +115,7 @@ export function CoachCommentary({ propertyId, dateRange, compareDateRange, repor
                 </div>
             )}
 
-            <Sparkles className="absolute -bottom-4 -right-4 h-24 w-24 text-amber-500/5 rotate-12 pointer-events-none" />
+            <Activity className="absolute -bottom-4 -right-4 h-24 w-24 text-amber-500/5 rotate-12 pointer-events-none" />
         </Card>
     )
 }

@@ -49,7 +49,7 @@ export function LinearSidebar() {
                         <div className="flex h-6 w-6 items-center justify-center rounded bg-amber-500/10 text-amber-500 shrink-0">
                             <Layers className="h-4 w-4" />
                         </div>
-                        {!sidebarCollapsed && <span className="text-sm font-medium tracking-tight text-zinc-900 truncate animate-in fade-in duration-300">Helpful Analytics</span>}
+                        {!sidebarCollapsed && <span className="text-sm font-semibold tracking-tight text-zinc-900 truncate animate-in fade-in duration-300 font-outfit">Helpful Analytics</span>}
                     </div>
 
                     <nav className="space-y-1">
@@ -180,13 +180,13 @@ function PlanCountdown({ subscription }: { subscription: { status: string; trial
         return () => clearInterval(interval)
     }, [])
 
-    const endDate = subscription.status === 'trialing' && subscription.trialEndsAt
-        ? new Date(subscription.trialEndsAt)
-        : subscription.stripeCurrentPeriodEnd
-            ? new Date(subscription.stripeCurrentPeriodEnd)
+    const endDate = subscription.stripeCurrentPeriodEnd
+        ? new Date(subscription.stripeCurrentPeriodEnd)
+        : subscription.trialEndsAt
+            ? new Date(subscription.trialEndsAt)
             : null
 
-    if (!endDate || endDate <= now) return null
+    if (!endDate || isNaN(endDate.getTime()) || endDate <= now) return null
 
     const diffMs = endDate.getTime() - now.getTime()
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))

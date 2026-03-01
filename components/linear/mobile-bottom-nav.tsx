@@ -15,6 +15,7 @@ import {
     Ellipsis,
     Timer,
     Search,
+    Download,
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { signOut } from "next-auth/react"
@@ -110,7 +111,12 @@ export function MobileBottomNav() {
                                         <span>Search</span>
                                         <span className="ml-auto text-[10px] text-zinc-400 font-mono">Cmd+K</span>
                                     </button>
-                                    <ExportDialog />
+                                    <ExportDialog>
+                                        <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900">
+                                            <Download className="h-4 w-4 text-zinc-400" />
+                                            <span>Export Data</span>
+                                        </button>
+                                    </ExportDialog>
                                 </div>
 
                                 {subscription && (
@@ -182,13 +188,13 @@ function MobileCountdown({ subscription }: { subscription: { status: string; tri
         return () => clearInterval(interval)
     }, [])
 
-    const endDate = subscription.status === 'trialing' && subscription.trialEndsAt
-        ? new Date(subscription.trialEndsAt)
-        : subscription.stripeCurrentPeriodEnd
-            ? new Date(subscription.stripeCurrentPeriodEnd)
+    const endDate = subscription.stripeCurrentPeriodEnd
+        ? new Date(subscription.stripeCurrentPeriodEnd)
+        : subscription.trialEndsAt
+            ? new Date(subscription.trialEndsAt)
             : null
 
-    if (!endDate || endDate <= now) return null
+    if (!endDate || isNaN(endDate.getTime()) || endDate <= now) return null
 
     const diffMs = endDate.getTime() - now.getTime()
     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24))

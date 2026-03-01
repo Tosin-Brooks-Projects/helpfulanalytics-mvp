@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useSession } from "next-auth/react"
-import { Sparkles, Loader2, Zap, Bot, Maximize2, ChevronRight } from "lucide-react"
+import { Loader2, Zap, Maximize2, ChevronRight } from "lucide-react"
 import { Typewriter } from "@/components/ui/typewriter-effect"
 import { useAI } from "@/components/linear/ai-context"
 import { cn } from "@/lib/utils"
@@ -35,7 +35,13 @@ export function LinearGreeting() {
         <div className="mb-8">
             <div className="space-y-1 mb-6">
                 <h1 className="text-3xl font-bold tracking-tight text-zinc-900">
-                    {greeting}, {firstName}
+                    {greeting},{" "}
+                    <span
+                        style={{ fontFamily: "var(--font-cormorant)" }}
+                        className="font-semibold italic text-amber-800"
+                    >
+                        {firstName}
+                    </span>
                 </h1>
                 <p className="text-zinc-500 text-sm">
                     Here's what's happening with your projects today.
@@ -57,12 +63,12 @@ export function LinearGreeting() {
                         </div>
                     )}
                     <div className="flex items-start gap-4">
-                        <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 shadow-sm shrink-0">
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin text-amber-500" /> : <Sparkles className="h-4 w-4" />}
+                        <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full shadow-sm shrink-0">
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin text-amber-500" /> : <img src="/kea-avatar.png" alt="Kea" className="h-8 w-8 rounded-full" />}
                         </div>
                         <div className="space-y-2 flex-1">
                             <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-bold text-amber-600 uppercase tracking-widest px-2 py-0.5 bg-amber-50 rounded">Core Insight</span>
+                                <span className="font-outfit text-[10px] font-bold text-amber-600 uppercase tracking-widest px-2 py-0.5 bg-amber-50 rounded">Kea's Insight</span>
                                 {!loading && <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />}
                             </div>
                             <div className="text-sm text-zinc-700 leading-relaxed min-h-[40px] font-medium">
@@ -130,8 +136,8 @@ export function LinearGreeting() {
             <Dialog open={!!selectedInsight} onOpenChange={(open) => !open && setSelectedInsight(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle className="flex items-center gap-2">
-                            {selectedInsight?.type === "Insight" ? <Sparkles className="h-4 w-4 text-amber-500" /> : <Bot className="h-4 w-4 text-orange-500" />}
+                        <DialogTitle className="font-outfit text-xl flex items-center gap-2">
+                            <img src="/kea-avatar.png" alt="Kea" className="h-6 w-6 rounded-full shrink-0" />
                             {selectedInsight?.title || selectedInsight?.type || "Insight Detail"}
                         </DialogTitle>
                         <DialogDescription>

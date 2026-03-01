@@ -24,12 +24,45 @@ export async function GET() {
             return NextResponse.json({})
         }
 
-        // Ensure subscription has defaults if missing
-        const subscription = userData.subscription || {
+        // Build subscription with defaults
+        const rawSub = userData.subscription || {
             tier: "starter",
             status: "active",
-            // If they are brand new and we are just generating this on the fly:
-            trialEndsAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        }
+
+        // Serialize Firestore Timestamps to ISO strings
+        const subscription: Record<string, any> = { ...rawSub }
+
+        if (subscription.stripeCurrentPeriodEnd) {
+            // Firestore Timestamp has toDate(), plain Date has toISOString()
+            const d = subscription.stripeCurrentPeriodEnd
+            subscription.stripeCurrentPeriodEnd = typeof d.toDate === 'function'
+                ? d.toDate().toISOString()
+                : d instanceof Date
+                    ? d.toISOString()
+                    : d
+        }
+
+        if (subscription.trialEndsAt) {
+            const d = subscription.trialEndsAt
+            subscription.trialEndsAt = typeof d.toDate === 'function'
+                ? d.toDate().toISOString()
+                : d instanceof Date
+                    ? d.toISOString()
+                    : d
+        }
+
+        // For trial/starter users without an explicit end date, compute from account creation
+        if (!subscription.stripeCurrentPeriodEnd && !subscription.trialEndsAt) {
+            const createdAt = userData.createdAt
+            if (createdAt) {
+                const created = typeof createdAt.toDate === 'function'
+                    ? createdAt.toDate()
+                    : new Date(createdAt)
+                subscription.trialEndsAt = new Date(created.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            } else {
+                subscription.trialEndsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            }
         }
 
         return NextResponse.json({
