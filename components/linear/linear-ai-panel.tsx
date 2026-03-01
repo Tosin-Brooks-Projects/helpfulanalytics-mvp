@@ -22,7 +22,7 @@ export function LinearAIPanel() {
         <>
             <div className="h-full rounded-lg border border-zinc-200 bg-white p-5 shadow-sm flex flex-col">
                 <div className="flex items-center gap-3 pb-4 border-b border-zinc-100 mb-4">
-                    <img src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50" alt="Kea" className="h-10 w-10 rounded-full shadow-sm" />
+                    <img src="/kea-avatar.png" alt="Kea" className="h-10 w-10 rounded-full shadow-sm" />
                     <div>
                         <h3 className="text-sm font-semibold text-zinc-900 font-outfit">Kea</h3>
                         <p className="text-xs text-zinc-500">Your marketing analyst</p>
@@ -54,7 +54,7 @@ export function LinearAIPanel() {
                                     <div className="space-y-1.5 w-full">
                                         <div className="rounded-2xl rounded-tl-none bg-zinc-50 p-4 text-sm text-zinc-700 leading-relaxed border border-zinc-100 transition-colors group-hover:bg-zinc-100 group-hover:border-zinc-200">
                                             <span className="font-outfit flex items-center gap-1.5 text-[10px] text-amber-600 mb-2 font-bold uppercase tracking-widest">
-                                                <img src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50" alt="Kea" className="h-4 w-4 rounded-full" /> Kea's Insight
+                                                <img src="/kea-avatar.png" alt="Kea" className="h-4 w-4 rounded-full" /> Kea's Insight
                                             </span>
                                             <Typewriter
                                                 text={insightItem.description || "Analyzing your data patterns..."}
@@ -74,7 +74,7 @@ export function LinearAIPanel() {
                                     <div className="space-y-1.5 w-full">
                                         <div className="rounded-2xl rounded-tl-none bg-zinc-50 p-4 text-sm text-zinc-700 leading-relaxed border border-zinc-100 transition-colors group-hover:bg-zinc-100 group-hover:border-zinc-200">
                                             <span className="font-outfit flex items-center gap-1.5 text-[10px] text-amber-600 mb-2 font-bold uppercase tracking-widest">
-                                                <img src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50" alt="Kea" className="h-4 w-4 rounded-full" /> Kea Suggests
+                                                <img src="/kea-avatar.png" alt="Kea" className="h-4 w-4 rounded-full" /> Kea Suggests
                                             </span>
                                             <Typewriter
                                                 text={suggestionItem.description || "Formulating recommendations..."}
@@ -100,7 +100,7 @@ export function LinearAIPanel() {
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle className="font-outfit text-xl flex items-center gap-2">
-                            <img src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50" alt="Kea" className="h-6 w-6 rounded-full shrink-0" />
+                            <img src="/kea-avatar.png" alt="Kea" className="h-6 w-6 rounded-full shrink-0" />
                             {selectedInsight?.title || selectedInsight?.type}
                         </DialogTitle>
                         <DialogDescription>

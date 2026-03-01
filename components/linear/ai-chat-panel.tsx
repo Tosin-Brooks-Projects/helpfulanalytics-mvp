@@ -165,9 +165,9 @@ export function AIChatPanel() {
                 )}
             >
                 <img
-                    src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50"
+                    src="/kea-avatar.png"
                     alt="Kea"
-                    className="h-12 w-12 rounded-full"
+                    className="h-12 w-12 rounded-full object-cover"
                 />
             </button>
 
@@ -187,13 +187,13 @@ export function AIChatPanel() {
                 <div className="flex shrink-0 items-center justify-between border-b border-zinc-100 bg-gradient-to-r from-amber-50 to-white px-4 py-3">
                     <div className="flex items-center gap-2">
                         <img
-                            src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50"
+                            src="/kea-avatar.png"
                             alt="Kea"
-                            className="h-8 w-8 rounded-full shrink-0"
+                            className="h-8 w-8 rounded-full shrink-0 object-cover"
                         />
                         <div>
-                            <p className="text-sm font-semibold text-zinc-900">Kea</p>
-                            <p className="text-[10px] text-zinc-400">Powered by Kea Marketing</p>
+                            <p className="text-sm font-semibold text-zinc-900 leading-none">Kea</p>
+                            <p className="text-[10px] text-emerald-600 font-medium">Online</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -230,9 +230,9 @@ export function AIChatPanel() {
                         >
                             {msg.role === "assistant" && (
                                 <img
-                                    src="https://api.dicebear.com/9.x/lorelei/svg?seed=Kea&backgroundColor=f59e0b&radius=50"
+                                    src="/kea-avatar.png"
                                     alt="Kea"
-                                    className="mr-2 mt-1 h-7 w-7 shrink-0 rounded-full"
+                                    className="mr-2 mt-1 h-7 w-7 shrink-0 rounded-full object-cover"
                                 />
                             )}
                             <div
