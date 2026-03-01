@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { useChat } from "@ai-sdk/react"
 import type { Message } from "ai"
+import { DefaultChatTransport } from "ai"
 import type { ChatMessage } from "@/types/chat"
 import { cn } from "@/lib/utils"
 
@@ -32,6 +33,7 @@ export function AIChatPanel() {
     const [showScrollBtn, setShowScrollBtn] = useState(false)
 
     const [isClient, setIsClient] = useState(false)
+    const [input, setInput] = useState("")
 
     useEffect(() => {
         setIsClient(true)
@@ -40,14 +42,16 @@ export function AIChatPanel() {
     const startDate = isClient && dateRange?.from ? dateRange.from.toISOString().split("T")[0] : "30daysAgo"
     const endDate = isClient && dateRange?.to ? dateRange.to.toISOString().split("T")[0] : "today"
 
-    const { messages, input, handleInputChange, handleSubmit, setMessages, isLoading, stop } = useChat({
-        api: "/api/ai/chat",
-        initialMessages: INITIAL_MESSAGES,
-        body: {
-            propertyId: selectedProperty || "demo-property",
-            startDate,
-            endDate
-        },
+    const { messages, sendMessage, setMessages, isLoading, stop } = useChat({
+        messages: INITIAL_MESSAGES,
+        transport: new DefaultChatTransport({
+            api: "/api/ai/chat",
+            body: {
+                propertyId: selectedProperty || "demo-property",
+                startDate,
+                endDate
+            }
+        }),
         onError: (err) => {
             console.error("Chat error:", err)
         }
@@ -90,7 +94,23 @@ export function AIChatPanel() {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
-            e.currentTarget.form?.requestSubmit()
+            console.log("Enter key pressed. Input:", input)
+            if (input && input.trim() !== "") {
+                console.log("Calling sendMessage from handleKeyDown")
+                sendMessage({ role: "user", content: input })
+                setInput("")
+            } else {
+                console.log("Input is empty, not submitting.")
+            }
+        }
+    }
+
+    const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        console.log("Form submitted. Input:", input)
+        if (input && input.trim() !== "") {
+            sendMessage({ role: "user", content: input })
+            setInput("")
         }
     }
 
@@ -188,22 +208,24 @@ export function AIChatPanel() {
                                 )}
                                 <div
                                     className={cn(
-                                        "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
+                                        "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm w-full",
                                         msg.role === "user"
                                             ? "bg-amber-500 text-white rounded-tr-sm"
-                                            : "bg-white border border-zinc-100 text-zinc-800 rounded-tl-sm"
+                                            : "bg-white border border-zinc-100 text-zinc-800 rounded-tl-sm empty:hidden" // hides box if content is truly empty
                                     )}
                                 >
-                                    {msg.role === "assistant" && msg.content === "" && !msg.toolInvocations ? (
+                                    {msg.role === "assistant" && !msg.content && (!msg.toolInvocations || msg.toolInvocations.length === 0) ? (
                                         <span className="flex gap-1 py-1">
                                             <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
                                             <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
                                             <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
                                         </span>
                                     ) : (
-                                        <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600">
-                                            <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                        </div>
+                                        msg.content && (
+                                            <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600">
+                                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                            </div>
+                                        )
                                     )}
                                 </div>
                             </div>
@@ -235,7 +257,7 @@ export function AIChatPanel() {
                             {SUGGESTED_PROMPTS.map((prompt) => (
                                 <button
                                     key={prompt}
-                                    onClick={() => handleInputChange({ target: { value: prompt } } as any)}
+                                    onClick={() => setInput(prompt)}
                                     className="block w-full rounded-xl border border-zinc-200 px-3 py-2 text-left text-xs text-zinc-600 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 transition-colors"
                                 >
                                     {prompt}
@@ -258,12 +280,15 @@ export function AIChatPanel() {
                 )}
 
                 {/* Input */}
-                <form onSubmit={handleSubmit} className="shrink-0 border-t border-zinc-100 bg-white px-3 py-3">
+                <form onSubmit={onFormSubmit} className="shrink-0 border-t border-zinc-100 bg-white px-3 py-3">
                     <div className="flex items-end gap-2 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-100 transition-all">
                         <textarea
                             ref={inputRef}
                             value={input}
-                            onChange={handleInputChange}
+                            onChange={(e) => {
+                                console.log("Input changed:", e.target.value)
+                                setInput(e.target.value)
+                            }}
                             onKeyDown={handleKeyDown}
                             placeholder="Ask about your analytics..."
                             rows={1}
@@ -278,7 +303,7 @@ export function AIChatPanel() {
                         />
                         <button
                             type="submit"
-                            disabled={!input?.trim() || isLoading}
+                            disabled={!input || input.trim() === "" || isLoading}
                             aria-label="Send message"
                             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                         >

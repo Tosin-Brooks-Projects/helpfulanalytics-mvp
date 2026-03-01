@@ -195,7 +195,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                                                         y={viewBox.cy}
                                                         className="fill-zinc-800 text-2xl font-bold"
                                                     >
-                                                        {data.metrics.sessions.toLocaleString()}
+                                                        {(data.metrics?.sessions || 0).toLocaleString()}
                                                     </tspan>
                                                     <tspan
                                                         x={viewBox.cx}
@@ -365,7 +365,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                                         <p className="text-[10px] text-zinc-500 truncate">{page.path}</p>
                                     </div>
                                     <div className="font-medium text-xs text-zinc-900 ml-auto">
-                                        {page.views.toLocaleString()} <span className="text-[10px] text-zinc-400 font-normal ml-1">views</span>
+                                        {(page.views || 0).toLocaleString()} <span className="text-[10px] text-zinc-400 font-normal ml-1">views</span>
                                     </div>
                                 </div>
                             ))}

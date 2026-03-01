@@ -50,9 +50,9 @@ export function AboutPageContent() {
                         {/* Intro Section */}
                         <motion.section {...fadeInUp} className="relative">
                             <div className="prose prose-lg prose-slate max-w-none">
-                                <h2 className="text-3xl font-bold text-slate-900">Hi, I'm Brooks</h2>
+                                <h2 className="text-3xl font-bold text-slate-900">Hi, I&apos;m Brooks</h2>
                                 <p>
-                                    I'm a solopreneur who's been building businesses for over 17 years. I run everything from local newsletters to content sites, manage a YouTube channel, and juggle about 18 different projects at any given time. It's chaos, but it's the good kind.
+                                    I&apos;m a solopreneur who&apos;s been building businesses for over 17 years. I run everything from local newsletters to content sites, manage a YouTube channel, and juggle about 18 different projects at any given time. It&apos;s chaos, but it&apos;s the good kind.
                                 </p>
                             </div>
                         </motion.section>
@@ -62,10 +62,10 @@ export function AboutPageContent() {
                             <div className="prose prose-lg prose-slate mx-auto">
                                 <h2 className="text-3xl font-bold text-slate-900 mb-6">The Problem That Was Eating My Time</h2>
                                 <p>
-                                    When you're managing 18+ properties, you don't have time to click through each one individually in GA4. I was spending hours just trying to figure out what was working.
+                                    When you&apos;re managing 18+ properties, you don&apos;t have time to click through each one individually in GA4. I was spending hours just trying to figure out what was working.
                                 </p>
                                 <p>
-                                    The GA4 dashboard felt like it required a PhD to navigate. I'd click around trying to read data, but I still couldn't answer simple questions like "What's working?" and "What should I do next?"
+                                    The GA4 dashboard felt like it required a PhD to navigate. I&apos;d click around trying to read data, but I still couldn&apos;t answer simple questions like &quot;What&apos;s working?&quot; and &quot;What should I do next?&quot;
                                 </p>
                             </div>
                         </motion.section>
@@ -76,11 +76,11 @@ export function AboutPageContent() {
                             <div className="relative z-10 max-w-2xl">
                                 <h2 className="text-3xl font-bold mb-6 text-white">Then I Realized: Agencies Have It Even Worse</h2>
                                 <p className="text-slate-300 text-lg leading-relaxed mb-6">
-                                    If managing 18 properties was driving me crazy, imagine what marketing agencies managing 20+ client accounts were going through. Hours spent each week just trying to explain Google Analytics metrics to clients who don't speak "analytics."
+                                    If managing 18 properties was driving me crazy, imagine what marketing agencies managing 20+ client accounts were going through. Hours spent each week just trying to explain Google Analytics metrics to clients who don&apos;t speak &quot;analytics.&quot;
                                 </p>
                                 <div className="flex items-center gap-4 text-primary font-medium">
                                     <MessageSquare className="w-5 h-5 text-primary" />
-                                    <span>"Why is our traffic down?" - Every client, every Monday.</span>
+                                    <span>&quot;Why is our traffic down?&quot; - Every client, every Monday.</span>
                                 </div>
                             </div>
                         </motion.section>
@@ -90,7 +90,7 @@ export function AboutPageContent() {
                             <div className="prose prose-lg prose-slate max-w-none text-center">
                                 <h2 className="text-3xl font-bold text-slate-900">So I Built Something That Actually Works</h2>
                                 <p className="max-w-3xl mx-auto">
-                                    I built a Google Analytics alternative that didn't require me to abandon years of historical data. Something that worked <strong>with</strong> GA4, not against it.
+                                    I built a Google Analytics alternative that didn&apos;t require me to abandon years of historical data. Something that worked <strong>with</strong> GA4, not against it.
                                 </p>
                             </div>
 
@@ -123,9 +123,9 @@ export function AboutPageContent() {
                         {/* Final Signature */}
                         <motion.section {...fadeInUp} className="text-center pt-12 border-t border-slate-100">
                             <div className="prose prose-lg prose-slate max-w-none mb-12">
-                                <h2 className="text-3xl font-bold text-slate-900">Let's Stay Connected</h2>
+                                <h2 className="text-3xl font-bold text-slate-900">Let&apos;s Stay Connected</h2>
                                 <p>
-                                    I'm building this in public and sharing the journey. You can find me on Twitter/X at <a href="https://x.com/brooksconkle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold tracking-tight">@brooksconkle</a>.
+                                    I&apos;m building this in public and sharing the journey. You can find me on Twitter/X at <a href="https://x.com/brooksconkle" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline font-bold tracking-tight">@brooksconkle</a>.
                                 </p>
                             </div>
 

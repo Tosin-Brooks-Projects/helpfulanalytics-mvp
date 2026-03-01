@@ -44,7 +44,7 @@ export function LinearGreeting() {
                     </span>
                 </h1>
                 <p className="text-zinc-500 text-sm">
-                    Here's what's happening with your projects today.
+                    Here&apos;s what&apos;s happening with your projects today.
                 </p>
             </div>
 
@@ -68,7 +68,7 @@ export function LinearGreeting() {
                         </div>
                         <div className="space-y-2 flex-1">
                             <div className="flex items-center gap-2">
-                                <span className="font-outfit text-[10px] font-bold text-amber-600 uppercase tracking-widest px-2 py-0.5 bg-amber-50 rounded">Kea's Insight</span>
+                                <span className="font-outfit text-[10px] font-bold text-amber-600 uppercase tracking-widest px-2 py-0.5 bg-amber-50 rounded">Kea&apos;s Insight</span>
                                 {!loading && <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />}
                             </div>
                             <div className="text-sm text-zinc-700 leading-relaxed min-h-[40px] font-medium">
@@ -149,6 +149,6 @@ export function LinearGreeting() {
                     </div>
                 </DialogContent>
             </Dialog>
-        </div>
+        </div >
     )
 }

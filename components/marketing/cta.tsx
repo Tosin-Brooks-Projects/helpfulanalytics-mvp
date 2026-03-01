@@ -11,7 +11,7 @@ export function CTA() {
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="mx-auto max-w-2xl text-center">
                     <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                        Your GA4 Doesn't Have to Suck
+                        Your GA4 Doesn&apos;t Have to Suck
                     </h2>
                     <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
                         Let’s make analytics fun again.
