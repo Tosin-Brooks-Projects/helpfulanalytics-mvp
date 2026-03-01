@@ -79,7 +79,7 @@ export function Pricing() {
                         </div>
                         <div>
                             <h3 className="text-red-900 font-bold text-lg">Your Free Trial Has Expired</h3>
-                            <p className="text-red-700 text-sm mt-1">You've enjoyed your 30 days of complimentary access. Please upgrade to a paid plan below to continue using the dashboard.</p>
+                            <p className="text-red-700 text-sm mt-1">You&apos;ve enjoyed your 30 days of complimentary access. Please upgrade to a paid plan below to continue using the dashboard.</p>
                         </div>
                     </div>
                 )}
@@ -90,7 +90,7 @@ export function Pricing() {
                         Pricing plans for teams of&nbsp;all&nbsp;sizes
                     </p>
                     <p className="mt-6 text-lg leading-8 text-muted-foreground">
-                        Choose the plan that's right for you. Save 20% with annual billing.
+                        Choose the plan that&apos;s right for you. Save 20% with annual billing.
                     </p>
                 </div>
 
@@ -163,7 +163,7 @@ export function Pricing() {
                         )
                     })}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

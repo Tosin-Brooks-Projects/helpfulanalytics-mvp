@@ -37,42 +37,42 @@ export function LinearMetricsOverview({ propertyId }: LinearMetricsOverviewProps
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <LinearStatCard
                     title="Total Users"
-                    value={metrics.users.toLocaleString()}
+                    value={(metrics.users || metrics.activeUsers || 0).toLocaleString()}
                     icon={Users}
                     variant="indigo"
                     description="The total number of unique users who visited your property within the selected time range."
                 />
                 <LinearStatCard
                     title="Sessions"
-                    value={metrics.sessions.toLocaleString()}
+                    value={(metrics.sessions || 0).toLocaleString()}
                     icon={Activity}
                     variant="amber"
                     description="The total number of sessions on your property. A session is a period of time a user is active on your site."
                 />
                 <LinearStatCard
                     title="Avg. Duration"
-                    value={formatDuration(metrics.avgSessionDuration)}
+                    value={formatDuration(metrics.avgSessionDuration || metrics.averageSessionDuration || 0)}
                     icon={Clock}
                     variant="emerald"
                     description="The average length of time a session lasted, calculated as total duration divided by total sessions."
                 />
                 <LinearStatCard
                     title="Bounce Rate"
-                    value={`${(metrics.bounceRate * 100).toFixed(1)}%`}
+                    value={`${((metrics.bounceRate || 0) * 100).toFixed(1)}%`}
                     icon={MousePointer2}
                     variant="rose"
                     description="The percentage of sessions that were not engaged (lasted less than 10 seconds, had no conversions, and had only one page or screen view)."
                 />
                 <LinearStatCard
                     title="Engagement"
-                    value={`${(metrics.engagementRate * 100).toFixed(1)}%`}
+                    value={`${((metrics.engagementRate || 0) * 100).toFixed(1)}%`}
                     icon={Activity}
                     variant="emerald"
                     description="The percentage of engaged sessions. An engaged session is a session that lasted longer than 10 seconds, or had a conversion event, or had 2 or more page or screen views."
                 />
                 <LinearStatCard
                     title="Page Views"
-                    value={metrics.pageViews.toLocaleString()}
+                    value={(metrics.pageViews || metrics.screenPageViews || 0).toLocaleString()}
                     icon={Activity}
                     variant="indigo"
                     description="The total number of web pages (or app screens) your users saw. Repeated views of a single page or screen are counted."

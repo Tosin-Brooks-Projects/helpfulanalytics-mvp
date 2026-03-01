@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
-// @ts-ignore
-import { getOverviewData, getMockOverviewData } from "@/app/api/analytics/route"
+import { getOverviewData, getMockOverviewData } from "@/lib/analytics/ga4"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { db } from "@/lib/firebase-admin"
 
@@ -63,8 +62,7 @@ export async function POST(request: Request) {
         }
 
         // REAL DATA FETCHING
-        // @ts-ignore
-        const accessToken = session.accessToken
+        const accessToken = (session as any).accessToken
         if (!accessToken) {
             return NextResponse.json({ error: "Unauthorized - No Google Token" }, { status: 401 })
         }
@@ -76,10 +74,10 @@ export async function POST(request: Request) {
 
         // Simplified for this iteration: We will use the Main Overview Data but prompt AI to look at specific sections (like 'mobile' in device breakdown if available in overview).
         // Ideally, we'd fetch the specific report data here too.
-        analyticsData = await getOverviewData(accessToken, propertyId, startDate, endDate)
+        analyticsData = await getOverviewData(accessToken, propertyId as string, startDate as string, endDate as string)
 
         if (compareStartDate && compareEndDate) {
-            previousData = await getOverviewData(accessToken, propertyId, compareStartDate, compareEndDate)
+            previousData = await getOverviewData(accessToken, propertyId as string, compareStartDate as string, compareEndDate as string)
         }
 
 
