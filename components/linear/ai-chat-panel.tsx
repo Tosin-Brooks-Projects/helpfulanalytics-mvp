@@ -22,16 +22,31 @@ const WELCOME_MESSAGE: ChatMessage = {
 
 export function AIChatPanel() {
     const { selectedProperty, dateRange } = useDashboard()
-    // Open by default on desktop, closed on mobile
+    // Default: Open on desktop, closed on mobile, BUT overridden by user preference if it exists
     const [open, setOpen] = useState(false)
     const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE])
     const [input, setInput] = useState("")
     const [streaming, setStreaming] = useState(false)
     const [showScrollBtn, setShowScrollBtn] = useState(false)
 
-    // On desktop, open by default; on mobile, stay closed
+    // Load initial preference from localStorage
     useEffect(() => {
-        if (window.innerWidth >= 1024) setOpen(true)
+        const stored = localStorage.getItem("kea_chat_open")
+        if (stored !== null) {
+            setOpen(stored === "true")
+        } else {
+            // Initial default behavior if never set
+            if (window.innerWidth >= 1024) setOpen(true)
+        }
+    }, [])
+
+    // Sync state to localStorage when it changes
+    const toggleOpen = useCallback((newState: boolean | ((v: boolean) => boolean)) => {
+        setOpen((prev) => {
+            const next = typeof newState === 'function' ? newState(prev) : newState
+            localStorage.setItem("kea_chat_open", String(next))
+            return next
+        })
     }, [])
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -154,7 +169,7 @@ export function AIChatPanel() {
         <>
             {/* Floating Toggle Button */}
             <button
-                onClick={() => setOpen((v) => !v)}
+                onClick={() => toggleOpen((v) => !v)}
                 aria-label="Open AI chat"
                 className={cn(
                     "fixed right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-300",
@@ -205,7 +220,7 @@ export function AIChatPanel() {
                             <RotateCcw className="h-3.5 w-3.5" />
                         </button>
                         <button
-                            onClick={() => setOpen(false)}
+                            onClick={() => toggleOpen(false)}
                             aria-label="Close chat"
                             className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
                         >
