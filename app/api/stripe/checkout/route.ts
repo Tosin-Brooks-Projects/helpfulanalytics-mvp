@@ -36,11 +36,11 @@ export async function POST(req: Request) {
             ? { trial_period_days: tier.trialDays }
             : undefined
 
-        const settingsUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+        const settingsUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.helpfulanalytics.com"
 
         const stripeSession = await stripe.checkout.sessions.create({
             success_url: `${settingsUrl}/dashboard?success=true`,
-            cancel_url: `${settingsUrl}/#pricing?canceled=true`,
+            cancel_url: `${settingsUrl}/pricing?canceled=true`,
             payment_method_types: ["card"],
             mode: "subscription",
             billing_address_collection: "auto",
