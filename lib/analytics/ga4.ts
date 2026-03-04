@@ -73,12 +73,13 @@ export async function getMockOverviewComparisonData() {
 }
 
 export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 10) {
-    const analyticsDataClient = new BetaAnalyticsDataClient({
-        authClient: new (require("google-auth-library").OAuth2Client)(),
-    })
+    const OAuth2Client = require("google-auth-library").OAuth2Client;
+    const authClient = new OAuth2Client();
+    authClient.setCredentials({ access_token: accessToken });
 
-    // @ts-ignore
-    analyticsDataClient.auth.setCredentials({ access_token: accessToken })
+    const analyticsDataClient = new BetaAnalyticsDataClient({
+        authClient,
+    })
 
     const [response] = await analyticsDataClient.runReport({
         property: propertyId.startsWith("properties/") ? propertyId : `properties/${propertyId}`,
