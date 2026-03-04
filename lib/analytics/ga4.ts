@@ -80,7 +80,7 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
     analyticsDataClient.auth.setCredentials({ access_token: accessToken })
 
     const [response] = await analyticsDataClient.runReport({
-        property: `properties/${propertyId}`,
+        property: propertyId.startsWith("properties/") ? propertyId : `properties/${propertyId}`,
         dateRanges: [{ startDate, endDate }],
         dimensions: [
             { name: "date" },

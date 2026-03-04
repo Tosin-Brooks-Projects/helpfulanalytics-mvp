@@ -420,7 +420,7 @@ export async function runReport(accessToken: string, propertyId: string, request
     // The API expects: https://analyticsdata.googleapis.com/v1beta/properties/12345:runReport
     // So if propertyId is 'properties/12345', we should use `.../v1beta/${ propertyId }: runReport`
 
-    const resourceName = propertyId.startsWith("properties/") ? propertyId : `properties / ${propertyId} `
+    const resourceName = propertyId.startsWith("properties/") ? propertyId : `properties/${propertyId}`
 
     const response = await fetch(`https://analyticsdata.googleapis.com/v1beta/${resourceName}:runReport`, {
         method: "POST",
