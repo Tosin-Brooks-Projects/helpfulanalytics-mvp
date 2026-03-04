@@ -6,6 +6,7 @@ import { AddPropertyModal } from "@/components/dashboard/add-property-modal"
 interface NoPropertyPlaceholderProps {
     title?: string
     description?: string
+    children?: React.ReactNode
 }
 
 export function NoPropertyPlaceholder({

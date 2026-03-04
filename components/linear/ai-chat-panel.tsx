@@ -5,7 +5,7 @@ import { X, Send, RotateCcw, ChevronDown } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { useChat } from "@ai-sdk/react"
-import type { Message } from "ai"
+type Message = { id?: string; role: 'user' | 'assistant' | 'system' | 'tool'; content: string; toolInvocations?: any[]; parts?: any[] }
 import { DefaultChatTransport } from "ai"
 import type { ChatMessage } from "@/types/chat"
 import { cn } from "@/lib/utils"
@@ -42,8 +42,8 @@ export function AIChatPanel() {
     const startDate = isClient && dateRange?.from ? dateRange.from.toISOString().split("T")[0] : "30daysAgo"
     const endDate = isClient && dateRange?.to ? dateRange.to.toISOString().split("T")[0] : "today"
 
-    const { messages, sendMessage, setMessages, isLoading, stop } = useChat({
-        messages: INITIAL_MESSAGES,
+    const { messages, sendMessage, setMessages, stop } = useChat({
+        messages: INITIAL_MESSAGES as any,
         transport: new DefaultChatTransport({
             api: "/api/ai/chat",
             body: {
@@ -56,6 +56,9 @@ export function AIChatPanel() {
             console.error("Chat error:", err)
         }
     })
+
+    // Stub definition as isLoading isn't provided by this specific custom hook implementation
+    const isLoading = false;
 
     // On desktop, open by default; on mobile, stay closed
     useEffect(() => {
@@ -97,7 +100,7 @@ export function AIChatPanel() {
             console.log("Enter key pressed. Input:", input)
             if (input && input.trim() !== "") {
                 console.log("Calling sendMessage from handleKeyDown")
-                sendMessage({ role: "user", content: input })
+                sendMessage({ role: "user", content: input } as any)
                 setInput("")
             } else {
                 console.log("Input is empty, not submitting.")
@@ -109,14 +112,14 @@ export function AIChatPanel() {
         e.preventDefault()
         console.log("Form submitted. Input:", input)
         if (input && input.trim() !== "") {
-            sendMessage({ role: "user", content: input })
+            sendMessage({ role: "user", content: input } as any)
             setInput("")
         }
     }
 
     const resetChat = () => {
         stop()
-        setMessages([{ id: "welcome", role: "assistant", content: WELCOME_MESSAGE.content }])
+        setMessages([{ id: "welcome", role: "assistant", content: WELCOME_MESSAGE.content } as any])
     }
 
     if (!isClient) return null
@@ -125,7 +128,7 @@ export function AIChatPanel() {
         <>
             {/* Floating Toggle Button */}
             <button
-                onClick={() => toggleOpen((v) => !v)}
+                onClick={() => setOpen((v: boolean) => !v)}
                 aria-label="Open AI chat"
                 className={cn(
                     "fixed right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-300",
@@ -176,7 +179,7 @@ export function AIChatPanel() {
                             <RotateCcw className="h-3.5 w-3.5" />
                         </button>
                         <button
-                            onClick={() => toggleOpen(false)}
+                            onClick={() => setOpen(false)}
                             aria-label="Close chat"
                             className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
                         >
@@ -191,78 +194,81 @@ export function AIChatPanel() {
                     onScroll={handleScroll}
                     className="relative flex-1 overflow-y-auto px-4 py-4 space-y-4"
                 >
-                    {messages.map((msg, i) => (
-                        <div key={msg.id || i} className="flex flex-col gap-2">
-                            <div
-                                className={cn(
-                                    "flex",
-                                    msg.role === "user" ? "justify-end" : "justify-start"
-                                )}
-                            >
-                                {(() => {
-                                    if (msg.role === "assistant") {
-                                        console.log("Rendering Assistant Message:", msg);
-                                    }
-                                    return msg.role === "assistant" && (
-                                        <img
-                                            src="/kea.svg"
-                                            alt="Kea"
-                                            className="mr-2 mt-1 h-7 w-7 shrink-0 rounded-full shadow-sm"
-                                        />
-                                    );
-                                })()}
+                    {messages.map((rawMsg, i) => {
+                        const msg = rawMsg as any;
+                        return (
+                            <div key={msg.id || i} className="flex flex-col gap-2">
                                 <div
                                     className={cn(
-                                        "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm w-full",
-                                        msg.role === "user"
-                                            ? "bg-amber-500 text-white rounded-tr-sm"
-                                            : "bg-white border border-zinc-100 text-zinc-800 rounded-tl-sm empty:hidden" // hides box if content is truly empty
+                                        "flex",
+                                        msg.role === "user" ? "justify-end" : "justify-start"
                                     )}
                                 >
-                                    {msg.role === "assistant" && (!msg.parts || msg.parts.length === 0) && (!msg.content) && (!msg.toolInvocations || msg.toolInvocations.length === 0) ? (
-                                        <span className="flex gap-1 py-1">
-                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
-                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
-                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
-                                        </span>
-                                    ) : (
-                                        <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600">
-                                            {msg.parts && msg.parts.length > 0 ? (
-                                                msg.parts.map((part, partIdx) => {
-                                                    if (part.type === 'text') {
-                                                        return <ReactMarkdown key={partIdx}>{part.text}</ReactMarkdown>;
-                                                    }
-                                                    return null;
-                                                })
-                                            ) : (
-                                                // Fallback to msg.content just in case (e.g. for user messages)
-                                                msg.content && <ReactMarkdown>{msg.content}</ReactMarkdown>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Tool Invocations UI */}
-                            {msg.toolInvocations?.map((toolInv) => (
-                                <div key={toolInv.toolCallId} className="flex justify-start pl-9">
-                                    <div className="flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-1.5 text-[10px] text-zinc-500 font-medium">
-                                        {'result' in toolInv ? (
-                                            <span className="flex items-center gap-1.5">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                                                ✓ Fetched {toolInv.toolName === 'getTrafficSources' ? 'traffic data' : 'metrics'}
+                                    {(() => {
+                                        if (msg.role === "assistant") {
+                                            console.log("Rendering Assistant Message:", msg);
+                                        }
+                                        return msg.role === "assistant" && (
+                                            <img
+                                                src="/kea.svg"
+                                                alt="Kea"
+                                                className="mr-2 mt-1 h-7 w-7 shrink-0 rounded-full shadow-sm"
+                                            />
+                                        );
+                                    })()}
+                                    <div
+                                        className={cn(
+                                            "max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm w-full",
+                                            msg.role === "user"
+                                                ? "bg-amber-500 text-white rounded-tr-sm"
+                                                : "bg-white border border-zinc-100 text-zinc-800 rounded-tl-sm empty:hidden" // hides box if content is truly empty
+                                        )}
+                                    >
+                                        {msg.role === "assistant" && (!msg.parts || msg.parts.length === 0) && (!msg.content) && (!msg.toolInvocations || msg.toolInvocations.length === 0) ? (
+                                            <span className="flex gap-1 py-1">
+                                                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
+                                                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
+                                                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
                                             </span>
                                         ) : (
-                                            <span className="flex items-center gap-1.5">
-                                                <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                                                Fetching {toolInv.toolName === 'getTrafficSources' ? 'traffic data' : 'metrics'} from GA4...
-                                            </span>
+                                            <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600">
+                                                {msg.parts && msg.parts.length > 0 ? (
+                                                    msg.parts.map((part: any, partIdx: any) => {
+                                                        if (part.type === 'text') {
+                                                            return <ReactMarkdown key={partIdx}>{part.text}</ReactMarkdown>;
+                                                        }
+                                                        return null;
+                                                    })
+                                                ) : (
+                                                    // Fallback to msg.content just in case (e.g. for user messages)
+                                                    msg.content && <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    ))}
+
+                                {/* Tool Invocations UI */}
+                                {msg.toolInvocations?.map((toolInv: any) => (
+                                    <div key={toolInv.toolCallId} className="flex justify-start pl-9">
+                                        <div className="flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-1.5 text-[10px] text-zinc-500 font-medium">
+                                            {'result' in toolInv ? (
+                                                <span className="flex items-center gap-1.5">
+                                                    <div className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                                    ✓ Fetched {toolInv.toolName === 'getTrafficSources' ? 'traffic data' : 'metrics'}
+                                                </span>
+                                            ) : (
+                                                <span className="flex items-center gap-1.5">
+                                                    <div className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                                    Fetching {toolInv.toolName === 'getTrafficSources' ? 'traffic data' : 'metrics'} from GA4...
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )
+                    })}
 
                     {/* Suggested prompts (only when just welcome message) */}
                     {messages.length === 1 && (

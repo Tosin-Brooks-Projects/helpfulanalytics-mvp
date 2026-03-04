@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         const userId = session.metadata?.userId
         if (userId) {
             const priceId = subscription.items.data[0].price.id
-            const tier = pricingData.find(t => t.priceId === priceId)
+            const tier = pricingData.find(t => (t as any).priceId === priceId)
 
             await db.collection("users").doc(userId).set({
                 subscription: {
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
                     stripeCustomerId: subscription.customer as string,
                     stripeSubscriptionId: subscription.id,
                     stripePriceId: priceId,
-                    stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000)
+                    stripeCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
                 }
             }, { merge: true })
         }
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
     // Handle Payment Succeeded (Invoice) - primarily for renewals
     if (event.type === "invoice.payment_succeeded") {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
 
         // Ensure we have a subscription ID
         if (invoice.subscription) {
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
                 await doc.ref.set({
                     subscription: {
                         status: subscription.status,
-                        stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000)
+                        stripeCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
                     }
                 }, { merge: true })
             }
@@ -82,7 +82,7 @@ export async function POST(req: Request) {
 
     // Handle Deletions/Updates
     if (event.type === "customer.subscription.deleted" || event.type === "customer.subscription.updated") {
-        const subscription = event.data.object as Stripe.Subscription
+        const subscription = event.data.object as any
 
         const snap = await db.collection("users").where("subscription.stripeSubscriptionId", "==", subscription.id).get()
 

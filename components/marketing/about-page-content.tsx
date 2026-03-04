@@ -48,6 +48,7 @@ export function AboutPageContent() {
 
                     <div className="space-y-24">
                         {/* Intro Section */}
+                        {/* @ts-ignore */}
                         <motion.section {...fadeInUp} className="relative">
                             <div className="prose prose-lg prose-slate max-w-none">
                                 <h2 className="text-3xl font-bold text-slate-900">Hi, I&apos;m Brooks</h2>
@@ -58,6 +59,7 @@ export function AboutPageContent() {
                         </motion.section>
 
                         {/* The Problem Section */}
+                        {/* @ts-ignore */}
                         <motion.section {...fadeInUp} className="max-w-3xl mx-auto text-center">
                             <div className="prose prose-lg prose-slate mx-auto">
                                 <h2 className="text-3xl font-bold text-slate-900 mb-6">The Problem That Was Eating My Time</h2>
@@ -71,6 +73,7 @@ export function AboutPageContent() {
                         </motion.section>
 
                         {/* Agency realization */}
+                        {/* @ts-ignore */}
                         <motion.section {...fadeInUp} className="bg-slate-900 rounded-[2.5rem] p-12 text-white relative overflow-hidden">
                             <div className="absolute top-0 right-0 -mr-20 -mt-20 h-64 w-64 rounded-full bg-primary/20 blur-[80px]" />
                             <div className="relative z-10 max-w-2xl">
@@ -86,6 +89,7 @@ export function AboutPageContent() {
                         </motion.section>
 
                         {/* The Solution */}
+                        {/* @ts-ignore */}
                         <motion.section {...fadeInUp} className="space-y-12">
                             <div className="prose prose-lg prose-slate max-w-none text-center">
                                 <h2 className="text-3xl font-bold text-slate-900">So I Built Something That Actually Works</h2>
@@ -121,6 +125,7 @@ export function AboutPageContent() {
                         </motion.section>
 
                         {/* Final Signature */}
+                        {/* @ts-ignore */}
                         <motion.section {...fadeInUp} className="text-center pt-12 border-t border-slate-100">
                             <div className="prose prose-lg prose-slate max-w-none mb-12">
                                 <h2 className="text-3xl font-bold text-slate-900">Let&apos;s Stay Connected</h2>

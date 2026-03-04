@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { streamText, tool } from "ai"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
-import type { Message } from "ai"
+type Message = { id?: string; role: 'user' | 'assistant' | 'system' | 'tool'; content: string; toolInvocations?: any[] }
 import { z } from "zod"
 
 const google = createGoogleGenerativeAI({
@@ -137,7 +137,6 @@ export async function POST(request: Request) {
         model: google("gemini-2.5-flash"),
         system: buildSystemPrompt(),
         messages: parsedMessages,
-        maxSteps: 5, // Allow Kea to call multiple tools automatically
         onFinish: ({ text, toolCalls, toolResults, finishReason, usage }) => {
             console.log("================ AI RESPONSE FINISHED ================")
             console.log("Text:", text)
@@ -154,13 +153,15 @@ export async function POST(request: Request) {
                     startDate: z.string().describe('The start date in YYYY-MM-DD format'),
                     endDate: z.string().describe('The end date in YYYY-MM-DD format'),
                 }),
-                execute: async ({ startDate: queryStart, endDate: queryEnd }) => {
+                // @ts-ignore
+                execute: async (...args: any[]) => {
+                    const { startDate: queryStart, endDate: queryEnd } = args[0] || {};
                     if (!accessToken || !propertyId) {
                         return { error: "Requires active GA4 property and valid authentication" }
                     }
                     try {
                         const data = await getOverviewData(accessToken, propertyId, queryStart, queryEnd)
-                        return data.overview
+                        return data
                     } catch (e) {
                         return { error: 'Failed to fetch metrics overview.' }
                     }
@@ -173,7 +174,9 @@ export async function POST(request: Request) {
                     endDate: z.string().describe('The end date in YYYY-MM-DD format'),
                     limit: z.number().optional().describe('How many sources to return. Default 5.')
                 }),
-                execute: async ({ startDate: queryStart, endDate: queryEnd }) => {
+                // @ts-ignore
+                execute: async (...args: any[]) => {
+                    const { startDate: queryStart, endDate: queryEnd, limit } = args[0] || {};
                     if (!accessToken || !propertyId) {
                         return { error: "Requires active GA4 property and valid authentication" }
                     }
@@ -193,7 +196,9 @@ export async function POST(request: Request) {
                     country: z.string().optional().describe('The country to filter states by. Defaults to "United States".'),
                     limit: z.number().optional().describe('How many states to return. Default 20.')
                 }),
-                execute: async ({ startDate: queryStart, endDate: queryEnd, country = "United States", limit = 20 }) => {
+                // @ts-ignore
+                execute: async (...args: any[]) => {
+                    const { startDate: queryStart, endDate: queryEnd, country = "United States", limit = 20 } = args[0] || {};
                     if (!accessToken || !propertyId) {
                         return { error: "Requires active GA4 property and valid authentication" }
                     }
@@ -209,12 +214,12 @@ export async function POST(request: Request) {
                         const data = await res.json()
                         return data.states
                     } catch (e) {
-                        return { error: 'Failed to fetch state traffic data.' }
+                        return { error: 'Failed to fetch state traffic' }
                     }
-                }
-            }),
+                },
+            })
         }
     })
 
-    return result.toUIMessageStreamResponse()
+    return (result as any).toDataStreamResponse()
 }

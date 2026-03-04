@@ -331,7 +331,6 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                                 />
                                 <Bar
                                     dataKey="sessions"
-                                    layout="vertical"
                                     radius={4}
                                     barSize={20}
                                 >

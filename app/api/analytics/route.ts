@@ -858,14 +858,14 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
             delta: calculateDelta(currentData.metrics.sessions, previousData.metrics.sessions)
         },
         users: {
-            value: currentData.metrics.users,
-            previous: previousData.metrics.users,
-            delta: calculateDelta(currentData.metrics.users, previousData.metrics.users)
+            value: currentData.metrics.activeUsers,
+            previous: previousData.metrics.activeUsers,
+            delta: calculateDelta(currentData.metrics.activeUsers, previousData.metrics.activeUsers)
         },
         pageViews: {
-            value: currentData.metrics.pageViews,
-            previous: previousData.metrics.pageViews,
-            delta: calculateDelta(currentData.metrics.pageViews, previousData.metrics.pageViews)
+            value: currentData.metrics.screenPageViews,
+            previous: previousData.metrics.screenPageViews,
+            delta: calculateDelta(currentData.metrics.screenPageViews, previousData.metrics.screenPageViews)
         },
         bounceRate: {
             value: currentData.metrics.bounceRate,
@@ -873,31 +873,31 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
             delta: currentData.metrics.bounceRate - previousData.metrics.bounceRate // Percentage point diff for rates
         },
         engagementRate: {
-            value: currentData.metrics.engagementRate,
-            previous: previousData.metrics.engagementRate,
-            delta: currentData.metrics.engagementRate - previousData.metrics.engagementRate
+            value: 100 - currentData.metrics.bounceRate,
+            previous: 100 - previousData.metrics.bounceRate,
+            delta: (100 - currentData.metrics.bounceRate) - (100 - previousData.metrics.bounceRate)
         },
         avgSessionDuration: {
-            value: currentData.metrics.avgSessionDuration,
-            previous: previousData.metrics.avgSessionDuration,
-            delta: calculateDelta(currentData.metrics.avgSessionDuration, previousData.metrics.avgSessionDuration)
+            value: currentData.metrics.averageSessionDuration,
+            previous: previousData.metrics.averageSessionDuration,
+            delta: calculateDelta(currentData.metrics.averageSessionDuration, previousData.metrics.averageSessionDuration)
         }
     }
 
     // Merge Traffic Sources (Top 5 comparison)
     // We map current sources, and find matching previous source to get delta
-    const trafficSourcesWithDelta = currentData.trafficSources.slice(0, 10).map((source: any) => {
-        const prev = previousData.trafficSources.find((p: any) => p.source === source.source)
+    const trafficSourcesWithDelta = (currentData as any).trafficSources.slice(0, 10).map((source: any) => {
+        const prev = (previousData as any).trafficSources.find((p: any) => p.source === source.source)
         return {
             ...source,
-            previousSessions: prev ? prev.sessions : 0,
-            delta: calculateDelta(source.sessions, prev ? prev.sessions : 0)
+            previousSessions: prev ? prev.users : 0,
+            delta: calculateDelta(source.users, prev ? prev.users : 0)
         }
     })
 
     // Merge Top Pages
-    const topPagesWithDelta = currentData.topPages.slice(0, 10).map((page: any) => {
-        const prev = previousData.topPages.find((p: any) => p.path === page.path)
+    const topPagesWithDelta = (currentData as any).pages.slice(0, 10).map((page: any) => {
+        const prev = (previousData as any).pages.find((p: any) => p.path === page.path)
         return {
             ...page,
             previousViews: prev ? prev.views : 0,
@@ -909,8 +909,8 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
     // They likely have different lengths or start dates. 
     // We returns them as two separate arrays for the frontend to align by "Day N" or similar.
     const chartData = {
-        current: currentData.sessionsOverTime,
-        previous: previousData.sessionsOverTime
+        current: currentData.sessionsData,
+        previous: previousData.sessionsData
     }
 
     return {
@@ -919,7 +919,7 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
         trafficSources: trafficSourcesWithDelta,
         topPages: topPagesWithDelta,
         chartData: chartData,
-        deviceBreakdown: currentData.deviceBreakdown // Just show current for donut usually
+        deviceBreakdown: currentData.devices // Just show current for donut usually
     }
 }
 
@@ -977,8 +977,8 @@ async function getTopPagesComparisonData(accessToken: string, propertyId: string
 
     const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
 
-    const merged = currentData.topPages.map((curr: any) => {
-        const prev = previousData.topPages.find((p: any) => p.path === curr.path)
+    const merged = currentData.pages.map((curr: any) => {
+        const prev = previousData.pages.find((p: any) => p.path === curr.path)
         return {
             name: curr.path,
             value: curr.views,
@@ -1010,8 +1010,8 @@ async function getLocationsComparisonData(accessToken: string, propertyId: strin
 
     const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
 
-    const merged = currentData.locations.map((curr: any) => {
-        const prev = previousData.locations.find((p: any) => p.country === curr.country)
+    const merged = currentData.countries.map((curr: any) => {
+        const prev = previousData.countries.find((p: any) => p.country === curr.country)
         return {
             name: curr.country,
             value: curr.users,
@@ -1037,14 +1037,14 @@ async function getAcquisitionComparisonData(accessToken: string, propertyId: str
     }
 
     const [currentData, previousData] = await Promise.all([
-        getTrafficSourcesData(accessToken, propertyId, startDate, endDate, limit),
-        getTrafficSourcesData(accessToken, propertyId, compareStartDate, compareEndDate, limit)
+        getSourcesData(accessToken, propertyId, startDate, endDate, limit),
+        getSourcesData(accessToken, propertyId, compareStartDate, compareEndDate, limit)
     ])
 
     const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
 
-    const merged = currentData.trafficSources.map((curr: any) => {
-        const prev = previousData.trafficSources.find((p: any) => p.source === curr.source)
+    const merged = currentData.sources.map((curr: any) => {
+        const prev = previousData.sources.find((p: any) => p.source === curr.source)
         return {
             name: curr.source,
             value: curr.sessions,

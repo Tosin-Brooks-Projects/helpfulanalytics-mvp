@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
 import { useDashboard } from "@/components/linear/dashboard-context"
 
-export function AddPropertyModal({ children }: { children: React.ReactNode }) {
+export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
     const [open, setOpen] = useState(false)
     const [submitting, setSubmitting] = useState(false) // local loading for saving
     const { availableProperties, loading: contextLoading } = useDashboard()

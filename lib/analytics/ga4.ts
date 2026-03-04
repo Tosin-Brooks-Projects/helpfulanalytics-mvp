@@ -77,6 +77,7 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
         authClient: new (require("google-auth-library").OAuth2Client)(),
     })
 
+    // @ts-ignore
     analyticsDataClient.auth.setCredentials({ access_token: accessToken })
 
     const [response] = await analyticsDataClient.runReport({

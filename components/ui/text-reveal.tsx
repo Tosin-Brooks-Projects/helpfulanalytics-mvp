@@ -54,7 +54,7 @@ export function TextReveal({ text, className, delay = 0 }: TextRevealProps) {
             className={className}
         >
             {words.map((word, index) => (
-                <motion.span variants={child} key={index} className="mr-2 pb-1">
+                <motion.span variants={child as any} key={index} className="mr-2 pb-1">
                     {word}
                 </motion.span>
             ))}

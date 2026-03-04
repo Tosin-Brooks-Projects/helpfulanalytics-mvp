@@ -79,7 +79,8 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "three": "0.160.0",
-    "vaul": "latest"
+    "vaul": "latest",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/node": "^22",

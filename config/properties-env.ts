@@ -53,7 +53,7 @@ export function getPropertiesFromEnv(): ManualProperty[] {
         description: process.env.NEXT_PUBLIC_GA4_PROPERTY_2_DESC,
       },
       // Add more as needed...
-    ].filter((prop): prop is ManualProperty => Boolean(prop.id && prop.name)) as ManualProperty[]
+    ].filter((prop) => Boolean(prop.id && prop.name)) as ManualProperty[]
 
     properties.push(...fallbackProperties)
   }

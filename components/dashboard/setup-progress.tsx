@@ -142,7 +142,7 @@ export function SetupProgress() {
                             {/* Content */}
                             <div className="p-3">
                                 <div className="mb-3">
-                                    <Progress value={progress} className="h-1.5 bg-zinc-100" indicatorClassName="bg-amber-500" />
+                                    <Progress value={progress} className="h-1.5 bg-zinc-100" />
                                 </div>
                                 <div className="space-y-2">
                                     {steps.map((step) => (

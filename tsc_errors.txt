@@ -1,0 +1,153 @@
+app/api/ai/chat/route.ts(53,62): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(59,21): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(60,56): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(62,21): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(62,44): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(63,37): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(79,21): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(79,44): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(79,65): error TS7006: Parameter 't' implicitly has an 'any' type.
+app/api/ai/chat/route.ts(82,34): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(83,33): error TS7006: Parameter 't' implicitly has an 'any' type.
+app/api/ai/chat/route.ts(84,30): error TS7006: Parameter 't' implicitly has an 'any' type.
+app/api/ai/chat/route.ts(126,45): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(126,60): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(126,92): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(126,115): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+app/api/ai/chat/route.ts(162,37): error TS2339: Property 'overview' does not exist on type '{ metrics: { sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }; ... 4 more ...; pageViewsData: number[]; }'.
+app/api/ai/chat/route.ts(175,17): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Type '({ startDate: queryStart, endDate: queryEnd }: { startDate: string; endDate: string; limit?: number; }) => Promise<any>' is not assignable to type 'undefined'.
+app/api/ai/chat/route.ts(195,17): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Type '({ startDate: queryStart, endDate: queryEnd, country, limit }: { startDate: string; endDate: string; country?: string; limit?: number; }) => Promise<any>' is not assignable to type 'undefined'.
+app/api/analytics/route.ts(861,40): error TS2339: Property 'users' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(862,44): error TS2339: Property 'users' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(863,55): error TS2339: Property 'users' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(863,83): error TS2339: Property 'users' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(866,40): error TS2339: Property 'pageViews' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(867,44): error TS2339: Property 'pageViews' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(868,55): error TS2339: Property 'pageViews' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(868,87): error TS2339: Property 'pageViews' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(876,40): error TS2339: Property 'engagementRate' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(877,44): error TS2339: Property 'engagementRate' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(878,40): error TS2339: Property 'engagementRate' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(878,78): error TS2339: Property 'engagementRate' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'.
+app/api/analytics/route.ts(881,40): error TS2551: Property 'avgSessionDuration' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'. Did you mean 'averageSessionDuration'?
+app/api/analytics/route.ts(882,44): error TS2551: Property 'avgSessionDuration' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'. Did you mean 'averageSessionDuration'?
+app/api/analytics/route.ts(883,55): error TS2551: Property 'avgSessionDuration' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'. Did you mean 'averageSessionDuration'?
+app/api/analytics/route.ts(883,96): error TS2551: Property 'avgSessionDuration' does not exist on type '{ sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }'. Did you mean 'averageSessionDuration'?
+app/api/analytics/route.ts(893,43): error TS2339: Property 'sessions' does not exist on type '{ name: string; users: number; }'.
+app/api/analytics/route.ts(894,64): error TS2339: Property 'sessions' does not exist on type '{ name: string; users: number; }'.
+app/api/analytics/route.ts(899,43): error TS2339: Property 'topPages' does not exist on type '{ metrics: { sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }; ... 4 more ...; pageViewsData: number[]; }'.
+app/api/analytics/route.ts(900,35): error TS2339: Property 'topPages' does not exist on type '{ metrics: { sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }; ... 4 more ...; pageViewsData: number[]; }'.
+app/api/analytics/route.ts(912,30): error TS2339: Property 'sessionsOverTime' does not exist on type '{ metrics: { sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }; ... 4 more ...; pageViewsData: number[]; }'.
+app/api/analytics/route.ts(913,32): error TS2339: Property 'sessionsOverTime' does not exist on type '{ metrics: { sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }; ... 4 more ...; pageViewsData: number[]; }'.
+app/api/analytics/route.ts(922,38): error TS2339: Property 'deviceBreakdown' does not exist on type '{ metrics: { sessions: number; sessionsDelta: number; activeUsers: number; activeUsersDelta: number; screenPageViews: number; screenPageViewsDelta: number; bounceRate: number; bounceRateDelta: number; averageSessionDuration: number; averageSessionDurationDelta: number; }; ... 4 more ...; pageViewsData: number[]; }'.
+app/api/stripe/webhook/route.ts(41,50): error TS2339: Property 'priceId' does not exist on type 'SubscriptionTier'.
+app/api/stripe/webhook/route.ts(50,67): error TS2339: Property 'current_period_end' does not exist on type 'Response<Subscription>'.
+app/api/stripe/webhook/route.ts(76,71): error TS2339: Property 'current_period_end' does not exist on type 'Response<Subscription>'.
+components/dashboard/dashboard-header.tsx(13,25): error TS2307: Cannot find module '@/components/layout/user-nav' or its corresponding type declarations.
+components/dashboard/dashboard-header.tsx(14,29): error TS2307: Cannot find module '@/components/theme-toggle' or its corresponding type declarations.
+components/dashboard/setup-progress.tsx(145,94): error TS2322: Type '{ value: number; className: string; indicatorClassName: string; }' is not assignable to type 'IntrinsicAttributes & Omit<ProgressProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLDivElement>'.
+  Property 'indicatorClassName' does not exist on type 'IntrinsicAttributes & Omit<ProgressProps & RefAttributes<HTMLDivElement>, "ref"> & RefAttributes<HTMLDivElement>'.
+components/linear/ai-chat-panel.tsx(8,15): error TS2724: '"ai"' has no exported member named 'Message'. Did you mean 'UIMessage'?
+components/linear/ai-chat-panel.tsx(45,49): error TS2339: Property 'isLoading' does not exist on type 'UseChatHelpers<UIMessage<unknown, UIDataTypes, UITools>>'.
+components/linear/ai-chat-panel.tsx(100,45): error TS2353: Object literal may only specify known properties, and 'content' does not exist in type '(Omit<UIMessage<unknown, UIDataTypes, UITools>, "id" | "role"> & { id?: string | undefined; role?: "user" | "system" | "assistant" | undefined; } & { ...; }) | { ...; } | { ...; }'.
+components/linear/ai-chat-panel.tsx(112,41): error TS2353: Object literal may only specify known properties, and 'content' does not exist in type '(Omit<UIMessage<unknown, UIDataTypes, UITools>, "id" | "role"> & { id?: string | undefined; role?: "user" | "system" | "assistant" | undefined; } & { ...; }) | { ...; } | { ...; }'.
+components/linear/ai-chat-panel.tsx(119,58): error TS2353: Object literal may only specify known properties, and 'content' does not exist in type 'UIMessage<unknown, UIDataTypes, UITools>'.
+components/linear/ai-chat-panel.tsx(128,32): error TS2304: Cannot find name 'toggleOpen'.
+components/linear/ai-chat-panel.tsx(128,44): error TS7006: Parameter 'v' implicitly has an 'any' type.
+components/linear/ai-chat-panel.tsx(179,44): error TS2304: Cannot find name 'toggleOpen'.
+components/linear/ai-chat-panel.tsx(222,114): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+components/linear/ai-chat-panel.tsx(222,132): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+components/linear/ai-chat-panel.tsx(222,155): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+components/linear/ai-chat-panel.tsx(239,53): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+components/linear/ai-chat-panel.tsx(239,84): error TS2339: Property 'content' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+components/linear/ai-chat-panel.tsx(247,34): error TS2339: Property 'toolInvocations' does not exist on type 'UIMessage<unknown, UIDataTypes, UITools>'.
+components/linear/ai-chat-panel.tsx(247,56): error TS7006: Parameter 'toolInv' implicitly has an 'any' type.
+components/linear/charts/overview-charts.tsx(334,37): error TS2322: Type '{ children: any; dataKey: string; layout: string; radius: number; barSize: number; }' is not assignable to type 'IntrinsicAttributes & Partial<BarEvents> & BarProps & Omit<BarSvgProps, keyof BarEvents>'.
+  Property 'layout' does not exist on type 'IntrinsicAttributes & Partial<BarEvents> & BarProps & Omit<BarSvgProps, keyof BarEvents>'.
+components/linear/no-property-placeholder.tsx(24,14): error TS2741: Property 'children' is missing in type '{}' but required in type '{ children: ReactNode; }'.
+components/marketing/about-page-content.tsx(51,26): error TS2322: Type '{ children: Element; className: string; initial: { opacity: number; y: number; }; whileInView: { opacity: number; y: number; }; viewport: { once: boolean; }; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Omit<HTMLMotionProps<"section">, "ref">'.
+  Types of property 'transition' are incompatible.
+    Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+      Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+        Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+          Types of property 'ease' are incompatible.
+            Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+              Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                Type 'number[]' is not assignable to type 'Easing[]'.
+                  Type 'number' is not assignable to type 'Easing'.
+components/marketing/about-page-content.tsx(61,26): error TS2322: Type '{ children: Element; className: string; initial: { opacity: number; y: number; }; whileInView: { opacity: number; y: number; }; viewport: { once: boolean; }; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Omit<HTMLMotionProps<"section">, "ref">'.
+  Types of property 'transition' are incompatible.
+    Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+      Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+        Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+          Types of property 'ease' are incompatible.
+            Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+              Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                Type 'number[]' is not assignable to type 'Easing[]'.
+                  Type 'number' is not assignable to type 'Easing'.
+components/marketing/about-page-content.tsx(74,26): error TS2322: Type '{ children: Element[]; className: string; initial: { opacity: number; y: number; }; whileInView: { opacity: number; y: number; }; viewport: { once: boolean; }; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Omit<HTMLMotionProps<"section">, "ref">'.
+  Types of property 'transition' are incompatible.
+    Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+      Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+        Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+          Types of property 'ease' are incompatible.
+            Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+              Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                Type 'number[]' is not assignable to type 'Easing[]'.
+                  Type 'number' is not assignable to type 'Easing'.
+components/marketing/about-page-content.tsx(89,26): error TS2322: Type '{ children: Element[]; className: string; initial: { opacity: number; y: number; }; whileInView: { opacity: number; y: number; }; viewport: { once: boolean; }; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Omit<HTMLMotionProps<"section">, "ref">'.
+  Types of property 'transition' are incompatible.
+    Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+      Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+        Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+          Types of property 'ease' are incompatible.
+            Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+              Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                Type 'number[]' is not assignable to type 'Easing[]'.
+                  Type 'number' is not assignable to type 'Easing'.
+components/marketing/about-page-content.tsx(124,26): error TS2322: Type '{ children: Element[]; className: string; initial: { opacity: number; y: number; }; whileInView: { opacity: number; y: number; }; viewport: { once: boolean; }; transition: { duration: number; ease: number[]; }; }' is not assignable to type 'Omit<HTMLMotionProps<"section">, "ref">'.
+  Types of property 'transition' are incompatible.
+    Type '{ duration: number; ease: number[]; }' is not assignable to type 'Transition<any> | undefined'.
+      Type '{ duration: number; ease: number[]; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+        Type '{ duration: number; ease: number[]; }' is not assignable to type 'ValueAnimationTransition<any>'.
+          Types of property 'ease' are incompatible.
+            Type 'number[]' is not assignable to type 'Easing | Easing[] | undefined'.
+              Type 'number[]' is not assignable to type 'EasingFunction | Easing[]'.
+                Type 'number[]' is not assignable to type 'Easing[]'.
+                  Type 'number' is not assignable to type 'Easing'.
+components/ui/chart.tsx(119,7): error TS2339: Property 'payload' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; allowEscapeViewBox?: AllowInDimension | undefined; ... 17 more ...; wrapperStyle?: CSSProperties | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+components/ui/chart.tsx(124,7): error TS2339: Property 'label' does not exist on type 'Omit<Omit<Props<ValueType, NameType>, PropertiesReadFromContext> & { active?: boolean | undefined; allowEscapeViewBox?: AllowInDimension | undefined; ... 17 more ...; wrapperStyle?: CSSProperties | undefined; } & ClassAttributes<...> & HTMLAttributes<...> & { ...; }, "ref">'.
+components/ui/chart.tsx(188,25): error TS7006: Parameter 'item' implicitly has an 'any' type.
+components/ui/chart.tsx(188,31): error TS7006: Parameter 'index' implicitly has an 'any' type.
+components/ui/chart.tsx(264,41): error TS2344: Type '"verticalAlign" | "payload"' does not satisfy the constraint '"string" | "media" | "spacing" | "order" | "height" | "width" | "transformOrigin" | "rotate" | "scale" | "cursor" | "fill" | "stroke" | "strokeWidth" | "fontFamily" | "fontSize" | ... 428 more ... | "onBBoxUpdate"'.
+  Type '"payload"' is not assignable to type '"string" | "media" | "spacing" | "order" | "height" | "width" | "transformOrigin" | "rotate" | "scale" | "cursor" | "fill" | "stroke" | "strokeWidth" | "fontFamily" | "fontSize" | ... 428 more ... | "onBBoxUpdate"'.
+components/ui/chart.tsx(275,19): error TS2339: Property 'length' does not exist on type '{}'.
+components/ui/chart.tsx(288,18): error TS2339: Property 'map' does not exist on type '{}'.
+components/ui/chart.tsx(288,23): error TS7006: Parameter 'item' implicitly has an 'any' type.
+components/ui/resizable.tsx(11,51): error TS2339: Property 'PanelGroup' does not exist on type 'typeof import("/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/react-resizable-panels@4.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+components/ui/resizable.tsx(12,23): error TS2339: Property 'PanelGroup' does not exist on type 'typeof import("/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/react-resizable-panels@4.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+components/ui/resizable.tsx(27,51): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/react-resizable-panels@4.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+components/ui/resizable.tsx(30,23): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/react-resizable-panels@4.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+components/ui/resizable.tsx(42,24): error TS2339: Property 'PanelResizeHandle' does not exist on type 'typeof import("/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/react-resizable-panels@4.2.2_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-resizable-panels/dist/react-resizable-panels")'.
+components/ui/shiny-button.tsx(38,10): error TS2322: Type '{ children: Element[]; className: string; disabled?: boolean | undefined; form?: string | undefined; formAction?: string | ((formData: FormData) => void | Promise<void>) | undefined; ... 340 more ...; "data-framer-appear-id"?: string | undefined; }' is not assignable to type 'Omit<HTMLMotionProps<"button">, "ref">'.
+  Types of property 'onDrag' are incompatible.
+    Type 'DragEventHandler<HTMLButtonElement> | ((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void) | undefined' is not assignable to type '((event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void) | undefined'.
+      Type 'DragEventHandler<HTMLButtonElement>' is not assignable to type '(event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void'.
+        Types of parameters 'event' and 'event' are incompatible.
+          Type 'MouseEvent | TouchEvent | PointerEvent' is not assignable to type 'DragEvent<HTMLButtonElement>'.
+            Type 'MouseEvent' is missing the following properties from type 'DragEvent<HTMLButtonElement>': dataTransfer, nativeEvent, isDefaultPrevented, isPropagationStopped, persist
+components/ui/text-reveal.tsx(57,30): error TS2322: Type '{ visible: { opacity: number; y: number; transition: { type: string; damping: number; stiffness: number; }; }; hidden: { opacity: number; y: number; transition: { type: string; damping: number; stiffness: number; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { type: string; damping: number; stiffness: number; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { type: string; damping: number; stiffness: number; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { type: string; damping: number; stiffness: number; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ type: string; damping: number; stiffness: number; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ type: string; damping: number; stiffness: number; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ type: string; damping: number; stiffness: number; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'type' are incompatible.
+                    Type 'string' is not assignable to type 'AnimationGeneratorType | undefined'.
