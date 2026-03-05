@@ -1,4 +1,5 @@
-import { BetaAnalyticsDataClient } from "@google-analytics/data"
+
+
 
 export async function getMockOverviewData() {
     return {
@@ -73,31 +74,41 @@ export async function getMockOverviewComparisonData() {
 }
 
 export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 10) {
-    const OAuth2Client = require("google-auth-library").OAuth2Client;
-    const authClient = new OAuth2Client();
-    authClient.setCredentials({ access_token: accessToken });
+    const propertyStr = propertyId.startsWith("properties/") ? propertyId : `properties/${propertyId}`;
 
-    const analyticsDataClient = new BetaAnalyticsDataClient({
-        authClient,
-    })
+    const fetchRes = await fetch(
+        `https://analyticsdata.googleapis.com/v1beta/${propertyStr}:runReport`,
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                dateRanges: [{ startDate, endDate }],
+                dimensions: [
+                    { name: "date" },
+                    { name: "sessionDefaultChannelGroup" },
+                    { name: "deviceCategory" },
+                ],
+                metrics: [
+                    { name: "sessions" },
+                    { name: "activeUsers" },
+                    { name: "screenPageViews" },
+                    { name: "bounceRate" },
+                    { name: "averageSessionDuration" },
+                ],
+                limit: 10000,
+            }),
+        }
+    );
 
-    const [response] = await analyticsDataClient.runReport({
-        property: propertyId.startsWith("properties/") ? propertyId : `properties/${propertyId}`,
-        dateRanges: [{ startDate, endDate }],
-        dimensions: [
-            { name: "date" },
-            { name: "sessionDefaultChannelGroup" },
-            { name: "deviceCategory" },
-        ],
-        metrics: [
-            { name: "sessions" },
-            { name: "activeUsers" },
-            { name: "screenPageViews" },
-            { name: "bounceRate" },
-            { name: "averageSessionDuration" },
-        ],
-        limit: 10000, // We need to fetch enough data to aggregate manually
-    })
+    if (!fetchRes.ok) {
+        const errorText = await fetchRes.text();
+        throw new Error(`GA4 REST API Error (${fetchRes.status}): ${errorText}`);
+    }
+
+    const response = await fetchRes.json();
 
     // Manual aggregation
     let totalSessions = 0
