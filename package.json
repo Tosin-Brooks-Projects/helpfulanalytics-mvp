@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.33",
+    "@ai-sdk/openai": "^3.0.41",
     "@ai-sdk/react": "^3.0.105",
     "@auth/core": "latest",
     "@google-analytics/data": "latest",

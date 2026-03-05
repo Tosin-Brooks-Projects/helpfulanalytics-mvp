@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { streamText, tool } from "ai"
-import { createGoogleGenerativeAI } from "@ai-sdk/google"
+import { createOpenAI } from "@ai-sdk/openai"
 import { z } from "zod"
 
 import {
@@ -15,8 +15,13 @@ import {
     getRealtimeData,
 } from "@/lib/analytics/ga4"
 
-const google = createGoogleGenerativeAI({
-    apiKey: process.env.GEMINI_API_KEY || process.env.GOOGLE_GENERATIVE_AI_API_KEY || "",
+const openrouter = createOpenAI({
+    baseURL: "https://openrouter.ai/api/v1",
+    apiKey: process.env.OPENROUTER_API_KEY || "",
+    headers: {
+        "HTTP-Referer": "https://helpfulanalytics.com",
+        "X-Title": "Helpful Analytics",
+    },
 })
 
 // ─── Demo / Mock Data ───────────────────────────────────────────
@@ -188,7 +193,7 @@ export async function POST(request: Request) {
 
     try {
         const result = streamText({
-            model: google("gemini-2.5-flash"),
+            model: openrouter("google/gemini-2.5-flash"),
             system: buildSystemPrompt(),
             messages,
             maxSteps: 3,
