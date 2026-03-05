@@ -78,19 +78,20 @@ export function DatePickerWithRange({
                             "h-8 w-fit justify-start text-left font-medium border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900 shadow-sm transition-all rounded-md px-3 text-[11px]",
                             !date && "text-muted-foreground"
                         )}
+                        suppressHydrationWarning
                     >
                         <CalendarIcon className="mr-2 h-3.5 w-3.5 text-zinc-400" />
-                        {date?.from ? (
-                            date.to ? (
-                                <>
-                                    {format(date.from, "MMM dd")} - {format(date.to, "MMM dd, yyyy")}
-                                </>
+                        <span suppressHydrationWarning>
+                            {date?.from ? (
+                                date.to ? (
+                                    `${format(date.from, "MMM dd")} - ${format(date.to, "MMM dd, yyyy")}`
+                                ) : (
+                                    format(date.from, "MMM dd, yyyy")
+                                )
                             ) : (
-                                format(date.from, "MMM dd, yyyy")
-                            )
-                        ) : (
-                            <span>Select date range</span>
-                        )}
+                                "Select date range"
+                            )}
+                        </span>
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 border-zinc-200 bg-white text-zinc-900 shadow-2xl rounded-lg overflow-hidden" align="end">
