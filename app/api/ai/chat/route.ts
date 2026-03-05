@@ -113,113 +113,117 @@ export async function POST(request: Request) {
         return new Response("Invalid JSON body", { status: 400 })
     }
 
-    const { propertyId, startDate, endDate, messages } = body
+    const { messages, propertyId, startDate, endDate } = body
 
     if (!messages || messages.length === 0) {
         return new Response("No messages provided", { status: 400 })
     }
 
     const accessToken = (session as { accessToken?: string }).accessToken
+    if (!accessToken) {
+        return new Response("Google access token missing or expired. Please re-authenticate.", { status: 401 })
+    }
 
-    // Filter out empty assistant messages that the frontend might have appended
-    const validMessages = messages.filter(msg =>
-        !(msg.role === 'assistant' && (!msg.content || msg.content.trim() === '') && (!msg.toolInvocations || msg.toolInvocations.length === 0))
-    )
-
-    const parsedMessages = parseMessages(validMessages)
+    const parsedMessages = parseMessages(messages)
     console.log("================ INCOMING MESSAGES ================")
-    console.log(JSON.stringify(validMessages, null, 2))
+    console.log(JSON.stringify(messages, null, 2))
     console.log("================ PARSED CORE MESSAGES ================")
     console.log(JSON.stringify(parsedMessages, null, 2))
     console.log("==================================================")
 
-    const result = streamText({
-        model: google("gemini-1.5-flash"),
-        system: buildSystemPrompt(),
-        messages: parsedMessages,
-        onFinish: ({ text, toolCalls, toolResults, finishReason, usage }) => {
-            console.log("================ AI RESPONSE FINISHED ================")
-            console.log("Text:", text)
-            console.log("Tool Calls:", JSON.stringify(toolCalls, null, 2))
-            console.log("Tool Results:", JSON.stringify(toolResults, null, 2))
-            console.log("Finish Reason:", finishReason)
-            console.log("Usage:", usage)
-            console.log("======================================================")
-        },
-        tools: {
-            getMetricsOverview: tool({
-                description: 'Fetch high-level GA4 metrics like total sessions, users, pageviews, and bounce rate for a specific date range.',
-                parameters: z.object({
-                    startDate: z.string().describe('The start date in YYYY-MM-DD format'),
-                    endDate: z.string().describe('The end date in YYYY-MM-DD format'),
-                }),
-                // @ts-ignore
-                execute: async (...args: any[]) => {
-                    const { startDate: queryStart, endDate: queryEnd } = args[0] || {};
-                    if (!accessToken || !propertyId) {
-                        return { error: "Requires active GA4 property and valid authentication" }
-                    }
-                    try {
-                        const data = await getOverviewData(accessToken, propertyId, queryStart, queryEnd)
-                        return data
-                    } catch (e) {
-                        return { error: 'Failed to fetch metrics overview.' }
-                    }
-                },
-            }),
-            getTrafficSources: tool({
-                description: 'Fetch the top traffic/acquisition sources to see where users are coming from (e.g. Organic Search, Direct, Referral).',
-                parameters: z.object({
-                    startDate: z.string().describe('The start date in YYYY-MM-DD format'),
-                    endDate: z.string().describe('The end date in YYYY-MM-DD format'),
-                    limit: z.number().optional().describe('How many sources to return. Default 5.')
-                }),
-                // @ts-ignore
-                execute: async (...args: any[]) => {
-                    const { startDate: queryStart, endDate: queryEnd, limit } = args[0] || {};
-                    if (!accessToken || !propertyId) {
-                        return { error: "Requires active GA4 property and valid authentication" }
-                    }
-                    try {
-                        const data = await getAcquisitionData(accessToken, propertyId, queryStart, queryEnd)
-                        return data.sources
-                    } catch (e) {
-                        return { error: 'Failed to fetch traffic sources.' }
-                    }
-                },
-            }),
-            getTrafficByState: tool({
-                description: 'Fetch the top states/regions where users are coming from within a specific country (e.g., California, New York for United States). Defaults to United States if no country is specified.',
-                parameters: z.object({
-                    startDate: z.string().describe('The start date in YYYY-MM-DD format'),
-                    endDate: z.string().describe('The end date in YYYY-MM-DD format'),
-                    country: z.string().optional().describe('The country to filter states by. Defaults to "United States".'),
-                    limit: z.number().optional().describe('How many states to return. Default 20.')
-                }),
-                // @ts-ignore
-                execute: async (...args: any[]) => {
-                    const { startDate: queryStart, endDate: queryEnd, country = "United States", limit = 20 } = args[0] || {};
-                    if (!accessToken || !propertyId) {
-                        return { error: "Requires active GA4 property and valid authentication" }
-                    }
-                    try {
-                        const res = await fetch(`${request.headers.get("origin") || "https://www.helpfulanalytics.com"}/api/analytics?propertyId=${propertyId}&reportType=states&startDate=${queryStart}&endDate=${queryEnd}&country=${encodeURIComponent(country)}&limit=${limit}`, {
-                            headers: {
-                                cookie: request.headers.get("cookie") || "",
-                            }
-                        })
-                        if (!res.ok) {
-                            return { error: 'Failed to fetch state traffic data.' }
+    try {
+        const result = streamText({
+            model: google("gemini-1.5-flash"),
+            system: buildSystemPrompt(),
+            messages: parsedMessages,
+            onFinish: ({ text, toolCalls, toolResults, finishReason, usage }) => {
+                console.log("================ AI RESPONSE FINISHED ================")
+                console.log("Text:", text)
+                console.log("Tool Calls:", JSON.stringify(toolCalls, null, 2))
+                console.log("Tool Results:", JSON.stringify(toolResults, null, 2))
+                console.log("Finish Reason:", finishReason)
+                console.log("Usage:", usage)
+                console.log("======================================================")
+            },
+            tools: {
+                getMetricsOverview: tool({
+                    description: 'Fetch high-level GA4 metrics like total sessions, users, pageviews, and bounce rate for a specific date range.',
+                    parameters: z.object({
+                        startDate: z.string().describe('The start date in YYYY-MM-DD format'),
+                        endDate: z.string().describe('The end date in YYYY-MM-DD format'),
+                    }),
+                    // @ts-ignore
+                    execute: async (...args: any[]) => {
+                        const { startDate: queryStart, endDate: queryEnd } = args[0] || {};
+                        if (!accessToken || !propertyId) {
+                            return { error: "Requires active GA4 property and valid authentication" }
                         }
-                        const data = await res.json()
-                        return data.states
-                    } catch (e) {
-                        return { error: 'Failed to fetch state traffic' }
-                    }
-                },
-            })
-        }
-    })
+                        try {
+                            const data = await getOverviewData(accessToken, propertyId, queryStart, queryEnd)
+                            return data
+                        } catch (e) {
+                            return { error: 'Failed to fetch metrics overview.' }
+                        }
+                    },
+                }),
+                getTrafficSources: tool({
+                    description: 'Fetch the top traffic/acquisition sources to see where users are coming from (e.g. Organic Search, Direct, Referral).',
+                    parameters: z.object({
+                        startDate: z.string().describe('The start date in YYYY-MM-DD format'),
+                        endDate: z.string().describe('The end date in YYYY-MM-DD format'),
+                        limit: z.number().optional().describe('How many sources to return. Default 5.')
+                    }),
+                    // @ts-ignore
+                    execute: async (...args: any[]) => {
+                        const { startDate: queryStart, endDate: queryEnd, limit } = args[0] || {};
+                        if (!accessToken || !propertyId) {
+                            return { error: "Requires active GA4 property and valid authentication" }
+                        }
+                        try {
+                            const data = await getAcquisitionData(accessToken, propertyId, queryStart, queryEnd)
+                            return data.sources
+                        } catch (e) {
+                            return { error: 'Failed to fetch traffic sources.' }
+                        }
+                    },
+                }),
+                getTrafficByState: tool({
+                    description: 'Fetch the top states/regions where users are coming from within a specific country (e.g., California, New York for United States). Defaults to United States if no country is specified.',
+                    parameters: z.object({
+                        startDate: z.string().describe('The start date in YYYY-MM-DD format'),
+                        endDate: z.string().describe('The end date in YYYY-MM-DD format'),
+                        country: z.string().optional().describe('The country to filter states by. Defaults to "United States".'),
+                        limit: z.number().optional().describe('How many states to return. Default 20.')
+                    }),
+                    // @ts-ignore
+                    execute: async (...args: any[]) => {
+                        const { startDate: queryStart, endDate: queryEnd, country = "United States", limit = 20 } = args[0] || {};
+                        if (!accessToken || !propertyId) {
+                            return { error: "Requires active GA4 property and valid authentication" }
+                        }
+                        try {
+                            const res = await fetch(`${request.headers.get("origin") || "https://www.helpfulanalytics.com"}/api/analytics?propertyId=${propertyId}&reportType=states&startDate=${queryStart}&endDate=${queryEnd}&country=${encodeURIComponent(country)}&limit=${limit}`, {
+                                headers: {
+                                    cookie: request.headers.get("cookie") || "",
+                                }
+                            })
+                            if (!res.ok) {
+                                return { error: 'Failed to fetch state traffic data.' }
+                            }
+                            const data = await res.json()
+                            return data.states
+                        } catch (e) {
+                            return { error: 'Failed to fetch state traffic' }
+                        }
+                    },
+                })
+            }
+        })
 
-    return (result as any).toDataStreamResponse()
+        console.log("STREAM TEXT KEYS:", Object.keys(result))
+        return (result as any).toUIMessageStreamResponse()
+    } catch (e: any) {
+        console.error("AI SDK Stream Error:", e)
+        return new Response(JSON.stringify({ error: "AI Stream Error", details: e?.message || "Unknown" }), { status: 500, headers: { "Content-Type": "application/json" } })
+    }
 }
