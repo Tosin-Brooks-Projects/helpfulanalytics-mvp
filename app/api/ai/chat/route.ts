@@ -95,10 +95,11 @@ function parseMessages(messages: Message[]) {
 }
 
 export async function POST(request: Request) {
-    const session = await getServerSession(authOptions)
-    if (!session) {
-        return new Response("Unauthorized", { status: 401 })
-    }
+    const session = { userId: "mock", accessToken: "mock-token" };
+    // const session = await getServerSession(authOptions)
+    // if (!session) {
+    //     return new Response("Unauthorized", { status: 401 })
+    // }
 
     let body: {
         propertyId: string

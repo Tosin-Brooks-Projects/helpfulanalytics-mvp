@@ -42,8 +42,8 @@ export function AIChatPanel() {
     const startDate = isClient && dateRange?.from ? dateRange.from.toISOString().split("T")[0] : "30daysAgo"
     const endDate = isClient && dateRange?.to ? dateRange.to.toISOString().split("T")[0] : "today"
 
-    const { messages, sendMessage, setMessages, stop } = useChat({
-        messages: INITIAL_MESSAGES as any,
+    const { messages, sendMessage, setMessages, stop, status } = useChat({
+        initialMessages: INITIAL_MESSAGES as any,
         transport: new DefaultChatTransport({
             api: "/api/ai/chat",
             body: {
@@ -57,8 +57,7 @@ export function AIChatPanel() {
         }
     })
 
-    // Stub definition as isLoading isn't provided by this specific custom hook implementation
-    const isLoading = false;
+    const isLoading = status === 'submitted' || status === 'streaming';
 
     // On desktop, open by default; on mobile, stay closed
     useEffect(() => {
