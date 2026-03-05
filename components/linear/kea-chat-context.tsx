@@ -6,6 +6,8 @@ import { DefaultChatTransport } from "ai"
 import { useDashboard } from "@/components/linear/dashboard-context"
 
 const STORAGE_KEY = "kea_chat_history"
+const STORAGE_VERSION_KEY = "kea_chat_version"
+const CURRENT_VERSION = "v3"
 
 type InitialMessage = {
     id: string
@@ -48,10 +50,17 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
     const startDate = isClient && dateRange?.from ? dateRange.from.toISOString().split("T")[0] : "30daysAgo"
     const endDate = isClient && dateRange?.to ? dateRange.to.toISOString().split("T")[0] : "today"
 
-    // Load saved messages from localStorage
+    // Load saved messages from localStorage (with version check)
     const loadSavedMessages = (): any[] => {
         if (typeof window === "undefined") return INITIAL_MESSAGES
         try {
+            const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY)
+            if (storedVersion !== CURRENT_VERSION) {
+                // Old format — clear and start fresh
+                localStorage.removeItem(STORAGE_KEY)
+                localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION)
+                return INITIAL_MESSAGES
+            }
             const saved = localStorage.getItem(STORAGE_KEY)
             if (saved) {
                 const parsed = JSON.parse(saved)
@@ -89,6 +98,7 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
         if (messages.length > 0) {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
+                localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION)
             } catch {
                 // storage full or unavailable
             }

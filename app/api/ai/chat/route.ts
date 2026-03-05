@@ -110,31 +110,48 @@ function isDemoProperty(propertyId: string): boolean {
 // This converts between the two.
 
 function convertToModelMessages(uiMessages: any[]): Array<{ role: string; content: string }> {
-    return uiMessages.map((msg) => {
-        // User messages already have `content`
+    const result: Array<{ role: string; content: string }> = []
+
+    for (const msg of uiMessages) {
+        // User messages always have `content`
         if (msg.role === "user") {
-            return { role: "user", content: msg.content || "" }
+            if (msg.content && msg.content.trim().length > 0) {
+                result.push({ role: "user", content: msg.content })
+            }
+            continue
         }
 
-        // Assistant messages may have `parts` instead of `content`
+        // Assistant messages — extract text from parts or use content
         if (msg.role === "assistant") {
-            // If content exists, use it
-            if (msg.content) {
-                return { role: "assistant", content: msg.content }
+            let text = ""
+
+            // Try content first
+            if (typeof msg.content === "string" && msg.content.trim().length > 0) {
+                text = msg.content
+            }
+            // Extract from parts
+            else if (Array.isArray(msg.parts)) {
+                text = msg.parts
+                    .filter((p: any) => p.type === "text" && p.text)
+                    .map((p: any) => p.text)
+                    .join("\n")
             }
 
-            // Extract text from parts
-            const textContent = (msg.parts || [])
-                .filter((p: any) => p.type === "text")
-                .map((p: any) => p.text)
-                .join("\n")
-
-            return { role: "assistant", content: textContent || "" }
+            // Only include assistant messages that have actual text
+            if (text.trim().length > 0) {
+                result.push({ role: "assistant", content: text })
+            }
+            continue
         }
 
-        // Fallback: pass through
-        return { role: msg.role, content: msg.content || "" }
-    }).filter((msg) => msg.content.length > 0) // Remove empty messages
+        // System or other messages — pass through if they have content
+        if (msg.content && typeof msg.content === "string" && msg.content.trim().length > 0) {
+            result.push({ role: msg.role, content: msg.content })
+        }
+    }
+
+    console.log("[Kea] Converting", uiMessages.length, "UI messages →", result.length, "model messages")
+    return result
 }
 
 // ─── System Prompt ──────────────────────────────────────────────
