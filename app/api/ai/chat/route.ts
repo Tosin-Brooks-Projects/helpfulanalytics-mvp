@@ -102,6 +102,7 @@ export async function POST(request: Request) {
             model: google("gemini-2.5-flash"),
             system: buildSystemPrompt(),
             messages,
+            maxSteps: 5,
             tools: {
                 getMetricsOverview: tool({
                     description: "Fetch high-level GA4 metrics: total sessions, active users, pageviews, bounce rate, and average session duration for the selected date range. Use this for general performance questions.",
