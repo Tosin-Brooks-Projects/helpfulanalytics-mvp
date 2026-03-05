@@ -16,6 +16,7 @@ import {
     Timer,
     Search,
     Download,
+    Bird,
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { signOut } from "next-auth/react"
@@ -82,6 +83,13 @@ export function MobileBottomNav() {
                         <div className="p-4 pt-6">
                             <div className="w-10 h-1 rounded-full bg-zinc-200 mx-auto mb-6" />
                             <nav className="space-y-1">
+                                <SheetNavLink
+                                    href="/dashboard/kea"
+                                    icon={Bird}
+                                    label="Kea AI"
+                                    active={pathname.startsWith("/dashboard/kea")}
+                                    onClick={() => setSheetOpen(false)}
+                                />
                                 <SheetNavLink
                                     href="/dashboard/devices"
                                     icon={Smartphone}

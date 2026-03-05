@@ -18,6 +18,7 @@ import {
     ChevronRight,
     Swords,
     Timer,
+    Bird,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useDashboard } from "./dashboard-context"
@@ -35,6 +36,7 @@ const items = [
     { title: "Top Pages", href: "/dashboard/reports", icon: BarChart3 },
     { title: "Audience", href: "/dashboard/audience", icon: Users },
     { title: "Sources", href: "/dashboard/sources", icon: Globe },
+    { title: "Kea AI", href: "/dashboard/kea", icon: Bird },
 ]
 
 export function LinearSidebar() {

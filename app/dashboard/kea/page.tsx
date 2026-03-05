@@ -1,10 +1,10 @@
 "use client"
 
 import { useRef, useEffect, useCallback, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
-import { X, Send, RotateCcw, ChevronDown, Sparkles, Maximize2 } from "lucide-react"
-import ReactMarkdown from "react-markdown"
+import { LinearShell } from "@/components/linear/linear-shell"
 import { useKeaChat } from "@/components/linear/kea-chat-context"
+import { Send, RotateCcw, Sparkles } from "lucide-react"
+import ReactMarkdown from "react-markdown"
 import { cn } from "@/lib/utils"
 
 const SUGGESTED_PROMPTS = [
@@ -12,6 +12,8 @@ const SUGGESTED_PROMPTS = [
     "Where is my traffic coming from?",
     "Which pages get the most views?",
     "What devices do my visitors use?",
+    "How many people are on my site right now?",
+    "Where are my visitors located?",
 ]
 
 const TOOL_LABELS: Record<string, { label: string; icon: string }> = {
@@ -29,26 +31,8 @@ function getToolInfo(toolName: string) {
     return TOOL_LABELS[toolName] ?? { label: toolName, icon: "🔧" }
 }
 
-export function AIChatPanel() {
-    const pathname = usePathname()
-    const router = useRouter()
+export default function KeaPage() {
     const { messages, sendMessage, input, setInput, resetChat, isLoading, status } = useKeaChat()
-    const [open, setOpen] = useState(false)
-    const [showScrollBtn, setShowScrollBtn] = useState(false)
-    const [isClient, setIsClient] = useState(false)
-
-    useEffect(() => { setIsClient(true) }, [])
-
-    // Hide floating panel on the full Kea page
-    const isOnKeaPage = pathname === "/dashboard/kea"
-
-    useEffect(() => {
-        if (typeof window !== "undefined" && window.innerWidth >= 1024 && !isOnKeaPage) {
-            setOpen(true)
-        }
-        if (isOnKeaPage) setOpen(false)
-    }, [isOnKeaPage])
-
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -58,21 +42,13 @@ export function AIChatPanel() {
     }, [])
 
     useEffect(() => {
-        if (open) {
-            setTimeout(() => scrollToBottom("instant"), 50)
-            setTimeout(() => inputRef.current?.focus(), 100)
-        }
-    }, [open, scrollToBottom])
+        setTimeout(() => scrollToBottom("instant"), 50)
+        setTimeout(() => inputRef.current?.focus(), 100)
+    }, [scrollToBottom])
 
     useEffect(() => {
         scrollToBottom()
     }, [messages, scrollToBottom])
-
-    const handleScroll = () => {
-        const el = scrollContainerRef.current
-        if (!el) return
-        setShowScrollBtn(el.scrollHeight - el.scrollTop - el.clientHeight > 120)
-    }
 
     const handleSend = () => {
         if (!input || input.trim() === "" || isLoading) return
@@ -87,13 +63,6 @@ export function AIChatPanel() {
         }
     }
 
-    const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        handleSend()
-    }
-
-    if (!isClient || isOnKeaPage) return null
-
     const statusLabel = (() => {
         if (status === "submitted") return "Kea is thinking…"
         if (status === "streaming") return "Kea is writing…"
@@ -101,88 +70,46 @@ export function AIChatPanel() {
     })()
 
     return (
-        <>
-            {/* ─── Floating Toggle ──────────────────────────── */}
-            <button
-                onClick={() => setOpen((v) => !v)}
-                aria-label="Open AI chat"
-                className={cn(
-                    "fixed right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-300",
-                    "bg-gradient-to-br from-amber-400 to-amber-500 text-white hover:from-amber-500 hover:to-amber-600 hover:scale-105",
-                    "bottom-[4.5rem] lg:bottom-8 lg:right-8",
-                    open && "opacity-0 pointer-events-none scale-75"
-                )}
-            >
-                <img src="/kea.svg" alt="Kea" className="h-12 w-12 rounded-full" />
-            </button>
-
-            {/* ─── Chat Panel ───────────────────────────────── */}
-            <div
-                className={cn(
-                    "fixed right-4 z-50 flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ease-out",
-                    "bottom-[4.5rem] lg:bottom-8 lg:right-8",
-                    "w-[calc(100vw-2rem)] max-w-sm sm:w-96",
-                    open
-                        ? "h-[540px] opacity-100 translate-y-0 scale-100"
-                        : "h-0 opacity-0 translate-y-4 scale-95 pointer-events-none"
-                )}
-            >
+        <LinearShell>
+            <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto">
                 {/* ─── Header ───────────────────────────── */}
-                <div className="flex shrink-0 items-center justify-between border-b border-zinc-100 bg-gradient-to-r from-amber-50/80 to-white px-4 py-3">
-                    <div className="flex items-center gap-2.5">
+                <div className="flex items-center justify-between pb-4 border-b border-zinc-100 mb-4">
+                    <div className="flex items-center gap-3">
                         <div className="relative">
-                            <img src="/kea.svg" alt="Kea" className="h-8 w-8 rounded-full shrink-0" />
-                            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
+                            <img src="/kea.svg" alt="Kea" className="h-10 w-10 rounded-full" />
+                            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-zinc-900 leading-tight">Kea</p>
-                            <p className="text-[10px] text-zinc-400 leading-tight">Your analytics assistant</p>
+                            <h1 className="text-lg font-bold text-zinc-900 font-outfit">Kea</h1>
+                            <p className="text-xs text-zinc-400">Your AI analytics assistant · Powered by GA4</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-0.5">
-                        <button
-                            onClick={() => router.push("/dashboard/kea")}
-                            aria-label="Expand to full page"
-                            title="Open full page"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
-                        >
-                            <Maximize2 className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                            onClick={resetChat}
-                            aria-label="Reset chat"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
-                        >
-                            <RotateCcw className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                            onClick={() => setOpen(false)}
-                            aria-label="Close chat"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
-                        >
-                            <X className="h-3.5 w-3.5" />
-                        </button>
-                    </div>
+                    <button
+                        onClick={resetChat}
+                        className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
+                    >
+                        <RotateCcw className="h-3 w-3" />
+                        New chat
+                    </button>
                 </div>
 
                 {/* ─── Messages ──────────────────────────── */}
                 <div
                     ref={scrollContainerRef}
-                    onScroll={handleScroll}
-                    className="relative flex-1 overflow-y-auto px-4 py-4 space-y-3"
+                    className="flex-1 overflow-y-auto space-y-4 pr-2"
                 >
                     {messages.map((rawMsg, i) => {
                         const msg = rawMsg as any
                         return (
-                            <div key={msg.id || i} className="flex flex-col gap-1.5">
+                            <div key={msg.id || i} className="flex flex-col gap-2">
                                 {/* Message bubble */}
                                 <div className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
                                     {msg.role === "assistant" && (
-                                        <img src="/kea.svg" alt="Kea" className="mr-2 mt-1 h-6 w-6 shrink-0 rounded-full" />
+                                        <img src="/kea.svg" alt="Kea" className="mr-3 mt-1 h-7 w-7 shrink-0 rounded-full" />
                                     )}
                                     <div
                                         className={cn(
-                                            "max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed",
+                                            "max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
                                             msg.role === "user"
                                                 ? "bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-tr-md shadow-sm"
                                                 : "bg-zinc-50 border border-zinc-100 text-zinc-800 rounded-tl-md"
@@ -198,9 +125,9 @@ export function AIChatPanel() {
                                     const hasResult = part.toolInvocation?.state === "result" || part.state === "result"
 
                                     return (
-                                        <div key={pi} className="flex justify-start pl-8">
+                                        <div key={pi} className="flex justify-start pl-10">
                                             <div className={cn(
-                                                "flex items-center gap-2 rounded-xl px-3 py-1.5 text-[10px] font-medium transition-all",
+                                                "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all",
                                                 hasResult
                                                     ? "bg-emerald-50 border border-emerald-100 text-emerald-700"
                                                     : "bg-amber-50 border border-amber-100 text-amber-700"
@@ -224,7 +151,7 @@ export function AIChatPanel() {
 
                     {/* Suggested prompts */}
                     {messages.length === 1 && (
-                        <div className="grid grid-cols-1 gap-1.5 pt-1">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 max-w-2xl">
                             {SUGGESTED_PROMPTS.map((prompt) => (
                                 <button
                                     key={prompt}
@@ -232,9 +159,9 @@ export function AIChatPanel() {
                                         sendMessage({ role: "user", content: prompt } as any)
                                         setInput("")
                                     }}
-                                    className="flex items-center gap-2 w-full rounded-xl border border-zinc-200/80 px-3 py-2.5 text-left text-xs text-zinc-600 hover:bg-amber-50/60 hover:border-amber-200 hover:text-amber-700 transition-all"
+                                    className="flex items-center gap-2.5 rounded-xl border border-zinc-200/80 px-4 py-3 text-left text-sm text-zinc-600 hover:bg-amber-50/60 hover:border-amber-200 hover:text-amber-700 transition-all"
                                 >
-                                    <Sparkles className="h-3 w-3 text-amber-400 shrink-0" />
+                                    <Sparkles className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                                     {prompt}
                                 </button>
                             ))}
@@ -243,12 +170,12 @@ export function AIChatPanel() {
 
                     {/* Typing / status indicator */}
                     {statusLabel && (
-                        <div className="flex items-center gap-2 pl-8">
-                            <div className="flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-1.5 text-[10px] text-zinc-500 font-medium">
+                        <div className="flex items-center gap-2 pl-10">
+                            <div className="flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-2 text-xs text-zinc-500 font-medium">
                                 <span className="flex gap-0.5">
-                                    <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
-                                    <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
-                                    <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
+                                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
+                                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
+                                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
                                 </span>
                                 {statusLabel}
                             </div>
@@ -258,29 +185,19 @@ export function AIChatPanel() {
                     <div ref={messagesEndRef} />
                 </div>
 
-                {/* ─── Scroll to bottom ─────────────────── */}
-                {showScrollBtn && (
-                    <button
-                        onClick={() => scrollToBottom()}
-                        className="absolute bottom-[72px] right-4 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white border border-zinc-200 shadow-sm text-zinc-500 hover:text-zinc-900 transition-colors"
-                    >
-                        <ChevronDown className="h-4 w-4" />
-                    </button>
-                )}
-
                 {/* ─── Input ────────────────────────────── */}
-                <form onSubmit={onFormSubmit} className="shrink-0 border-t border-zinc-100 bg-white/80 backdrop-blur-sm px-3 py-3">
-                    <div className="flex items-end gap-2 rounded-xl border border-zinc-200 bg-zinc-50/80 px-3 py-2 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-100 transition-all">
+                <form onSubmit={(e) => { e.preventDefault(); handleSend() }} className="shrink-0 border-t border-zinc-100 pt-4 mt-4">
+                    <div className="flex items-end gap-3 rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-100 transition-all">
                         <textarea
                             ref={inputRef}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Ask about your analytics…"
+                            placeholder="Ask Kea about your analytics…"
                             rows={1}
                             disabled={isLoading}
-                            className="flex-1 resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 outline-none max-h-28 disabled:opacity-50"
-                            style={{ height: "auto", minHeight: "20px" }}
+                            className="flex-1 resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 outline-none max-h-32 disabled:opacity-50"
+                            style={{ height: "auto", minHeight: "24px" }}
                             onInput={(e) => {
                                 const el = e.target as HTMLTextAreaElement
                                 el.style.height = "auto"
@@ -292,20 +209,20 @@ export function AIChatPanel() {
                             disabled={!input || input.trim() === "" || isLoading}
                             aria-label="Send message"
                             className={cn(
-                                "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all",
+                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all",
                                 "bg-gradient-to-br from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700",
                                 "disabled:opacity-30 disabled:cursor-not-allowed disabled:from-zinc-400 disabled:to-zinc-400"
                             )}
                         >
-                            <Send className="h-3.5 w-3.5" />
+                            <Send className="h-4 w-4" />
                         </button>
                     </div>
-                    <p className="mt-1.5 text-center text-[10px] text-zinc-300">
+                    <p className="mt-2 text-center text-[10px] text-zinc-300">
                         Press Enter to send · Shift+Enter for new line
                     </p>
                 </form>
             </div>
-        </>
+        </LinearShell>
     )
 }
 
@@ -316,7 +233,7 @@ function MessageContent({ msg }: { msg: any }) {
 
     if (textParts.length > 0) {
         return (
-            <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline">
+            <div className="prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline">
                 {textParts.map((part: any, i: number) => (
                     <ReactMarkdown key={i}>{part.text}</ReactMarkdown>
                 ))}
@@ -326,7 +243,7 @@ function MessageContent({ msg }: { msg: any }) {
 
     if (msg.content) {
         return (
-            <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline">
+            <div className="prose prose-sm max-w-none prose-p:my-1.5 prose-ul:my-1.5 prose-ol:my-1.5 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline">
                 <ReactMarkdown>{msg.content}</ReactMarkdown>
             </div>
         )
