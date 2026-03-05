@@ -42,8 +42,9 @@ export function DatePickerWithRange({
 
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "d" && !e.metaKey && !e.ctrlKey && !e.altKey && document.activeElement?.tagName !== 'INPUT') {
-                // Toggle open if closed, or just open
+            const tag = document.activeElement?.tagName
+            const isEditable = document.activeElement?.getAttribute("contenteditable") === "true"
+            if (e.key === "d" && !e.metaKey && !e.ctrlKey && !e.altKey && tag !== 'INPUT' && tag !== 'TEXTAREA' && !isEditable) {
                 setOpen((prev) => !prev)
             }
         }
