@@ -134,7 +134,7 @@ export async function POST(request: Request) {
     console.log("==================================================")
 
     const result = streamText({
-        model: google("gemini-2.5-flash"),
+        model: google("gemini-1.5-flash"),
         system: buildSystemPrompt(),
         messages: parsedMessages,
         onFinish: ({ text, toolCalls, toolResults, finishReason, usage }) => {
@@ -203,7 +203,7 @@ export async function POST(request: Request) {
                         return { error: "Requires active GA4 property and valid authentication" }
                     }
                     try {
-                        const res = await fetch(`${request.headers.get("origin") || "http://localhost:3000"}/api/analytics?propertyId=${propertyId}&reportType=states&startDate=${queryStart}&endDate=${queryEnd}&country=${encodeURIComponent(country)}&limit=${limit}`, {
+                        const res = await fetch(`${request.headers.get("origin") || "https://www.helpfulanalytics.com"}/api/analytics?propertyId=${propertyId}&reportType=states&startDate=${queryStart}&endDate=${queryEnd}&country=${encodeURIComponent(country)}&limit=${limit}`, {
                             headers: {
                                 cookie: request.headers.get("cookie") || "",
                             }
