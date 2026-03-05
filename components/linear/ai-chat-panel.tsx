@@ -276,7 +276,10 @@ export function AIChatPanel() {
                             {SUGGESTED_PROMPTS.map((prompt) => (
                                 <button
                                     key={prompt}
-                                    onClick={() => setInput(prompt)}
+                                    onClick={() => {
+                                        sendMessage({ role: "user", content: prompt } as any)
+                                        setInput("")
+                                    }}
                                     className="block w-full rounded-xl border border-zinc-200 px-3 py-2 text-left text-xs text-zinc-600 hover:bg-amber-50 hover:border-amber-200 hover:text-amber-700 transition-colors"
                                 >
                                     {prompt}
