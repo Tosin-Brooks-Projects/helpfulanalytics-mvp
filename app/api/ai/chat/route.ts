@@ -25,8 +25,6 @@ const openrouter = createOpenAI({
 })
 
 // ─── Demo / Mock Data ───────────────────────────────────────────
-// When the user is on the demo property, return realistic mock data
-// so Kea can still demonstrate her analysis capabilities.
 
 const DEMO_OVERVIEW = {
     metrics: {
@@ -111,6 +109,39 @@ function isDemoProperty(propertyId: string): boolean {
     return propertyId === "demo-property" || propertyId === ""
 }
 
+// ─── Message Format Converter ───────────────────────────────────
+// The frontend sends v6 UIMessage format (with `parts` array).
+// streamText expects ModelMessage format (with `content` string).
+// This converts between the two.
+
+function convertToModelMessages(uiMessages: any[]): Array<{ role: string; content: string }> {
+    return uiMessages.map((msg) => {
+        // User messages already have `content`
+        if (msg.role === "user") {
+            return { role: "user", content: msg.content || "" }
+        }
+
+        // Assistant messages may have `parts` instead of `content`
+        if (msg.role === "assistant") {
+            // If content exists, use it
+            if (msg.content) {
+                return { role: "assistant", content: msg.content }
+            }
+
+            // Extract text from parts
+            const textContent = (msg.parts || [])
+                .filter((p: any) => p.type === "text")
+                .map((p: any) => p.text)
+                .join("\n")
+
+            return { role: "assistant", content: textContent || "" }
+        }
+
+        // Fallback: pass through
+        return { role: msg.role, content: msg.content || "" }
+    }).filter((msg) => msg.content.length > 0) // Remove empty messages
+}
+
 // ─── System Prompt ──────────────────────────────────────────────
 
 function buildSystemPrompt(): string {
@@ -191,11 +222,14 @@ export async function POST(request: Request) {
 
     const isDemo = isDemoProperty(propertyId)
 
+    // Convert UIMessages (parts-based) to ModelMessages (content-based)
+    const modelMessages = convertToModelMessages(messages)
+
     try {
         const result = streamText({
             model: openrouter("google/gemini-2.5-flash"),
             system: buildSystemPrompt(),
-            messages,
+            messages: modelMessages as any,
             maxSteps: 3,
             tools: {
                 getMetricsOverview: tool({
