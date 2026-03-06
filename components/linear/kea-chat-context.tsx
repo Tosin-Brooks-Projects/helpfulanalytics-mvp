@@ -7,7 +7,7 @@ import { useDashboard } from "@/components/linear/dashboard-context"
 
 const STORAGE_KEY = "kea_chat_history"
 const STORAGE_VERSION_KEY = "kea_chat_version"
-const CURRENT_VERSION = "v3"
+const CURRENT_VERSION = "v4"
 
 type InitialMessage = {
     id: string
