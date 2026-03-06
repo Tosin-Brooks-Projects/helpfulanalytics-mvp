@@ -3,6 +3,7 @@
 import { useRef, useEffect, useCallback, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { X, Send, RotateCcw, ChevronDown, Sparkles, Maximize2 } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 import ReactMarkdown from "react-markdown"
 import { useKeaChat } from "@/components/linear/kea-chat-context"
 import { cn } from "@/lib/utils"
@@ -25,6 +26,120 @@ const TOOL_LABELS: Record<string, { label: string; icon: string }> = {
     getTrafficByCity: { label: "city data", icon: "🏙️" },
 }
 
+const BIRD_MESSAGES = [
+    "Caw! Look at that traffic soar!",
+    "Tweet! Your bounce rate is fluttering down!",
+    "Squawk! Who are these new visitors?",
+    "Coo... Your retention is looking peaceful.",
+    "Hoot! Wise move checkin' the top pages.",
+    "Chirp! Mobile users are flocking in!",
+    "Caw caw! A spike! A spike in the woods!",
+    "Peep! Look at those real-time visitors!",
+    "Tweet-tweet! You've got a nest full of users!",
+    "Caw! Time to preen those landing pages!",
+    "Squawk! Organic search is flying high!",
+    "Chirp! Social traffic is migrating your way.",
+    "Hoot! I see a wise trend in your data.",
+    "Coo... Conversions are hatching nicely.",
+    "Peep! Little fledglings are clicking around!",
+    "Caw! Don't let your data fly south!",
+    "Tweet! Are we migrating to more desktop users?",
+    "Squawk! That referral source is a rare bird!",
+    "Chirp chirp! High engagement! Shake those feathers!",
+    "Hoot! Knowledge is a powerful wingspan.",
+    "Caw! Is your load time making users fly away?",
+    "Tweet! Let's build a stronger nest for your leads.",
+    "Squawk! Your SEO is reaching the canopy!",
+    "Chirp! I've spotted a worm in your funnel!",
+    "Coo... Soft landings on your homepage.",
+    "Peep! The audience is singing your praises.",
+    "Caw! Flock to the reports, quick!",
+    "Tweet! Your data is singing a beautiful song.",
+    "Squawk! Who's that colorful new referral?",
+    "Chirp! Twitter traffic is... well, tweeting!",
+    "Hoot! I've stayed up all night watching your stats.",
+    "Caw! Dive deep like a falcon into these numbers!",
+    "Tweet! Your reach is spreading its wings.",
+    "Squawk! Don't be a dodo, check the devices!",
+    "Chirp! Your site is buzzing like a hummingbird.",
+    "Coo... Peaceful growth, my friend.",
+    "Peep! Is that a new device category I see?",
+    "Caw! The wind is in your favor today.",
+    "Tweet! Let's peck at these location stats.",
+    "Squawk! Shiny new users! I want 'em!",
+    "Chirp! High bounce rate? Flap harder!",
+    "Hoot! I've got my eyes on your sessions.",
+    "Caw! You're the alpha of this analytics forest!",
+    "Tweet! Are we soaring or just gliding?",
+    "Squawk! I found a shiny bit of data for you!",
+    "Chirp! Your funnel is as clear as a blue sky.",
+    "Coo... Rest your wings and look at this.",
+    "Peep! Tiny clicks make big rivers.",
+    "Caw! I've circled the top pages twice now!",
+    "Tweet! Your audience is a diverse flock!",
+    "Squawk! Look! Shiny conversion points!",
+    "Chirp-a-dee! Happy users, happy tree!",
+    "Hoot! Whooo's visiting at this hour?",
+    "Caw! Ride the thermal of this traffic spike!",
+    "Tweet! Every user is a feather in your cap.",
+    "Squawk! Don't let the cat catch your leads!",
+    "Chirp! I'm preening your metrics right now.",
+    "Coo... Steady as a dove.",
+    "Peep! Are we growing? I think we're growing!",
+    "Caw! I can see your site from way up here!",
+    "Tweet! Let's migrate some more traffic!",
+    "Squawk! Shiny! Look at that screen time!",
+    "Chirp! Your bounce rate just took a dive!",
+    "Hoot! A parliament of users has arrived!",
+    "Caw! Sharp eyes on the goal!",
+    "Tweet! Flap those marketing wings!",
+    "Squawk! I'm hungry for more data!",
+    "Chirp chirp! The morning traffic is here!",
+    "Coo... Soft as a feather, your UI is.",
+    "Peep! Tiny users, huge potential!",
+    "Caw! I've scouted some new sources!",
+    "Tweet! Your brand is taking flight!",
+    "Squawk! Look out for that competitors' hawk!",
+    "Chirp! Is your cache as fresh as a spring breeze?",
+    "Coo... All quiet on the bounce front.",
+    "Peep! I'm chirping for more conversions!",
+    "Caw! I've got a bird's eye view of your sales!",
+    "Tweet! Let's sprinkle some seed on that ad!",
+    "Squawk! Look at the colors on that chart!",
+    "Chirp! High speed, low drag, let's fly!",
+    "Hoot! Wisdom is knowing your audience.",
+    "Caw! I'm nesting in your dashboard today.",
+    "Tweet! Your CTR is looking fly!",
+    "Squawk! Grab that lead! Grab it!",
+    "Chirp! I'm singing the song of GA4!",
+    "Coo... Relaxed users stay longer.",
+    "Peep! I've spotted a trend!",
+    "Caw! Thunder-traffic is rolling in!",
+    "Tweet! Scatter some content, watch 'em flock!",
+    "Squawk! Is that a goldfinch or a golden lead?",
+    "Chirp! Fluttering through the location data.",
+    "Hoot! Night owls are buying more!",
+    "Caw! My beak is ready for some insights!",
+    "Tweet! Your reach is mult-continental!",
+    "Squawk! Don't let your data get caged!",
+    "Chirp! Be bold like a blue jay!",
+    "Coo... Soft landings for every click.",
+    "Peep! Look at the little user-steps!",
+    "Caw! I've claimed this dashboard as my nest!",
+    "Tweet! Let's soar together!",
+    "Squawk! Peek-a-boo, I see a user!",
+    "Chirp! Bright feathers, bright data!",
+    "Hoot! Who's the master of analytics? You!",
+    "Caw! Spread your wings and analyze!",
+    "Tweet! Your site is the tallest tree!",
+    "Squawk! No crumbs left behind!",
+    "Chirp! Every click is a melody!",
+    "Peep! Hatching new ideas!",
+    "Caw! Soar high, little dashboard!",
+    "Tweet! Your metrics are top-tier!",
+    "Squawk! I'm the king of the canopy!"
+]
+
 function getToolInfo(toolName: string) {
     return TOOL_LABELS[toolName] ?? { label: toolName, icon: "🔧" }
 }
@@ -36,18 +151,32 @@ export function AIChatPanel() {
     const [open, setOpen] = useState(false)
     const [showScrollBtn, setShowScrollBtn] = useState(false)
     const [isClient, setIsClient] = useState(false)
+    const [bubbleIndex, setBubbleIndex] = useState(0)
+    const [showBubble, setShowBubble] = useState(false)
 
     useEffect(() => { setIsClient(true) }, [])
 
     // Hide floating panel on the full Kea page
     const isOnKeaPage = pathname === "/dashboard/kea"
 
+    // Load persisted open/closed state on mount
     useEffect(() => {
-        if (typeof window !== "undefined" && window.innerWidth >= 1024 && !isOnKeaPage) {
-            setOpen(true)
+        if (typeof window !== "undefined") {
+            const saved = localStorage.getItem("kea_panel_open")
+            if (saved !== null && !isOnKeaPage) {
+                setOpen(saved === "true")
+            } else if (window.innerWidth >= 1024 && !isOnKeaPage) {
+                setOpen(true)
+            }
         }
-        if (isOnKeaPage) setOpen(false)
     }, [isOnKeaPage])
+
+    // Persist open/closed state whenever it changes
+    useEffect(() => {
+        if (isClient && !isOnKeaPage) {
+            localStorage.setItem("kea_panel_open", open.toString())
+        }
+    }, [open, isClient, isOnKeaPage])
 
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -67,6 +196,37 @@ export function AIChatPanel() {
     useEffect(() => {
         scrollToBottom()
     }, [messages, scrollToBottom])
+
+    // Bird Bubble logic
+    useEffect(() => {
+        if (!isClient || open || isOnKeaPage) {
+            setShowBubble(false)
+            return
+        }
+
+        const cycleBubble = () => {
+            // Pick a random message
+            const nextIndex = Math.floor(Math.random() * BIRD_MESSAGES.length)
+            setBubbleIndex(nextIndex)
+            setShowBubble(true)
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                setShowBubble(false)
+            }, 5000)
+        }
+
+        // Run every 10 seconds (5s visible + 5s hidden)
+        const interval = setInterval(cycleBubble, 10000)
+
+        // Final check to run immediately if closed
+        const initialTimeout = setTimeout(cycleBubble, 3000)
+
+        return () => {
+            clearInterval(interval)
+            clearTimeout(initialTimeout)
+        }
+    }, [isClient, open, isOnKeaPage])
 
     const handleScroll = () => {
         const el = scrollContainerRef.current
@@ -102,19 +262,39 @@ export function AIChatPanel() {
 
     return (
         <>
-            {/* ─── Floating Toggle ──────────────────────────── */}
-            <button
-                onClick={() => setOpen((v) => !v)}
-                aria-label="Open AI chat"
-                className={cn(
-                    "fixed right-4 z-50 flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all duration-300",
-                    "bg-gradient-to-br from-amber-400 to-amber-500 text-white hover:from-amber-500 hover:to-amber-600 hover:scale-105",
-                    "bottom-[4.5rem] lg:bottom-8 lg:right-8",
-                    open && "opacity-0 pointer-events-none scale-75"
-                )}
-            >
-                <img src="/kea.svg" alt="Kea" className="h-12 w-12 rounded-full" />
-            </button>
+            {/* ─── Floating Toggle & Bubble ─────────────────── */}
+            <div className={cn(
+                "fixed right-4 z-50 flex flex-col items-end gap-3 transition-all duration-300",
+                "bottom-[4.5rem] lg:bottom-8 lg:right-8",
+                open && "opacity-0 pointer-events-none scale-75"
+            )}>
+                <AnimatePresence>
+                    {showBubble && !open && (
+                        <motion.button
+                            initial={{ opacity: 0, y: 10, scale: 0.9, x: 20 }}
+                            animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
+                            exit={{ opacity: 0, y: 5, scale: 0.95, x: 10 }}
+                            onClick={() => setOpen(true)}
+                            className="relative mb-1 max-w-[200px] rounded-2xl bg-white border border-amber-200 p-3 shadow-xl text-xs text-zinc-600 font-medium leading-relaxed group hover:border-amber-400 transition-colors cursor-pointer"
+                        >
+                            <div className="absolute bottom-[-6px] right-6 h-3 w-3 rotate-45 border-b border-r border-amber-200 bg-white group-hover:border-amber-400 transition-colors" />
+                            <Sparkles className="h-3 w-3 text-amber-500 mb-1 inline mr-1" />
+                            {BIRD_MESSAGES[bubbleIndex]}
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+
+                <button
+                    onClick={() => setOpen((v) => !v)}
+                    aria-label="Open AI chat"
+                    className={cn(
+                        "flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform",
+                        "bg-gradient-to-br from-amber-400 to-amber-500 text-white hover:from-amber-500 hover:to-amber-600 hover:scale-105"
+                    )}
+                >
+                    <img src="/kea.svg" alt="Kea" className="h-12 w-12 rounded-full" />
+                </button>
+            </div>
 
             {/* ─── Chat Panel ───────────────────────────────── */}
             <div
