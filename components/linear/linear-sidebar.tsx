@@ -29,6 +29,12 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip"
 
+const KeaAvatarIcon = ({ className }: { className?: string }) => (
+    <div className={cn("relative shrink-0 flex items-center justify-center", className)}>
+        <img src="/kea.svg" alt="Kea AI" className="h-full w-full rounded-full object-cover" />
+    </div>
+)
+
 const items = [
     { title: "Overview", href: "/dashboard", icon: LayoutGrid },
     { title: "Versus", href: "/dashboard/versus", icon: Swords },
@@ -36,7 +42,7 @@ const items = [
     { title: "Top Pages", href: "/dashboard/reports", icon: BarChart3 },
     { title: "Audience", href: "/dashboard/audience", icon: Users },
     { title: "Sources", href: "/dashboard/sources", icon: Globe },
-    { title: "Kea AI", href: "/dashboard/kea", icon: Bird },
+    { title: "Kea AI", href: "/dashboard/kea", icon: KeaAvatarIcon },
 ]
 
 export function LinearSidebar() {

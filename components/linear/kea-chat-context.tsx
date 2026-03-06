@@ -93,8 +93,17 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         if (!hasMounted.current) {
             hasMounted.current = true
+            // Hydrate saved messages from localStorage *after* mount to avoid SSR mismatch
+            if (typeof window !== "undefined") {
+                const saved = loadSavedMessages()
+                // If we found saved messages (and not just the default welcome message), set them
+                if (saved.length > 1 || (saved.length === 1 && saved[0].id !== "welcome-message")) {
+                    setMessages(saved as any)
+                }
+            }
             return
         }
+
         if (messages.length > 0) {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
@@ -103,7 +112,7 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
                 // storage full or unavailable
             }
         }
-    }, [messages])
+    }, [messages, setMessages])
 
     const resetChat = useCallback(() => {
         stop()

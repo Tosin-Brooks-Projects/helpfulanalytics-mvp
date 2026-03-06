@@ -178,116 +178,81 @@ You have tools connected to the user's live GA4 property. You MUST call your too
 
 // ─── Build Tools ────────────────────────────────────────────────
 
-function buildTools(isDemo: boolean, accessToken: string, propertyId: string) {
+// ─── Schema-Only Tools (for model to choose which to call) ──────
+
+function buildSchemaOnlyTools() {
     return {
         getMetricsOverview: tool({
             description: "Fetch high-level GA4 metrics: total sessions, active users, pageviews, bounce rate, and average session duration.",
-            parameters: z.object({
-                startDate: z.string().describe("Start date YYYY-MM-DD"),
-                endDate: z.string().describe("End date YYYY-MM-DD"),
-            }),
-            execute: async ({ startDate: s, endDate: e }) => {
-                console.log("[Kea Tool] getMetricsOverview")
-                if (isDemo) return DEMO_OVERVIEW
-                try { return await getOverviewData(accessToken, propertyId, s, e) }
-                catch (err: any) { return { error: err?.message || "Unknown" } }
-            },
+            parameters: z.object({ startDate: z.string(), endDate: z.string() }),
         }),
         getTrafficSources: tool({
             description: "Fetch top traffic sources with sessions, users, bounce rates.",
-            parameters: z.object({
-                startDate: z.string().describe("Start date YYYY-MM-DD"),
-                endDate: z.string().describe("End date YYYY-MM-DD"),
-                limit: z.number().optional().describe("Number of sources. Default 10."),
-            }),
-            execute: async ({ startDate: s, endDate: e, limit }) => {
-                console.log("[Kea Tool] getTrafficSources")
-                if (isDemo) return DEMO_SOURCES
-                try { return await getAcquisitionData(accessToken, propertyId, s, e, limit ?? 10) }
-                catch (err: any) { return { error: err?.message || "Unknown" } }
-            },
+            parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
         }),
         getTopPages: tool({
             description: "Fetch most visited pages with pageviews, bounce rate, avg time.",
-            parameters: z.object({
-                startDate: z.string().describe("Start date YYYY-MM-DD"),
-                endDate: z.string().describe("End date YYYY-MM-DD"),
-                limit: z.number().optional().describe("Number of pages. Default 10."),
-            }),
-            execute: async ({ startDate: s, endDate: e, limit }) => {
-                console.log("[Kea Tool] getTopPages")
-                if (isDemo) return DEMO_PAGES
-                try { return await getTopPagesData(accessToken, propertyId, s, e, limit ?? 10) }
-                catch (err: any) { return { error: err?.message || "Unknown" } }
-            },
+            parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
         }),
         getDeviceBreakdown: tool({
             description: "Fetch device category breakdown (mobile/desktop/tablet), browsers.",
-            parameters: z.object({
-                startDate: z.string().describe("Start date YYYY-MM-DD"),
-                endDate: z.string().describe("End date YYYY-MM-DD"),
-            }),
-            execute: async ({ startDate: s, endDate: e }) => {
-                console.log("[Kea Tool] getDeviceBreakdown")
-                if (isDemo) return DEMO_DEVICES
-                try { return await getDevicesData(accessToken, propertyId, s, e) }
-                catch (err: any) { return { error: err?.message || "Unknown" } }
-            },
+            parameters: z.object({ startDate: z.string(), endDate: z.string() }),
         }),
         getLocationData: tool({
             description: "Fetch geographic distribution of users by country.",
-            parameters: z.object({
-                startDate: z.string().describe("Start date YYYY-MM-DD"),
-                endDate: z.string().describe("End date YYYY-MM-DD"),
-                limit: z.number().optional().describe("Number of countries. Default 10."),
-            }),
-            execute: async ({ startDate: s, endDate: e, limit }) => {
-                console.log("[Kea Tool] getLocationData")
-                if (isDemo) return DEMO_LOCATIONS
-                try { return await getLocationsData(accessToken, propertyId, s, e, limit ?? 10) }
-                catch (err: any) { return { error: err?.message || "Unknown" } }
-            },
+            parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
         }),
         getRealtimeSnapshot: tool({
             description: "Fetch real-time active users and pages they are viewing.",
             parameters: z.object({}),
-            execute: async () => {
-                console.log("[Kea Tool] getRealtimeSnapshot")
-                if (isDemo) return DEMO_REALTIME
-                try { return await getRealtimeData(accessToken, propertyId) }
-                catch (err: any) { return { error: err?.message || "Unknown" } }
-            },
         }),
         getTrafficByState: tool({
             description: "Fetch state/region level traffic within a country.",
-            parameters: z.object({
-                startDate: z.string().describe("Start date YYYY-MM-DD"),
-                endDate: z.string().describe("End date YYYY-MM-DD"),
-                country: z.string().optional().describe("Country. Default 'United States'."),
-                limit: z.number().optional().describe("Number of states. Default 10."),
-            }),
-            execute: async ({ startDate: s, endDate: e, country, limit }) => {
-                console.log("[Kea Tool] getTrafficByState")
-                if (isDemo) return { states: [{ state: "California", sessions: 2100, users: 1800 }, { state: "New York", sessions: 1500, users: 1200 }, { state: "Texas", sessions: 900, users: 750 }], totalSessions: 5200 }
-                try { return await getStatesData(accessToken, propertyId, s, e, country ?? "United States", limit ?? 10) }
-                catch (err: any) { return { error: err?.message || "Unknown" } }
-            },
+            parameters: z.object({ startDate: z.string(), endDate: z.string(), country: z.string().optional(), limit: z.number().optional() }),
         }),
         getTrafficByCity: tool({
             description: "Fetch city-level traffic within a country.",
-            parameters: z.object({
-                startDate: z.string().describe("Start date YYYY-MM-DD"),
-                endDate: z.string().describe("End date YYYY-MM-DD"),
-                country: z.string().optional().describe("Country. Default 'United States'."),
-                limit: z.number().optional().describe("Number of cities. Default 10."),
-            }),
-            execute: async ({ startDate: s, endDate: e, country, limit }) => {
-                console.log("[Kea Tool] getTrafficByCity")
-                if (isDemo) return { cities: [{ city: "New York", sessions: 800, users: 650 }, { city: "Los Angeles", sessions: 600, users: 480 }, { city: "Chicago", sessions: 400, users: 320 }], totalSessions: 5200 }
-                try { return await getCitiesData(accessToken, propertyId, s, e, country ?? "United States", limit ?? 10) }
-                catch (err: any) { return { error: err?.message || "Unknown" } }
-            },
+            parameters: z.object({ startDate: z.string(), endDate: z.string(), country: z.string().optional(), limit: z.number().optional() }),
         }),
+    }
+}
+
+// ─── Tool Executors (actual data fetching functions) ─────────────
+
+function buildToolExecutors(isDemo: boolean, accessToken: string, propertyId: string): Record<string, (args: any) => Promise<any>> {
+    return {
+        getMetricsOverview: async (args: any) => {
+            if (isDemo) return DEMO_OVERVIEW
+            return getOverviewData(accessToken, propertyId, args.startDate, args.endDate)
+        },
+        getTrafficSources: async (args: any) => {
+            if (isDemo) return DEMO_SOURCES
+            return getAcquisitionData(accessToken, propertyId, args.startDate, args.endDate, args.limit ?? 10)
+        },
+        getTopPages: async (args: any) => {
+            if (isDemo) return DEMO_PAGES
+            return getTopPagesData(accessToken, propertyId, args.startDate, args.endDate, args.limit ?? 10)
+        },
+        getDeviceBreakdown: async (args: any) => {
+            if (isDemo) return DEMO_DEVICES
+            return getDevicesData(accessToken, propertyId, args.startDate, args.endDate)
+        },
+        getLocationData: async (args: any) => {
+            if (isDemo) return DEMO_LOCATIONS
+            return getLocationsData(accessToken, propertyId, args.startDate, args.endDate, args.limit ?? 10)
+        },
+        getRealtimeSnapshot: async () => {
+            if (isDemo) return DEMO_REALTIME
+            return getRealtimeData(accessToken, propertyId)
+        },
+        getTrafficByState: async (args: any) => {
+            if (isDemo) return { states: [{ state: "California", sessions: 2100, users: 1800 }, { state: "New York", sessions: 1500, users: 1200 }, { state: "Texas", sessions: 900, users: 750 }], totalSessions: 5200 }
+            return getStatesData(accessToken, propertyId, args.startDate, args.endDate, args.country ?? "United States", args.limit ?? 10)
+        },
+        getTrafficByCity: async (args: any) => {
+            if (isDemo) return { cities: [{ city: "New York", sessions: 800, users: 650 }, { city: "Los Angeles", sessions: 600, users: 480 }, { city: "Chicago", sessions: 400, users: 320 }], totalSessions: 5200 }
+            return getCitiesData(accessToken, propertyId, args.startDate, args.endDate, args.country ?? "United States", args.limit ?? 10)
+        },
     }
 }
 
@@ -311,45 +276,56 @@ export async function POST(request: Request) {
     const modelMessages = convertToModelMessages(messages)
     const model = google("gemini-2.5-flash")
     const system = buildSystemPrompt()
-    const tools = buildTools(isDemo, accessToken, propertyId)
 
     console.log("[Kea] Property:", propertyId, "| isDemo:", isDemo, "| msgs:", modelMessages.length)
 
     try {
-        // ── Step 1: Let the model decide what to do ─────────────
-        // @ai-sdk/google has a bug where maxSteps doesn't trigger
-        // a second model call after tool execution. So we do it manually.
+        // ── Step 1: Ask the model which tools to call ───────────
+        // Use schema-only tools (no execute) so we control execution
         const step1 = await generateText({
             model,
             system,
             messages: modelMessages as any,
-            tools,
+            tools: buildSchemaOnlyTools(),
         })
 
         console.log("[Kea] Step 1:", {
             finish: step1.finishReason,
             textLen: step1.text.length,
             toolCalls: step1.toolCalls.length,
-            toolResults: step1.toolResults.length,
         })
 
         let finalText = step1.text
-        const allToolCalls = step1.toolCalls
-        const allToolResults = step1.toolResults
+        const executedTools: Array<{ name: string; data: any }> = []
 
-        // ── Step 2: If tools were called, feed results back ─────
-        if (step1.toolCalls.length > 0 && step1.toolResults.length > 0) {
-            // Build the conversation with tool results for the model
-            const toolResultsSummary = step1.toolResults
-                .map((tr: any) => `Tool "${tr.toolName}" returned:\n${JSON.stringify(tr.result, null, 2)}`)
+        // ── Manual tool execution ───────────────────────────────
+        if (step1.toolCalls.length > 0) {
+            const toolExecutors = buildToolExecutors(isDemo, accessToken, propertyId)
+
+            for (const tc of step1.toolCalls) {
+                const executor = toolExecutors[tc.toolName]
+                if (executor) {
+                    try {
+                        const data = await executor(tc.args)
+                        executedTools.push({ name: tc.toolName, data })
+                        console.log("[Kea Tool]", tc.toolName, "→", JSON.stringify(data).slice(0, 100))
+                    } catch (err: any) {
+                        executedTools.push({ name: tc.toolName, data: { error: err?.message || "Unknown" } })
+                    }
+                }
+            }
+
+            // ── Step 2: Feed tool results to model for analysis ─────
+            const toolDataSummary = executedTools
+                .map((t) => `### ${t.name}\n\`\`\`json\n${JSON.stringify(t.data, null, 2)}\n\`\`\``)
                 .join("\n\n")
 
             const step2Messages = [
                 ...modelMessages,
-                { role: "assistant", content: step1.text || "Let me analyze your data." },
+                { role: "assistant", content: step1.text || "Let me pull your data." },
                 {
                     role: "user",
-                    content: `Here are the analytics results from the tools I requested:\n\n${toolResultsSummary}\n\nPlease analyze this data and provide your insights. Follow your formatting rules.`,
+                    content: `Here is the analytics data I fetched:\n\n${toolDataSummary}\n\nAnalyze this data and give me insights. Use your formatting rules.`,
                 },
             ]
 
@@ -357,7 +333,6 @@ export async function POST(request: Request) {
                 model,
                 system,
                 messages: step2Messages as any,
-                // No tools — just analyze the data
             })
 
             console.log("[Kea] Step 2:", { textLen: step2.text.length, finish: step2.finishReason })
@@ -368,23 +343,6 @@ export async function POST(request: Request) {
         const textPartId = `text-${Date.now()}`
         const stream = createUIMessageStream({
             execute: async ({ writer }) => {
-                // Write tool invocations
-                for (const tc of allToolCalls) {
-                    writer.write({
-                        type: "tool-input-available",
-                        toolCallId: tc.toolCallId,
-                        toolName: tc.toolName,
-                        input: tc.args,
-                    } as any)
-                }
-                for (const tr of allToolResults) {
-                    writer.write({
-                        type: "tool-output-available",
-                        toolCallId: tr.toolCallId,
-                        output: tr.result,
-                    } as any)
-                }
-                // Write the final analysis text using start/delta/end
                 writer.write({ type: "text-start", id: textPartId } as any)
                 writer.write({ type: "text-delta", id: textPartId, delta: finalText } as any)
                 writer.write({ type: "text-end", id: textPartId } as any)
