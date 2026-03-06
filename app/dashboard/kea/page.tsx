@@ -3,7 +3,7 @@
 import { useRef, useEffect, useCallback, useState } from "react"
 import { LinearShell } from "@/components/linear/linear-shell"
 import { useKeaChat } from "@/components/linear/kea-chat-context"
-import { Send, RotateCcw, Sparkles } from "lucide-react"
+import { Send, Plus, Sparkles, MessageSquare, Trash2, Menu } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import { cn } from "@/lib/utils"
 
@@ -31,11 +31,22 @@ function getToolInfo(toolName: string) {
     return TOOL_LABELS[toolName] ?? { label: toolName, icon: "🔧" }
 }
 
+function formatSessionDate(ts: number) {
+    const d = new Date(ts)
+    if (d.toDateString() === new Date().toDateString()) return "Today, " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+    return d.toLocaleDateString([], { month: "short", day: "numeric" })
+}
+
 export default function KeaPage() {
-    const { messages, sendMessage, input, setInput, resetChat, isLoading, status } = useKeaChat()
+    const {
+        messages, sendMessage, input, setInput, resetChat, isLoading, status,
+        sessions, currentSessionId, switchSession, deleteSession
+    } = useKeaChat()
+
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const scrollContainerRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLTextAreaElement>(null)
+    const [sidebarOpen, setSidebarOpen] = useState(false)
 
     const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
         messagesEndRef.current?.scrollIntoView({ behavior })
@@ -69,158 +80,224 @@ export default function KeaPage() {
         return null
     })()
 
+    // Group sessions into Today, Previous 7 Days, Older (Optional, for now just sort by date desc)
+    const sortedSessions = [...sessions].sort((a, b) => b.updatedAt - a.updatedAt)
+
     return (
         <LinearShell>
-            <div className="flex flex-col h-[calc(100vh-8rem)] max-w-4xl mx-auto">
-                {/* ─── Header ───────────────────────────── */}
-                <div className="flex items-center justify-between pb-4 border-b border-zinc-100 mb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="relative">
-                            <img src="/kea.svg" alt="Kea" className="h-10 w-10 rounded-full" />
-                            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
-                        </div>
-                        <div>
-                            <h1 className="text-lg font-bold text-zinc-900 font-outfit">Kea</h1>
-                            <p className="text-xs text-zinc-400">Your AI analytics assistant · Powered by GA4</p>
-                        </div>
-                    </div>
-                    <button
-                        onClick={resetChat}
-                        className="flex items-center gap-1.5 rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors"
-                    >
-                        <RotateCcw className="h-3 w-3" />
-                        New chat
-                    </button>
-                </div>
+            <div className="flex bg-white h-[calc(100vh-8rem)] rounded-2xl border border-zinc-200 overflow-hidden shadow-sm max-w-6xl mx-auto">
 
-                {/* ─── Messages ──────────────────────────── */}
-                <div
-                    ref={scrollContainerRef}
-                    className="flex-1 overflow-y-auto space-y-4 pr-2"
-                >
-                    {messages.map((rawMsg, i) => {
-                        const msg = rawMsg as any
-                        return (
-                            <div key={msg.id || i} className="flex flex-col gap-2">
-                                {/* Message bubble */}
-                                <div className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
-                                    {msg.role === "assistant" && (
-                                        <img src="/kea.svg" alt="Kea" className="mr-3 mt-1 h-7 w-7 shrink-0 rounded-full" />
-                                    )}
-                                    <div
-                                        className={cn(
-                                            "max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
-                                            msg.role === "user"
-                                                ? "bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-tr-md shadow-sm"
-                                                : "bg-zinc-50 border border-zinc-100 text-zinc-800 rounded-tl-md"
-                                        )}
-                                    >
-                                        <MessageContent msg={msg} />
-                                    </div>
-                                </div>
-
-                                {/* Tool invocation cards */}
-                                {msg.parts?.filter((p: any) => p.type === "tool-invocation").map((part: any, pi: number) => {
-                                    const toolInfo = getToolInfo(part.toolInvocation?.toolName || part.toolName || "")
-                                    const hasResult = part.toolInvocation?.state === "result" || part.state === "result"
-
-                                    return (
-                                        <div key={pi} className="flex justify-start pl-10">
-                                            <div className={cn(
-                                                "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all",
-                                                hasResult
-                                                    ? "bg-emerald-50 border border-emerald-100 text-emerald-700"
-                                                    : "bg-amber-50 border border-amber-100 text-amber-700"
-                                            )}>
-                                                <span className="text-sm">{toolInfo.icon}</span>
-                                                {hasResult ? (
-                                                    <span>✓ Loaded {toolInfo.label}</span>
-                                                ) : (
-                                                    <span className="flex items-center gap-1.5">
-                                                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                                                        Fetching {toolInfo.label}…
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )
-                    })}
-
-                    {/* Suggested prompts */}
-                    {messages.length === 1 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 max-w-2xl">
-                            {SUGGESTED_PROMPTS.map((prompt) => (
-                                <button
-                                    key={prompt}
-                                    onClick={() => {
-                                        sendMessage({ role: "user", content: prompt } as any)
-                                        setInput("")
-                                    }}
-                                    className="flex items-center gap-2.5 rounded-xl border border-zinc-200/80 px-4 py-3 text-left text-sm text-zinc-600 hover:bg-amber-50/60 hover:border-amber-200 hover:text-amber-700 transition-all"
-                                >
-                                    <Sparkles className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-                                    {prompt}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Typing / status indicator */}
-                    {statusLabel && (
-                        <div className="flex items-center gap-2 pl-10">
-                            <div className="flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-2 text-xs text-zinc-500 font-medium">
-                                <span className="flex gap-0.5">
-                                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
-                                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
-                                    <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
-                                </span>
-                                {statusLabel}
-                            </div>
-                        </div>
-                    )}
-
-                    <div ref={messagesEndRef} />
-                </div>
-
-                {/* ─── Input ────────────────────────────── */}
-                <form onSubmit={(e) => { e.preventDefault(); handleSend() }} className="shrink-0 border-t border-zinc-100 pt-4 mt-4">
-                    <div className="flex items-end gap-3 rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-100 transition-all">
-                        <textarea
-                            ref={inputRef}
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Ask Kea about your analytics…"
-                            rows={1}
-                            disabled={isLoading}
-                            className="flex-1 resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 outline-none max-h-32 disabled:opacity-50"
-                            style={{ height: "auto", minHeight: "24px" }}
-                            onInput={(e) => {
-                                const el = e.target as HTMLTextAreaElement
-                                el.style.height = "auto"
-                                el.style.height = `${el.scrollHeight}px`
-                            }}
-                        />
+                {/* ─── History Sidebar ──────────────────────── */}
+                <div className={cn(
+                    "w-64 border-r border-zinc-200 bg-zinc-50/50 flex flex-col shrink-0 transition-transform duration-300 md:translate-x-0 absolute md:static inset-y-0 left-0 z-30 h-full",
+                    sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
+                )}>
+                    <div className="p-4 border-b border-zinc-200 flex items-center justify-between">
                         <button
-                            type="submit"
-                            disabled={!input || input.trim() === "" || isLoading}
-                            aria-label="Send message"
-                            className={cn(
-                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all",
-                                "bg-gradient-to-br from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700",
-                                "disabled:opacity-30 disabled:cursor-not-allowed disabled:from-zinc-400 disabled:to-zinc-400"
-                            )}
+                            onClick={() => { resetChat(); setSidebarOpen(false); }}
+                            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 text-sm font-medium transition-colors shadow-sm"
                         >
-                            <Send className="h-4 w-4" />
+                            <Plus className="h-4 w-4" />
+                            New chat
                         </button>
                     </div>
-                    <p className="mt-2 text-center text-[10px] text-zinc-300">
-                        Press Enter to send · Shift+Enter for new line
-                    </p>
-                </form>
+
+                    <div className="flex-1 overflow-y-auto p-3 space-y-1">
+                        {sortedSessions.length === 0 ? (
+                            <div className="py-8 text-center text-xs text-zinc-400">No previous chats</div>
+                        ) : (
+                            sortedSessions.map(session => (
+                                <div
+                                    key={session.id}
+                                    className={cn(
+                                        "group flex items-center gap-2 rounded-lg px-3 py-2 text-sm cursor-pointer transition-colors",
+                                        currentSessionId === session.id
+                                            ? "bg-amber-100/50 text-amber-900 font-medium"
+                                            : "hover:bg-zinc-100/80 text-zinc-600"
+                                    )}
+                                    onClick={() => { switchSession(session.id); setSidebarOpen(false); }}
+                                >
+                                    <MessageSquare className="h-4 w-4 shrink-0 opacity-50" />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="truncate text-sm">{session.title}</div>
+                                        <div className="text-[10px] opacity-70 mt-0.5">{formatSessionDate(session.updatedAt)}</div>
+                                    </div>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); deleteSession(session.id); }}
+                                        className="opacity-0 group-hover:opacity-100 hover:text-red-500 rounded p-1 hover:bg-zinc-200/50 transition-all shrink-0"
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* ─── Main Chat Area ───────────────────────── */}
+                <div className="flex-1 flex flex-col min-w-0 bg-white relative">
+
+                    {/* Header */}
+                    <div className="flex flex-col h-full right-0">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100 shrink-0">
+                            <div className="flex items-center gap-3">
+                                <button
+                                    className="md:hidden p-2 -ml-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg shrink-0"
+                                    onClick={() => setSidebarOpen(true)}
+                                >
+                                    <Menu className="h-5 w-5" />
+                                </button>
+                                <div className="relative shrink-0">
+                                    <img src="/kea.svg" alt="Kea" className="h-10 w-10 rounded-full" />
+                                    <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-400" />
+                                </div>
+                                <div className="min-w-0">
+                                    <h1 className="text-lg font-bold text-zinc-900 font-outfit truncate">Kea</h1>
+                                    <p className="text-xs text-zinc-400 hidden sm:block truncate">Your AI analytics assistant · Powered by GA4</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Messages */}
+                        <div
+                            ref={scrollContainerRef}
+                            className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4"
+                        >
+                            {messages.map((rawMsg, i) => {
+                                const msg = rawMsg as any
+                                return (
+                                    <div key={msg.id || i} className="flex flex-col gap-2">
+                                        {/* Message bubble */}
+                                        <div className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+                                            {msg.role === "assistant" && (
+                                                <img src="/kea.svg" alt="Kea" className="mr-3 mt-1 h-7 w-7 shrink-0 rounded-full" />
+                                            )}
+                                            <div
+                                                className={cn(
+                                                    "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed",
+                                                    msg.role === "user"
+                                                        ? "bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-tr-md shadow-sm"
+                                                        : "bg-zinc-50 border border-zinc-100 text-zinc-800 rounded-tl-md"
+                                                )}
+                                            >
+                                                <MessageContent msg={msg} />
+                                            </div>
+                                        </div>
+
+                                        {/* Tool invocation cards */}
+                                        {msg.parts?.filter((p: any) => p.type === "tool-invocation").map((part: any, pi: number) => {
+                                            const toolInfo = getToolInfo(part.toolInvocation?.toolName || part.toolName || "")
+                                            const hasResult = part.toolInvocation?.state === "result" || part.state === "result"
+
+                                            return (
+                                                <div key={pi} className="flex justify-start pl-10">
+                                                    <div className={cn(
+                                                        "flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-medium transition-all",
+                                                        hasResult
+                                                            ? "bg-emerald-50 border border-emerald-100 text-emerald-700"
+                                                            : "bg-amber-50 border border-amber-100 text-amber-700"
+                                                    )}>
+                                                        <span className="text-sm">{toolInfo.icon}</span>
+                                                        {hasResult ? (
+                                                            <span>✓ Loaded {toolInfo.label}</span>
+                                                        ) : (
+                                                            <span className="flex items-center gap-1.5">
+                                                                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                                                Fetching {toolInfo.label}…
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                )
+                            })}
+
+                            {/* Suggested prompts (only if empty chat) */}
+                            {messages.length === 1 && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-4 max-w-2xl mx-auto">
+                                    {SUGGESTED_PROMPTS.map((prompt) => (
+                                        <button
+                                            key={prompt}
+                                            onClick={() => {
+                                                sendMessage({ role: "user", content: prompt } as any)
+                                                setInput("")
+                                            }}
+                                            className="flex items-center gap-3 rounded-xl border border-zinc-200/80 px-4 py-3.5 text-left text-sm text-zinc-700 hover:bg-amber-50/60 hover:border-amber-200 hover:text-amber-800 transition-all font-medium"
+                                        >
+                                            <Sparkles className="h-4 w-4 text-amber-500 shrink-0" />
+                                            {prompt}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
+                            {/* Typing / status indicator */}
+                            {statusLabel && (
+                                <div className="flex items-center gap-2 pl-10">
+                                    <div className="flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-2 text-xs text-zinc-500 font-medium tracking-wide">
+                                        <span className="flex gap-0.5">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
+                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
+                                            <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
+                                        </span>
+                                        {statusLabel}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="p-4 sm:p-6 border-t border-zinc-100 bg-white shrink-0">
+                            <form onSubmit={(e) => { e.preventDefault(); handleSend() }} className="max-w-4xl mx-auto">
+                                <div className="flex items-end gap-3 rounded-2xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 focus-within:border-amber-400 focus-within:ring-4 focus-within:ring-amber-500/10 transition-all">
+                                    <textarea
+                                        ref={inputRef}
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        onKeyDown={handleKeyDown}
+                                        placeholder="Ask Kea about your analytics..."
+                                        rows={1}
+                                        disabled={isLoading}
+                                        className="flex-1 resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 outline-none max-h-32 disabled:opacity-50"
+                                        style={{ height: "auto", minHeight: "24px" }}
+                                        onInput={(e) => {
+                                            const el = e.target as HTMLTextAreaElement
+                                            el.style.height = "auto"
+                                            el.style.height = `${el.scrollHeight}px`
+                                        }}
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={!input || input.trim() === "" || isLoading}
+                                        aria-label="Send message"
+                                        className={cn(
+                                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all shadow-sm",
+                                            "bg-amber-500 text-white hover:bg-amber-600",
+                                            "disabled:opacity-40 disabled:cursor-not-allowed disabled:bg-zinc-300"
+                                        )}
+                                    >
+                                        <Send className="h-4 w-4" />
+                                    </button>
+                                </div>
+                                <p className="mt-2.5 text-center text-xs text-zinc-400">
+                                    Press <kbd className="font-sans px-1 py-0.5 bg-zinc-100 border border-zinc-200 rounded mx-0.5">Enter</kbd> to send · <kbd className="font-sans px-1 py-0.5 bg-zinc-100 border border-zinc-200 rounded mx-0.5">Shift</kbd> + <kbd className="font-sans px-1 py-0.5 bg-zinc-100 border border-zinc-200 rounded mx-0.5">Enter</kbd> for new line
+                                </p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Backdrop for mobile sidebar */}
+                {sidebarOpen && (
+                    <div
+                        className="fixed inset-0 z-20 bg-zinc-900/20 backdrop-blur-sm md:hidden"
+                        onClick={() => setSidebarOpen(false)}
+                    />
+                )}
             </div>
         </LinearShell>
     )

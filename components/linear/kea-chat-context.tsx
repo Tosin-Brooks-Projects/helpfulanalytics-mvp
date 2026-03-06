@@ -5,9 +5,9 @@ import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { useDashboard } from "@/components/linear/dashboard-context"
 
-const STORAGE_KEY = "kea_chat_history"
-const STORAGE_VERSION_KEY = "kea_chat_version"
-const CURRENT_VERSION = "v4"
+const STORAGE_KEY = "kea_chat_sessions" // Changed key for new data structure
+const STORAGE_VERSION_KEY = "kea_chat_session_version"
+const CURRENT_VERSION = "v1"
 
 type InitialMessage = {
     id: string
@@ -25,6 +25,13 @@ const INITIAL_MESSAGES: InitialMessage[] = [
     },
 ]
 
+export type ChatSession = {
+    id: string
+    title: string
+    updatedAt: number
+    messages: any[]
+}
+
 interface KeaChatContextType {
     messages: any[]
     sendMessage: (msg: any) => void
@@ -35,9 +42,22 @@ interface KeaChatContextType {
     setInput: (val: string) => void
     resetChat: () => void
     isLoading: boolean
+    // Session management
+    sessions: ChatSession[]
+    currentSessionId: string
+    switchSession: (id: string) => void
+    deleteSession: (id: string) => void
 }
 
 const KeaChatContext = createContext<KeaChatContextType | undefined>(undefined)
+
+function generateSessionId() {
+    return Math.random().toString(36).substring(2, 9)
+}
+
+function getFirstUserMessage(messages: any[]): string | undefined {
+    return messages.find((m) => m.role === "user")?.content
+}
 
 export function KeaChatProvider({ children }: { children: ReactNode }) {
     const { selectedProperty, dateRange } = useDashboard()
@@ -45,35 +65,39 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
     const [input, setInput] = useState("")
     const hasMounted = useRef(false)
 
+    const [sessions, setSessions] = useState<ChatSession[]>([])
+    const [currentSessionId, setCurrentSessionId] = useState<string>("")
+
     useEffect(() => { setIsClient(true) }, [])
 
     const startDate = isClient && dateRange?.from ? dateRange.from.toISOString().split("T")[0] : "30daysAgo"
     const endDate = isClient && dateRange?.to ? dateRange.to.toISOString().split("T")[0] : "today"
 
-    // Load saved messages from localStorage (with version check)
-    const loadSavedMessages = (): any[] => {
-        if (typeof window === "undefined") return INITIAL_MESSAGES
+    // Load saved sessions from localStorage (with version check)
+    const loadSavedSessions = useCallback((): ChatSession[] => {
+        if (typeof window === "undefined") return []
         try {
             const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY)
             if (storedVersion !== CURRENT_VERSION) {
-                // Old format — clear and start fresh
+                // Old format or old single-chat storage — clear and start fresh
                 localStorage.removeItem(STORAGE_KEY)
+                localStorage.removeItem("kea_chat_history") // Clean up old single-chat key
                 localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION)
-                return INITIAL_MESSAGES
+                return []
             }
             const saved = localStorage.getItem(STORAGE_KEY)
             if (saved) {
                 const parsed = JSON.parse(saved)
-                if (Array.isArray(parsed) && parsed.length > 0) return parsed
+                if (Array.isArray(parsed)) return parsed
             }
         } catch {
             // ignore parse errors
         }
-        return INITIAL_MESSAGES
-    }
+        return []
+    }, [])
 
-    const { messages, sendMessage, setMessages, stop, status } = useChat({
-        initialMessages: loadSavedMessages() as any,
+    const { messages, append: sendMessage, setMessages, stop, status } = useChat({
+        initialMessages: INITIAL_MESSAGES as any,
         transport: new DefaultChatTransport({
             api: "/api/ai/chat",
             body: {
@@ -89,36 +113,132 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
 
     const isLoading = status === "submitted" || status === "streaming"
 
-    // Persist messages to localStorage whenever they change
+    // Initial Hydration
     useEffect(() => {
-        if (!hasMounted.current) {
+        if (!hasMounted.current && typeof window !== "undefined") {
             hasMounted.current = true
-            // Hydrate saved messages from localStorage *after* mount to avoid SSR mismatch
-            if (typeof window !== "undefined") {
-                const saved = loadSavedMessages()
-                // If we found saved messages (and not just the default welcome message), set them
-                if (saved.length > 1 || (saved.length === 1 && saved[0].id !== "welcome-message")) {
-                    setMessages(saved as any)
+            const savedSessions = loadSavedSessions()
+            setSessions(savedSessions)
+
+            if (savedSessions.length > 0) {
+                // Load the most recently updated session
+                const mostRecent = savedSessions.reduce((prev, current) =>
+                    (prev.updatedAt > current.updatedAt) ? prev : current
+                )
+                setCurrentSessionId(mostRecent.id)
+                setMessages(mostRecent.messages as any)
+            } else {
+                // Initialize a new clear session
+                const newId = generateSessionId()
+                setCurrentSessionId(newId)
+                setSessions([{
+                    id: newId,
+                    title: "New Chat",
+                    updatedAt: Date.now(),
+                    messages: INITIAL_MESSAGES,
+                }])
+            }
+        }
+    }, [loadSavedSessions, setMessages])
+
+    // Sync messages to the current session whenever messages change
+    useEffect(() => {
+        if (!hasMounted.current || !currentSessionId) return
+
+        setSessions((prev) => {
+            const sessionIndex = prev.findIndex((s) => s.id === currentSessionId)
+            let updatedSessions = [...prev]
+
+            // Derive title from first user message, fallback to "New Chat"
+            const firstUserMsg = getFirstUserMessage(messages)
+            const title = firstUserMsg ? (firstUserMsg.length > 30 ? firstUserMsg.slice(0, 30) + "..." : firstUserMsg) : "New Chat"
+
+            if (sessionIndex >= 0) {
+                updatedSessions[sessionIndex] = {
+                    ...updatedSessions[sessionIndex],
+                    messages,
+                    title,
+                    updatedAt: Date.now(),
+                }
+            } else {
+                // Failsafe: session got deleted but messages updated? Create it.
+                updatedSessions.push({
+                    id: currentSessionId,
+                    title,
+                    updatedAt: Date.now(),
+                    messages,
+                })
+            }
+
+            // Save to local storage
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedSessions))
+                localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION)
+            } catch { }
+
+            return updatedSessions
+        })
+    }, [messages, currentSessionId])
+
+    const switchSession = useCallback((id: string) => {
+        stop()
+        const target = sessions.find((s) => s.id === id)
+        if (target) {
+            setCurrentSessionId(id)
+            setMessages(target.messages as any)
+        }
+    }, [sessions, stop, setMessages])
+
+    const deleteSession = useCallback((id: string) => {
+        setSessions((prev) => {
+            const filtered = prev.filter((s) => s.id !== id)
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered))
+            } catch { }
+
+            // If we deleted the active session, switch to another or create new
+            if (id === currentSessionId) {
+                if (filtered.length > 0) {
+                    const mostRecent = filtered.reduce((p, c) => (p.updatedAt > c.updatedAt) ? p : c)
+                    setCurrentSessionId(mostRecent.id)
+                    setMessages(mostRecent.messages as any)
+                } else {
+                    const newId = generateSessionId()
+                    setCurrentSessionId(newId)
+                    setMessages(INITIAL_MESSAGES as any)
+                    return [{
+                        id: newId,
+                        title: "New Chat",
+                        updatedAt: Date.now(),
+                        messages: INITIAL_MESSAGES,
+                    }]
                 }
             }
-            return
-        }
 
-        if (messages.length > 0) {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
-                localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION)
-            } catch {
-                // storage full or unavailable
-            }
-        }
-    }, [messages, setMessages])
+            return filtered
+        })
+    }, [currentSessionId, setMessages])
 
     const resetChat = useCallback(() => {
         stop()
+
+        // Only create a new session if the current one actually has user messages
+        const firstUserMsg = getFirstUserMessage(messages)
+        if (!firstUserMsg) {
+            // Already an empty chat, don't spam sessions
+            return
+        }
+
+        const newId = generateSessionId()
+        // We defer adding it to `sessions` list until messages are generated (or pre-add it)
+        setSessions((prev) => [
+            { id: newId, title: "New Chat", updatedAt: Date.now(), messages: INITIAL_MESSAGES },
+            ...prev
+        ])
+        setCurrentSessionId(newId)
         setMessages(INITIAL_MESSAGES as any)
-        localStorage.removeItem(STORAGE_KEY)
-    }, [stop, setMessages])
+        setInput("")
+    }, [stop, setMessages, messages])
 
     return (
         <KeaChatContext.Provider value={{
@@ -131,6 +251,10 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
             setInput,
             resetChat,
             isLoading,
+            sessions,
+            currentSessionId,
+            switchSession,
+            deleteSession,
         }}>
             {children}
         </KeaChatContext.Provider>
