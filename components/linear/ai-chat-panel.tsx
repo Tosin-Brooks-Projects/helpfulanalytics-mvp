@@ -222,8 +222,8 @@ export function AIChatPanel() {
                         )
                     })}
 
-                    {/* Suggested prompts */}
-                    {messages.length === 1 && (
+                    {/* Suggested prompts (visible until user sends first message) */}
+                    {!messages.some(m => m.role === "user") && (
                         <div className="grid grid-cols-1 gap-1.5 pt-1">
                             {SUGGESTED_PROMPTS.map((prompt) => (
                                 <button

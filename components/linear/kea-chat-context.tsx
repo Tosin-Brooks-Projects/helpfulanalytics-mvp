@@ -13,15 +13,13 @@ type InitialMessage = {
     id: string
     role: "assistant"
     content: string
-    parts: Array<{ type: "text"; text: string }>
 }
 
-const INITIAL_MESSAGES: InitialMessage[] = [
+const INITIAL_MESSAGES = [
     {
         id: "welcome-message",
         role: "assistant",
         content: "Hey — I'm Kea. I'm plugged directly into your GA4 data and ready to dig in. Ask me anything about your traffic, pages, audience, or performance.",
-        parts: [{ type: "text", text: "Hey — I'm Kea. I'm plugged directly into your GA4 data and ready to dig in. Ask me anything about your traffic, pages, audience, or performance." }],
     },
 ]
 

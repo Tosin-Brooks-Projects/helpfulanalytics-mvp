@@ -214,8 +214,8 @@ export default function KeaPage() {
                                 )
                             })}
 
-                            {/* Suggested prompts (only if empty chat) */}
-                            {messages.length === 1 && (
+                            {/* Suggested prompts (visible until user sends first message) */}
+                            {!messages.some(m => m.role === "user") && (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-4 max-w-2xl mx-auto">
                                     {SUGGESTED_PROMPTS.map((prompt) => (
                                         <button
