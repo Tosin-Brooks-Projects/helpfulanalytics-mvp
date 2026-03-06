@@ -365,17 +365,29 @@ export async function POST(request: Request) {
         }
 
         // ── Return as UI message stream ─────────────────────────
+        const textPartId = `text-${Date.now()}`
         const stream = createUIMessageStream({
             execute: async ({ writer }) => {
                 // Write tool invocations
                 for (const tc of allToolCalls) {
-                    writer.write({ type: "tool-call", toolCallId: tc.toolCallId, toolName: tc.toolName, args: tc.args })
+                    writer.write({
+                        type: "tool-input-available",
+                        toolCallId: tc.toolCallId,
+                        toolName: tc.toolName,
+                        input: tc.args,
+                    } as any)
                 }
                 for (const tr of allToolResults) {
-                    writer.write({ type: "tool-result", toolCallId: tr.toolCallId, result: tr.result })
+                    writer.write({
+                        type: "tool-output-available",
+                        toolCallId: tr.toolCallId,
+                        output: tr.result,
+                    } as any)
                 }
-                // Write the final analysis text
-                writer.write({ type: "text", text: finalText })
+                // Write the final analysis text using start/delta/end
+                writer.write({ type: "text-start", id: textPartId } as any)
+                writer.write({ type: "text-delta", id: textPartId, delta: finalText } as any)
+                writer.write({ type: "text-end", id: textPartId } as any)
             },
         })
 
