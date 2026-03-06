@@ -1,9 +1,10 @@
 "use client"
 
 import { useRef, useEffect, useCallback, useState } from "react"
+import { useRouter } from "next/navigation"
 import { LinearShell } from "@/components/linear/linear-shell"
 import { useKeaChat } from "@/components/linear/kea-chat-context"
-import { Send, Plus, Sparkles, MessageSquare, Trash2, Menu } from "lucide-react"
+import { Send, Plus, Sparkles, MessageSquare, Trash2, Menu, Minimize2 } from "lucide-react"
 import ReactMarkdown from "react-markdown"
 import { cn } from "@/lib/utils"
 
@@ -36,8 +37,8 @@ function formatSessionDate(ts: number) {
     if (d.toDateString() === new Date().toDateString()) return "Today, " + d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
     return d.toLocaleDateString([], { month: "short", day: "numeric" })
 }
-
 export default function KeaPage() {
+    const router = useRouter()
     const {
         messages, sendMessage, input, setInput, resetChat, isLoading, status,
         sessions, currentSessionId, switchSession, deleteSession
@@ -155,6 +156,16 @@ export default function KeaPage() {
                                     <h1 className="text-lg font-bold text-zinc-900 font-outfit truncate">Kea</h1>
                                     <p className="text-xs text-zinc-400 hidden sm:block truncate">Your AI analytics assistant · Powered by GA4</p>
                                 </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => router.push("/dashboard")}
+                                    aria-label="Minimize to dashboard"
+                                    title="Back to dashboard"
+                                    className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors border border-zinc-100 shadow-sm"
+                                >
+                                    <Minimize2 className="h-4 w-4" />
+                                </button>
                             </div>
                         </div>
 
