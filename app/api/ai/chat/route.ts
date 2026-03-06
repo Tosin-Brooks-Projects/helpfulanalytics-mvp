@@ -1,5 +1,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
+
+export const dynamic = "force-dynamic"
 import { generateText, tool, createUIMessageStream, createUIMessageStreamResponse } from "ai"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { z } from "zod"

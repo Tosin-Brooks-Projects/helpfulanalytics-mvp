@@ -82,11 +82,11 @@ export function ReportTemplate({ data, dateRange }: ReportTemplateProps) {
                         </tr>
                         <tr className="border-b border-gray-300">
                             <td className="p-2">Bounce Rate</td>
-                            <td className="p-2 text-right font-mono">{(metrics.bounceRate * 100).toFixed(1)}%</td>
+                            <td className="p-2 text-right font-mono">{((metrics?.bounceRate || 0) * 100).toFixed(1)}%</td>
                         </tr>
                         <tr className="border-b border-gray-300">
                             <td className="p-2">Engagement Rate</td>
-                            <td className="p-2 text-right font-mono">{(metrics.engagementRate * 100).toFixed(1)}%</td>
+                            <td className="p-2 text-right font-mono">{((metrics?.engagementRate || 0) * 100).toFixed(1)}%</td>
                         </tr>
                     </tbody>
                 </table>
@@ -107,8 +107,8 @@ export function ReportTemplate({ data, dateRange }: ReportTemplateProps) {
                         {trafficSources?.map((source: any, i: number) => (
                             <tr key={i} className="border-b border-gray-300">
                                 <td className="p-2">{source.source}</td>
-                                <td className="p-2 text-right font-mono">{source.sessions.toLocaleString()}</td>
-                                <td className="p-2 text-right font-mono">{source.percentage.toFixed(1)}%</td>
+                                <td className="p-2 font-mono text-right">{(source.sessions || 0).toLocaleString()}</td>
+                                <td className="p-2 font-mono text-right">{(source.percentage || 0).toFixed(1)}%</td>
                             </tr>
                         ))}
                     </tbody>
@@ -131,8 +131,8 @@ export function ReportTemplate({ data, dateRange }: ReportTemplateProps) {
                             {data.topPages.map((page: any, i: number) => (
                                 <tr key={i} className="border-b border-gray-300">
                                     <td className="p-2 truncate max-w-[300px]">{page.title}</td>
-                                    <td className="p-2 text-right font-mono">{page.views.toLocaleString()}</td>
-                                    <td className="p-2 text-right font-mono">{page.percentage.toFixed(1)}%</td>
+                                    <td className="p-2 text-right font-mono">{(page.views || 0).toLocaleString()}</td>
+                                    <td className="p-2 text-right font-mono">{(page.percentage || 0).toFixed(1)}%</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -156,8 +156,8 @@ export function ReportTemplate({ data, dateRange }: ReportTemplateProps) {
                             {data.topCountries.map((country: any, i: number) => (
                                 <tr key={i} className="border-b border-gray-300">
                                     <td className="p-2">{country.country}</td>
-                                    <td className="p-2 text-right font-mono">{country.sessions.toLocaleString()}</td>
-                                    <td className="p-2 text-right font-mono">{country.percentage.toFixed(1)}%</td>
+                                    <td className="p-2 text-right font-mono">{(country.sessions || 0).toLocaleString()}</td>
+                                    <td className="p-2 text-right font-mono">{(country.percentage || 0).toFixed(1)}%</td>
                                 </tr>
                             ))}
                         </tbody>

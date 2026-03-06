@@ -144,12 +144,12 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
             // 1. Overview Metrics (Special Handling)
             if (scope === "overview") {
                 const metrics = [
-                    { label: "Total Sessions", value: data.sessions },
-                    { label: "Total Users", value: data.totalUsers },
-                    { label: "Page Views", value: data.pageViews || data.screenPageViews },
-                    { label: "Bounce Rate", value: `${(data.bounceRate * 100).toFixed(1)}%` },
-                    { label: "Engagement Rate", value: `${(data.engagementRate * 100).toFixed(1)}%` },
-                    { label: "Avg Session Duration", value: `${Math.round(data.avgSessionDuration)}s` },
+                    { label: "Total Sessions", value: data?.sessions || 0 },
+                    { label: "Total Users", value: data?.totalUsers || 0 },
+                    { label: "Page Views", value: data?.pageViews || data?.screenPageViews || 0 },
+                    { label: "Bounce Rate", value: `${((data?.bounceRate || 0) * 100).toFixed(1)}%` },
+                    { label: "Engagement Rate", value: `${((data?.engagementRate || 0) * 100).toFixed(1)}%` },
+                    { label: "Avg Session Duration", value: `${Math.round(data?.avgSessionDuration || 0)}s` },
                 ]
 
                 autoTable(doc, {
@@ -174,9 +174,9 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         startY: finalY + 5,
                         head: [['Source', 'Sessions', '%']],
                         body: data.trafficSources.map((s: any) => [
-                            s.source,
-                            s.sessions,
-                            `${s.percentage.toFixed(1)}%`
+                            s.source || "Unknown",
+                            s.sessions || 0,
+                            `${(s.percentage || 0).toFixed(1)}%`
                         ]),
                         theme: 'grid',
                         headStyles: { fillColor: secondaryColor }
@@ -191,11 +191,11 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         startY: startY,
                         head: [['Page Path', 'Title', 'Views', 'Unique', 'Bounce %']],
                         body: pages.map((p: any) => [
-                            p.pagePath || p.path,
+                            p.pagePath || p.path || "Unknown",
                             (p.pageTitle || p.title || "").substring(0, 40),
-                            p.screenPageViews || p.pageViews || p.views,
-                            p.uniquePageViews,
-                            (p.bounceRate * 100).toFixed(1) + "%"
+                            p.screenPageViews || p.pageViews || p.views || 0,
+                            p.uniquePageViews || 0,
+                            ((p.bounceRate || 0) * 100).toFixed(1) + "%"
                         ]),
                         theme: 'grid',
                         headStyles: { fillColor: primaryColor },
@@ -219,10 +219,10 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         startY: startY + 5,
                         head: [['Category', 'Sessions', 'Users', 'Bounce %']],
                         body: data.devices.map((d: any) => [
-                            d.deviceCategory,
-                            d.sessions,
-                            d.users,
-                            (d.bounceRate * 100).toFixed(1) + "%"
+                            d.deviceCategory || "Unknown",
+                            d.sessions || 0,
+                            d.users || 0,
+                            ((d.bounceRate || 0) * 100).toFixed(1) + "%"
                         ]),
                         theme: 'grid',
                         headStyles: { fillColor: secondaryColor }
@@ -241,9 +241,9 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         startY: startY + 5,
                         head: [['Browser', 'Sessions', '% Share']],
                         body: data.browsers.slice(0, 15).map((b: any) => [
-                            b.browser,
-                            b.sessions,
-                            b.percentage.toFixed(1) + "%"
+                            b.browser || "Unknown",
+                            b.sessions || 0,
+                            (b.percentage || 0).toFixed(1) + "%"
                         ]),
                         theme: 'grid',
                         headStyles: { fillColor: secondaryColor }
@@ -263,9 +263,9 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         startY: startY + 5,
                         head: [['OS', 'Sessions', '% Share']],
                         body: data.os.slice(0, 15).map((o: any) => [
-                            o.name,
-                            o.sessions,
-                            o.percentage.toFixed(1) + "%"
+                            o.name || "Unknown",
+                            o.sessions || 0,
+                            (o.percentage || 0).toFixed(1) + "%"
                         ]),
                         theme: 'grid',
                         headStyles: { fillColor: secondaryColor }
@@ -280,10 +280,10 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         startY: startY,
                         head: [['Country', 'Sessions', 'Users', 'Bounce %']],
                         body: countries.map((c: any) => [
-                            c.country,
-                            c.sessions,
-                            c.users,
-                            (c.bounceRate * 100).toFixed(1) + "%"
+                            c.country || "Unknown",
+                            c.sessions || 0,
+                            c.users || 0,
+                            ((c.bounceRate || 0) * 100).toFixed(1) + "%"
                         ]),
                         theme: 'grid',
                         headStyles: { fillColor: primaryColor }
