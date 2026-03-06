@@ -23,9 +23,6 @@ import { format } from "date-fns"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 
-// Add declaration to fix typescript complaining about autoTable on jsPDF instance if needed, 
-// though importing it usually works. We'll use the imported function directly or apply it.
-
 const convertToCSVString = (data: any[], title?: string) => {
     if (!data || !data.length) return ""
     const headers = Object.keys(data[0])
@@ -42,8 +39,6 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
     const [exportFormat, setExportFormat] = useState<"csv" | "pdf">("csv")
     const [loading, setLoading] = useState(false)
     const [loadingStep, setLoadingStep] = useState<string>("")
-
-    // Custom selection state
     const [selectedScopes, setSelectedScopes] = useState<string[]>(["overview"])
 
     const { selectedProperty, dateRange } = useDashboard()
@@ -56,15 +51,11 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
         { id: "sources", label: "Traffic Sources", description: "Source/Medium acquisition data" },
     ]
 
-
-
     const handleScopeToggle = (id: string) => {
         setSelectedScopes(prev =>
             prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
         )
     }
-
-
 
     const fetchReportData = async (scope: string) => {
         let reportTypeParam = "overview"
@@ -81,8 +72,6 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
         if (endDate) q.set("endDate", endDate)
         q.set("propertyId", selectedProperty || "")
         q.set("reportType", reportTypeParam)
-
-        // Request up to 1000 items for exports to get "Full Data"
         q.set("limit", "1000")
 
         const res = await fetch(`/api/analytics?${q.toString()}`)
@@ -93,238 +82,206 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
     const generateDetailedPDF = (results: { scope: string, data: any }[], filename: string) => {
         setLoadingStep("Generating PDF pages...")
         const doc = new jsPDF()
-        const primaryColor = [245, 158, 11] as [number, number, number] // Amber-500
-        const secondaryColor = [100, 116, 139] as [number, number, number] // Slate-500
+
+        const COLORS = {
+            primary: [79, 70, 229], // Indigo 600
+            secondary: [71, 85, 105], // Slate 600
+            light: [248, 250, 252], // Slate 50
+            border: [226, 232, 240], // Slate 200
+            text: [30, 41, 59], // Slate 800
+            muted: [100, 116, 139] // Slate 500
+        }
 
         // --- Cover Page ---
-        doc.setFillColor(255, 255, 255)
-        doc.rect(0, 0, 210, 297, "F")
+        // Header Graphic
+        doc.setFillColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
+        doc.rect(0, 0, 210, 40, 'F')
 
-        // Logo / Brand
-        doc.setFontSize(32)
-        doc.setTextColor(...primaryColor)
         doc.setFont("helvetica", "bold")
-        doc.text("Helpful Analytics", 105, 100, { align: "center" })
+        doc.setFontSize(28)
+        doc.setTextColor(255, 255, 255)
+        doc.text("Helpful Analytics", 105, 25, { align: "center" })
+
+        // Title Section
+        doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2])
+        doc.setFontSize(22)
+        doc.text("Performance Insights Report", 105, 80, { align: "center" })
 
         doc.setFontSize(14)
-        doc.setTextColor(50, 50, 50)
         doc.setFont("helvetica", "normal")
-        doc.text("Comprehensive Analytics Export", 105, 115, { align: "center" })
+        doc.setTextColor(COLORS.muted[0], COLORS.muted[1], COLORS.muted[2])
+        doc.text("ANALYTICS EXPORT DATA", 105, 95, { align: "center" })
+
+        // Divider
+        doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
+        doc.setLineWidth(0.5)
+        doc.line(40, 105, 170, 105)
 
         // Metadata
-        doc.setFontSize(10)
-        doc.setTextColor(100, 100, 100)
-        doc.text(`Generated on: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, 105, 130, { align: "center" })
-        doc.text(`Period: ${dateRange?.from ? format(dateRange.from, 'MMM d, yyyy') : 'Start'} - ${dateRange?.to ? format(dateRange.to, 'MMM d, yyyy') : 'End'}`, 105, 136, { align: "center" })
+        doc.setFontSize(11)
+        doc.text(`Generated: ${new Date().toLocaleString()}`, 105, 125, { align: "center" })
+        const dateStr = dateRange?.from ? `${format(dateRange.from, "MMM d, yyyy")} - ${format(dateRange.to!, "MMM d, yyyy")}` : "All Time"
+        doc.text(`Reporting Period: ${dateStr}`, 105, 135, { align: "center" })
+        doc.text(`Property: ${selectedProperty || "Demo Property"}`, 105, 145, { align: "center" })
 
-        // Footer acknowledgement
-        doc.setFontSize(8)
-        doc.setTextColor(150, 150, 150)
-        doc.text("Powered by HelpfulAnalytics Engine", 105, 280, { align: "center" })
+        // Footer for Cover Page
+        doc.setFontSize(9)
+        doc.text("© 2026 Helpful Analytics Engine", 105, 280, { align: "center" })
+
+        // Helper for Footer on Content Pages
+        const addFooter = (data: any) => {
+            const pageCount = doc.getNumberOfPages()
+            doc.setFontSize(9)
+            doc.setTextColor(COLORS.muted[0], COLORS.muted[1], COLORS.muted[2])
+            doc.text(`Helpful Analytics — Marketing Analysis`, 15, 285)
+            doc.text(`Page ${data.pageNumber} of ${pageCount}`, 195, 285, { align: "right" })
+        }
 
         doc.addPage()
-
-        // --- Content Pages ---
-        let pageNumber = 2
+        let currentY = 25
 
         results.forEach(({ scope, data }) => {
+            // Check for new page if close to bottom
+            if (currentY > 240) {
+                doc.addPage()
+                currentY = 25
+            }
+
             // Section Header
-            doc.setFontSize(18)
-            doc.setTextColor(...primaryColor)
             doc.setFont("helvetica", "bold")
-            doc.text(scope.toUpperCase(), 14, 20)
+            doc.setFontSize(18)
+            doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
+            doc.text(scope.toUpperCase() + " ANALYSIS", 15, currentY)
 
-            // Draw a line under title
-            doc.setDrawColor(...primaryColor)
-            doc.setLineWidth(0.5)
-            doc.line(14, 22, 196, 22)
+            doc.setDrawColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
+            doc.setLineWidth(0.8)
+            doc.line(15, currentY + 3, 195, currentY + 3)
+            currentY += 15
 
-            let startY = 30
-
-            // 1. Overview Metrics (Special Handling)
+            // 1. Overview Style Metrics
             if (scope === "overview") {
-                const metrics = [
-                    { label: "Total Sessions", value: data?.sessions || 0 },
-                    { label: "Total Users", value: data?.totalUsers || 0 },
-                    { label: "Page Views", value: data?.pageViews || data?.screenPageViews || 0 },
-                    { label: "Bounce Rate", value: `${((data?.bounceRate || 0) * 100).toFixed(1)}%` },
-                    { label: "Engagement Rate", value: `${((data?.engagementRate || 0) * 100).toFixed(1)}%` },
-                    { label: "Avg Session Duration", value: `${Math.round(data?.avgSessionDuration || 0)}s` },
+                const m = data?.metrics || {}
+                const metricsRow1 = [
+                    { label: "Sessions", value: (m.sessions || 0).toLocaleString() },
+                    { label: "Active Users", value: (m.activeUsers || 0).toLocaleString() },
+                    { label: "Page Views", value: (m.screenPageViews || 0).toLocaleString() },
+                ]
+                const metricsRow2 = [
+                    { label: "Bounce Rate", value: `${(m.bounceRate || 0).toFixed(1)}%` },
+                    { label: "Avg Duration", value: `${Math.round(m.averageSessionDuration || 0)}s` },
+                    { label: "Reports", value: (results.length).toString() },
                 ]
 
                 autoTable(doc, {
-                    startY: startY,
-                    head: [['Metric', 'Value']],
-                    body: metrics.map(m => [m.label, m.value]),
+                    startY: currentY,
+                    head: [['Performance Summary', 'Values']],
+                    body: [
+                        ...metricsRow1.map(item => [item.label, item.value]),
+                        ...metricsRow2.map(item => [item.label, item.value])
+                    ],
                     theme: 'striped',
-                    headStyles: { fillColor: primaryColor },
-                    styles: { fontSize: 12, cellPadding: 5 },
-                    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 100 } }
+                    headStyles: { fillColor: COLORS.primary, halign: 'center' },
+                    columnStyles: { 0: { cellWidth: 100 }, 1: { halign: 'right', fontStyle: 'bold' } },
+                    margin: { left: 15, right: 15 },
+                    didDrawPage: addFooter
                 })
 
-                // Add Traffic Sources Table if present in overview
-                if (data.trafficSources && Array.isArray(data.trafficSources)) {
-                    // @ts-ignore
-                    const finalY = doc.lastAutoTable.finalY + 15
+                currentY = (doc as any).lastAutoTable.finalY + 20
+
+                // Add Traffic Sources Table
+                if (data.trafficSources) {
                     doc.setFontSize(14)
-                    doc.setTextColor(0, 0, 0)
-                    doc.text("Top Traffic Sources", 14, finalY)
+                    doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2])
+                    doc.text("Primary Acquisition Channels", 15, currentY)
 
                     autoTable(doc, {
-                        startY: finalY + 5,
-                        head: [['Source', 'Sessions', '%']],
-                        body: data.trafficSources.map((s: any) => [
-                            s.source || "Unknown",
-                            s.sessions || 0,
-                            `${(s.percentage || 0).toFixed(1)}%`
-                        ]),
+                        startY: currentY + 5,
+                        head: [['Source', 'Users']],
+                        body: data.trafficSources.map((s: any) => [s.name || "Direct", (s.users || 0).toLocaleString()]),
                         theme: 'grid',
-                        headStyles: { fillColor: secondaryColor }
+                        headStyles: { fillColor: COLORS.secondary },
+                        margin: { left: 15, right: 15 },
+                        didDrawPage: addFooter
                     })
-                }
-
-            } else if (scope === "pages") {
-                const pages = Array.isArray(data.topPages) ? data.topPages : (Array.isArray(data) ? data : (data.pages || []))
-
-                if (pages.length > 0) {
-                    autoTable(doc, {
-                        startY: startY,
-                        head: [['Page Path', 'Title', 'Views', 'Unique', 'Bounce %']],
-                        body: pages.map((p: any) => [
-                            p.pagePath || p.path || "Unknown",
-                            (p.pageTitle || p.title || "").substring(0, 40),
-                            p.screenPageViews || p.pageViews || p.views || 0,
-                            p.uniquePageViews || 0,
-                            ((p.bounceRate || 0) * 100).toFixed(1) + "%"
-                        ]),
-                        theme: 'grid',
-                        headStyles: { fillColor: primaryColor },
-                        styles: { fontSize: 9 },
-                        columnStyles: { 0: { cellWidth: 50 }, 1: { cellWidth: 60 } }
-                    })
-                } else {
-                    doc.setFontSize(10)
-                    doc.setTextColor(100, 100, 100)
-                    doc.text("No page data available for this period.", 14, startY)
-                }
-
-            } else if (scope === "devices") {
-                // Devices Table
-                if (data.devices) {
-                    doc.setFontSize(12)
-                    doc.setTextColor(0, 0, 0)
-                    doc.text("Device Categories", 14, startY)
-
-                    autoTable(doc, {
-                        startY: startY + 5,
-                        head: [['Category', 'Sessions', 'Users', 'Bounce %']],
-                        body: data.devices.map((d: any) => [
-                            d.deviceCategory || "Unknown",
-                            d.sessions || 0,
-                            d.users || 0,
-                            ((d.bounceRate || 0) * 100).toFixed(1) + "%"
-                        ]),
-                        theme: 'grid',
-                        headStyles: { fillColor: secondaryColor }
-                    })
-                    // @ts-ignore
-                    startY = doc.lastAutoTable.finalY + 15
-                }
-
-                // Browsers Table
-                if (data.browsers) {
-                    doc.setFontSize(12)
-                    doc.setTextColor(0, 0, 0)
-                    doc.text("Top Browsers", 14, startY)
-
-                    autoTable(doc, {
-                        startY: startY + 5,
-                        head: [['Browser', 'Sessions', '% Share']],
-                        body: data.browsers.slice(0, 15).map((b: any) => [
-                            b.browser || "Unknown",
-                            b.sessions || 0,
-                            (b.percentage || 0).toFixed(1) + "%"
-                        ]),
-                        theme: 'grid',
-                        headStyles: { fillColor: secondaryColor }
-                    })
-                    // @ts-ignore
-                    startY = doc.lastAutoTable.finalY + 15
-                }
-
-                // OS Table
-                if (data.os) {
-                    if (startY > 250) { doc.addPage(); startY = 20; }
-                    doc.setFontSize(12)
-                    doc.setTextColor(0, 0, 0)
-                    doc.text("Operating Systems", 14, startY)
-
-                    autoTable(doc, {
-                        startY: startY + 5,
-                        head: [['OS', 'Sessions', '% Share']],
-                        body: data.os.slice(0, 15).map((o: any) => [
-                            o.name || "Unknown",
-                            o.sessions || 0,
-                            (o.percentage || 0).toFixed(1) + "%"
-                        ]),
-                        theme: 'grid',
-                        headStyles: { fillColor: secondaryColor }
-                    })
-                }
-
-            } else if (scope === "audience") {
-                // Countries
-                const countries = data.countries || data // handle if raw array
-                if (Array.isArray(countries)) {
-                    autoTable(doc, {
-                        startY: startY,
-                        head: [['Country', 'Sessions', 'Users', 'Bounce %']],
-                        body: countries.map((c: any) => [
-                            c.country || "Unknown",
-                            c.sessions || 0,
-                            c.users || 0,
-                            ((c.bounceRate || 0) * 100).toFixed(1) + "%"
-                        ]),
-                        theme: 'grid',
-                        headStyles: { fillColor: primaryColor }
-                    })
-                }
-
-            } else if (scope === "sources") {
-                // Sources
-                const sources = data.sources || data
-                if (Array.isArray(sources)) {
-                    autoTable(doc, {
-                        startY: startY,
-                        head: [['Source', 'Medium', 'Sessions', 'Users', 'New Users']],
-                        body: sources.map((s: any) => [
-                            s.source,
-                            s.medium,
-                            s.sessions,
-                            s.users,
-                            s.newUsers
-                        ]),
-                        theme: 'grid',
-                        headStyles: { fillColor: primaryColor }
-                    })
+                    currentY = (doc as any).lastAutoTable.finalY + 20
                 }
             }
 
-            // Always add a page break after each section unless it's the last one
-            if (scope !== results[results.length - 1].scope) {
-                doc.addPage()
-                pageNumber++
+            // 2. High Density Tables (Pages/Audience/Sources)
+            if (scope === "pages" || scope === "performance") {
+                const pages = data.pages || []
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Page Path', 'Title', 'Views', 'Bounce %']],
+                    body: pages.slice(0, 30).map((p: any) => [
+                        p.pagePath || "/",
+                        (p.pageTitle || "").substring(0, 45),
+                        (p.pageViews || 0).toLocaleString(),
+                        (p.bounceRate || 0).toFixed(1) + "%"
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: COLORS.primary },
+                    styles: { fontSize: 9 },
+                    columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right' } },
+                    didDrawPage: addFooter
+                })
+                currentY = (doc as any).lastAutoTable.finalY + 20
+            }
+
+            if (scope === "audience") {
+                const countries = data.countries || []
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Country', 'Sessions', 'Users', 'Bounce %']],
+                    body: countries.map((c: any) => [
+                        c.country || "Unknown",
+                        (c.sessions || 0).toLocaleString(),
+                        (c.users || 0).toLocaleString(),
+                        (c.bounceRate || 0).toFixed(1) + "%"
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: COLORS.primary },
+                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
+                    didDrawPage: addFooter
+                })
+                currentY = (doc as any).lastAutoTable.finalY + 20
+            }
+
+            if (scope === "devices") {
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Device', 'Sessions', 'Users']],
+                    body: (data.devices || []).map((d: any) => [d.name || "Unknown", (d.sessions || 0).toLocaleString(), (d.users || 0).toLocaleString()]),
+                    theme: 'grid',
+                    headStyles: { fillColor: COLORS.secondary },
+                    didDrawPage: addFooter
+                })
+                currentY = (doc as any).lastAutoTable.finalY + 15
+
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Browser', 'Sessions', 'Share %']],
+                    body: (data.browsers || []).slice(0, 10).map((b: any) => [b.browser, (b.sessions || 0).toLocaleString(), (b.percentage || 0).toFixed(1) + "%"]),
+                    theme: 'grid',
+                    headStyles: { fillColor: COLORS.secondary },
+                    didDrawPage: addFooter
+                })
+                currentY = (doc as any).lastAutoTable.finalY + 20
+            }
+
+            if (scope === "sources") {
+                const sources = data.sources || []
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Source', 'Medium', 'Sessions', 'Users']],
+                    body: sources.slice(0, 20).map((s: any) => [s.source, s.medium, (s.sessions || 0).toLocaleString(), (s.users || 0).toLocaleString()]),
+                    theme: 'striped',
+                    headStyles: { fillColor: COLORS.primary },
+                    didDrawPage: addFooter
+                })
+                currentY = (doc as any).lastAutoTable.finalY + 20
             }
         })
-
-        // Add page numbers to all pages
-        const pageCount = doc.getNumberOfPages()
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i)
-            doc.setFontSize(8)
-            doc.setTextColor(150, 150, 150)
-            doc.text(`Page ${i} of ${pageCount} - HelpfulAnalytics Export`, 105, 290, { align: "center" })
-        }
 
         doc.save(`${filename}.pdf`)
     }
@@ -336,10 +293,9 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
         setLoadingStep("Initializing...")
         try {
             const timestamp = new Date().toISOString().split('T')[0]
-            const baseFilename = `analytics_${timestamp}`
+            const baseFilename = `analytics_report_${timestamp}`
 
-            setLoadingStep("Fetching high-volume data...")
-            toast.info("Fetching fresh data from Google Analytics...")
+            setLoadingStep("Fetching report data...")
 
             const results = await Promise.all(
                 selectedScopes.map(async (scope) => {
@@ -348,11 +304,8 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                 })
             )
 
-            setLoadingStep("Processing export...")
-
             if (exportFormat === "csv") {
                 const { flattenAnalyticsData } = await import("@/lib/export-utils")
-
                 let combinedCSV = ""
                 results.forEach(({ scope, data }) => {
                     const flatData = flattenAnalyticsData(data)
@@ -364,22 +317,21 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                 const blob = new Blob([combinedCSV], { type: 'text/csv;charset=utf-8;' })
                 const url = URL.createObjectURL(blob)
                 const link = document.createElement("a")
-                link.setAttribute("href", url)
-                link.setAttribute("download", `${baseFilename}.csv`)
+                link.href = url
+                link.download = `${baseFilename}.csv`
                 document.body.appendChild(link)
                 link.click()
                 document.body.removeChild(link)
-
                 toast.success("CSV Export complete")
-            } else if (exportFormat === "pdf") {
+            } else {
                 generateDetailedPDF(results, baseFilename)
-                toast.success("PDF Export complete")
+                toast.success("PDF Report generated")
             }
 
             setOpen(false)
         } catch (error) {
             console.error(error)
-            toast.error("Export failed. Please check your connection.")
+            toast.error("Export failed. Please check your data or connection.")
         } finally {
             setLoading(false)
             setLoadingStep("")
@@ -404,7 +356,7 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="text-lg font-bold text-zinc-900">Export Analytics Data</DialogTitle>
                     <DialogDescription className="text-zinc-500 text-xs">
-                        Download raw data directly from the API. Select the data you wish to export.
+                        Download professional reports directly from Helpful Analytics.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -412,32 +364,32 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                     <div className="p-6 pt-4 min-h-[220px]">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center h-full py-8 space-y-4">
-                                <Loader2 className="h-8 w-8 text-amber-500 animate-spin" />
+                                <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
                                 <div className="text-center space-y-1">
-                                    <p className="text-sm font-semibold text-zinc-900">Exporting Data</p>
+                                    <p className="text-sm font-semibold text-zinc-900">Generating Report</p>
                                     <p className="text-xs text-zinc-500">{loadingStep || "Please wait..."}</p>
                                 </div>
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 <div className="space-y-3">
-                                    <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Data Selection</Label>
+                                    <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Select Report Sections</Label>
                                     {scopes.map((scope) => (
-                                        <div key={scope.id} className="flex items-start space-x-3">
+                                        <div key={scope.id} className="flex items-start space-x-3 p-2 rounded-lg hover:bg-slate-50 transition-colors">
                                             <Checkbox
                                                 id={scope.id}
                                                 checked={selectedScopes.includes(scope.id)}
                                                 onCheckedChange={() => handleScopeToggle(scope.id)}
-                                                className="mt-0.5 border-zinc-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                                                className="mt-0.5 border-zinc-300 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
                                             />
-                                            <div className="grid gap-1.5 leading-none">
+                                            <div className="grid gap-1 leading-none">
                                                 <Label
                                                     htmlFor={scope.id}
-                                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-zinc-700"
+                                                    className="text-sm font-medium leading-none cursor-pointer text-zinc-700"
                                                 >
                                                     {scope.label}
                                                 </Label>
-                                                <p className="text-[11px] text-zinc-500">
+                                                <p className="text-[10px] text-zinc-500">
                                                     {scope.description}
                                                 </p>
                                             </div>
@@ -460,7 +412,7 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                                 )}
                             >
                                 <FileText className="h-3 w-3" />
-                                PDF
+                                PDF Report
                             </button>
                             <button
                                 onClick={() => setExportFormat("csv")}
@@ -472,17 +424,17 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                                 )}
                             >
                                 <FileSpreadsheet className="h-3 w-3" />
-                                CSV
+                                CSV Data
                             </button>
                         </div>
 
                         <Button
                             onClick={handleExport}
                             disabled={loading || selectedScopes.length === 0}
-                            className="bg-amber-500 hover:bg-amber-600 text-white shadow-md shadow-amber-500/10 text-xs px-6"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/10 text-xs px-6"
                         >
                             {loading ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
-                            {loading ? "Exporting..." : "Download Data"}
+                            {loading ? "Exporting..." : "Generate Download"}
                         </Button>
                     </div>
                 </div>
