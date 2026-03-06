@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
-import { streamText, tool } from "ai"
+import { generateText, tool, createUIMessageStream, createUIMessageStreamResponse } from "ai"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { z } from "zod"
 
@@ -105,15 +105,11 @@ function isDemoProperty(propertyId: string): boolean {
 }
 
 // ─── Message Format Converter ───────────────────────────────────
-// The frontend sends v6 UIMessage format (with `parts` array).
-// streamText expects ModelMessage format (with `content` string).
-// This converts between the two.
 
 function convertToModelMessages(uiMessages: any[]): Array<{ role: string; content: string }> {
     const result: Array<{ role: string; content: string }> = []
 
     for (const msg of uiMessages) {
-        // User messages always have `content`
         if (msg.role === "user") {
             if (msg.content && msg.content.trim().length > 0) {
                 result.push({ role: "user", content: msg.content })
@@ -121,30 +117,22 @@ function convertToModelMessages(uiMessages: any[]): Array<{ role: string; conten
             continue
         }
 
-        // Assistant messages — extract text from parts or use content
         if (msg.role === "assistant") {
             let text = ""
-
-            // Try content first
             if (typeof msg.content === "string" && msg.content.trim().length > 0) {
                 text = msg.content
-            }
-            // Extract from parts
-            else if (Array.isArray(msg.parts)) {
+            } else if (Array.isArray(msg.parts)) {
                 text = msg.parts
                     .filter((p: any) => p.type === "text" && p.text)
                     .map((p: any) => p.text)
                     .join("\n")
             }
-
-            // Only include assistant messages that have actual text
             if (text.trim().length > 0) {
                 result.push({ role: "assistant", content: text })
             }
             continue
         }
 
-        // System or other messages — pass through if they have content
         if (msg.content && typeof msg.content === "string" && msg.content.trim().length > 0) {
             result.push({ role: msg.role, content: msg.content })
         }
@@ -202,6 +190,154 @@ You have tools connected to the user's live GA4 property. You MUST call your too
 - Round percentages to 1 decimal place and format large numbers with commas.`
 }
 
+// ─── Build Tools ────────────────────────────────────────────────
+
+function buildTools(isDemo: boolean, accessToken: string, propertyId: string) {
+    return {
+        getMetricsOverview: tool({
+            description: "Fetch high-level GA4 metrics: total sessions, active users, pageviews, bounce rate, and average session duration for the selected date range.",
+            parameters: z.object({
+                startDate: z.string().describe("Start date in YYYY-MM-DD format"),
+                endDate: z.string().describe("End date in YYYY-MM-DD format"),
+            }),
+            execute: async ({ startDate: qStart, endDate: qEnd }) => {
+                console.log("[Kea Tool] getMetricsOverview called")
+                if (isDemo) return DEMO_OVERVIEW
+                try {
+                    return await getOverviewData(accessToken, propertyId, qStart, qEnd)
+                } catch (e: any) {
+                    return { error: `Failed to fetch metrics: ${e?.message || "Unknown error"}` }
+                }
+            },
+        }),
+
+        getTrafficSources: tool({
+            description: "Fetch top traffic acquisition sources with session counts, user counts, new users, bounce rates.",
+            parameters: z.object({
+                startDate: z.string().describe("Start date in YYYY-MM-DD format"),
+                endDate: z.string().describe("End date in YYYY-MM-DD format"),
+                limit: z.number().optional().describe("Number of sources to return. Default 10."),
+            }),
+            execute: async ({ startDate: qStart, endDate: qEnd, limit }) => {
+                console.log("[Kea Tool] getTrafficSources called")
+                if (isDemo) return DEMO_SOURCES
+                try {
+                    return await getAcquisitionData(accessToken, propertyId, qStart, qEnd, limit ?? 10)
+                } catch (e: any) {
+                    return { error: `Failed to fetch traffic sources: ${e?.message || "Unknown error"}` }
+                }
+            },
+        }),
+
+        getTopPages: tool({
+            description: "Fetch the most visited pages on the site with pageviews, bounce rate, and avg time on page.",
+            parameters: z.object({
+                startDate: z.string().describe("Start date in YYYY-MM-DD format"),
+                endDate: z.string().describe("End date in YYYY-MM-DD format"),
+                limit: z.number().optional().describe("Number of pages to return. Default 10."),
+            }),
+            execute: async ({ startDate: qStart, endDate: qEnd, limit }) => {
+                console.log("[Kea Tool] getTopPages called")
+                if (isDemo) return DEMO_PAGES
+                try {
+                    return await getTopPagesData(accessToken, propertyId, qStart, qEnd, limit ?? 10)
+                } catch (e: any) {
+                    return { error: `Failed to fetch top pages: ${e?.message || "Unknown error"}` }
+                }
+            },
+        }),
+
+        getDeviceBreakdown: tool({
+            description: "Fetch device category breakdown (mobile/desktop/tablet), top browsers, and OS distribution.",
+            parameters: z.object({
+                startDate: z.string().describe("Start date in YYYY-MM-DD format"),
+                endDate: z.string().describe("End date in YYYY-MM-DD format"),
+            }),
+            execute: async ({ startDate: qStart, endDate: qEnd }) => {
+                console.log("[Kea Tool] getDeviceBreakdown called")
+                if (isDemo) return DEMO_DEVICES
+                try {
+                    return await getDevicesData(accessToken, propertyId, qStart, qEnd)
+                } catch (e: any) {
+                    return { error: `Failed to fetch device data: ${e?.message || "Unknown error"}` }
+                }
+            },
+        }),
+
+        getLocationData: tool({
+            description: "Fetch geographic distribution of users by country with session counts and bounce rates.",
+            parameters: z.object({
+                startDate: z.string().describe("Start date in YYYY-MM-DD format"),
+                endDate: z.string().describe("End date in YYYY-MM-DD format"),
+                limit: z.number().optional().describe("Number of countries to return. Default 10."),
+            }),
+            execute: async ({ startDate: qStart, endDate: qEnd, limit }) => {
+                console.log("[Kea Tool] getLocationData called")
+                if (isDemo) return DEMO_LOCATIONS
+                try {
+                    return await getLocationsData(accessToken, propertyId, qStart, qEnd, limit ?? 10)
+                } catch (e: any) {
+                    return { error: `Failed to fetch location data: ${e?.message || "Unknown error"}` }
+                }
+            },
+        }),
+
+        getRealtimeSnapshot: tool({
+            description: "Fetch real-time active users and which pages they are currently viewing.",
+            parameters: z.object({}),
+            execute: async () => {
+                console.log("[Kea Tool] getRealtimeSnapshot called")
+                if (isDemo) return DEMO_REALTIME
+                try {
+                    return await getRealtimeData(accessToken, propertyId)
+                } catch (e: any) {
+                    return { error: `Failed to fetch realtime data: ${e?.message || "Unknown error"}` }
+                }
+            },
+        }),
+
+        getTrafficByState: tool({
+            description: "Fetch state/region level traffic breakdown within a specific country.",
+            parameters: z.object({
+                startDate: z.string().describe("Start date in YYYY-MM-DD format"),
+                endDate: z.string().describe("End date in YYYY-MM-DD format"),
+                country: z.string().optional().describe("Country to filter by. Defaults to 'United States'."),
+                limit: z.number().optional().describe("Number of states to return. Default 10."),
+            }),
+            execute: async ({ startDate: qStart, endDate: qEnd, country, limit }) => {
+                console.log("[Kea Tool] getTrafficByState called")
+                if (isDemo) return { states: [{ state: "California", sessions: 2100, users: 1800 }, { state: "New York", sessions: 1500, users: 1200 }, { state: "Texas", sessions: 900, users: 750 }], totalSessions: 5200 }
+                try {
+                    return await getStatesData(accessToken, propertyId, qStart, qEnd, country ?? "United States", limit ?? 10)
+                } catch (e: any) {
+                    return { error: `Failed to fetch state data: ${e?.message || "Unknown error"}` }
+                }
+            },
+        }),
+
+        getTrafficByCity: tool({
+            description: "Fetch city-level traffic breakdown within a specific country.",
+            parameters: z.object({
+                startDate: z.string().describe("Start date in YYYY-MM-DD format"),
+                endDate: z.string().describe("End date in YYYY-MM-DD format"),
+                country: z.string().optional().describe("Country to filter by. Defaults to 'United States'."),
+                limit: z.number().optional().describe("Number of cities to return. Default 10."),
+            }),
+            execute: async ({ startDate: qStart, endDate: qEnd, country, limit }) => {
+                console.log("[Kea Tool] getTrafficByCity called")
+                if (isDemo) return { cities: [{ city: "New York", sessions: 800, users: 650 }, { city: "Los Angeles", sessions: 600, users: 480 }, { city: "Chicago", sessions: 400, users: 320 }], totalSessions: 5200 }
+                try {
+                    return await getCitiesData(accessToken, propertyId, qStart, qEnd, country ?? "United States", limit ?? 10)
+                } catch (e: any) {
+                    return { error: `Failed to fetch city data: ${e?.message || "Unknown error"}` }
+                }
+            },
+        }),
+    }
+}
+
+// ─── API Route ──────────────────────────────────────────────────
+
 export async function POST(request: Request) {
     const session = await getServerSession(authOptions)
     if (!session) {
@@ -233,155 +369,58 @@ export async function POST(request: Request) {
     }
 
     const isDemo = isDemoProperty(propertyId)
-
-    // Convert UIMessages (parts-based) to ModelMessages (content-based)
     const modelMessages = convertToModelMessages(messages)
 
+    console.log("[Kea] Property:", propertyId, "| isDemo:", isDemo)
+
     try {
-        const result = streamText({
+        // Use generateText (not streamText) — it reliably executes tools
+        // with maxSteps, unlike streamText which has issues with @ai-sdk/google.
+        const result = await generateText({
             model: google("gemini-2.5-flash"),
             system: buildSystemPrompt(),
             messages: modelMessages as any,
             maxSteps: 3,
-            tools: {
-                getMetricsOverview: tool({
-                    description: "Fetch high-level GA4 metrics: total sessions, active users, pageviews, bounce rate, and average session duration for the selected date range.",
-                    parameters: z.object({
-                        startDate: z.string().describe("Start date in YYYY-MM-DD format"),
-                        endDate: z.string().describe("End date in YYYY-MM-DD format"),
-                    }),
-                    execute: async ({ startDate: qStart, endDate: qEnd }) => {
-                        if (isDemo) return DEMO_OVERVIEW
-                        try {
-                            return await getOverviewData(accessToken, propertyId, qStart, qEnd)
-                        } catch (e: any) {
-                            return { error: `Failed to fetch metrics: ${e?.message || "Unknown error"}` }
-                        }
-                    },
-                }),
+            tools: buildTools(isDemo, accessToken, propertyId),
+        })
 
-                getTrafficSources: tool({
-                    description: "Fetch top traffic acquisition sources with session counts, user counts, new users, bounce rates. Shows source/medium pairs.",
-                    parameters: z.object({
-                        startDate: z.string().describe("Start date in YYYY-MM-DD format"),
-                        endDate: z.string().describe("End date in YYYY-MM-DD format"),
-                        limit: z.number().optional().describe("Number of sources to return. Default 10."),
-                    }),
-                    execute: async ({ startDate: qStart, endDate: qEnd, limit }) => {
-                        if (isDemo) return DEMO_SOURCES
-                        try {
-                            return await getAcquisitionData(accessToken, propertyId, qStart, qEnd, limit ?? 10)
-                        } catch (e: any) {
-                            return { error: `Failed to fetch traffic sources: ${e?.message || "Unknown error"}` }
-                        }
-                    },
-                }),
+        console.log("[Kea] generateText finished:", {
+            textLen: result.text.length,
+            steps: result.steps.length,
+            finishReason: result.finishReason,
+        })
 
-                getTopPages: tool({
-                    description: "Fetch the most visited pages on the site with pageviews, bounce rate, and avg time on page.",
-                    parameters: z.object({
-                        startDate: z.string().describe("Start date in YYYY-MM-DD format"),
-                        endDate: z.string().describe("End date in YYYY-MM-DD format"),
-                        limit: z.number().optional().describe("Number of pages to return. Default 10."),
-                    }),
-                    execute: async ({ startDate: qStart, endDate: qEnd, limit }) => {
-                        if (isDemo) return DEMO_PAGES
-                        try {
-                            return await getTopPagesData(accessToken, propertyId, qStart, qEnd, limit ?? 10)
-                        } catch (e: any) {
-                            return { error: `Failed to fetch top pages: ${e?.message || "Unknown error"}` }
-                        }
-                    },
-                }),
-
-                getDeviceBreakdown: tool({
-                    description: "Fetch device category breakdown (mobile/desktop/tablet), top browsers, and OS distribution.",
-                    parameters: z.object({
-                        startDate: z.string().describe("Start date in YYYY-MM-DD format"),
-                        endDate: z.string().describe("End date in YYYY-MM-DD format"),
-                    }),
-                    execute: async ({ startDate: qStart, endDate: qEnd }) => {
-                        if (isDemo) return DEMO_DEVICES
-                        try {
-                            return await getDevicesData(accessToken, propertyId, qStart, qEnd)
-                        } catch (e: any) {
-                            return { error: `Failed to fetch device data: ${e?.message || "Unknown error"}` }
-                        }
-                    },
-                }),
-
-                getLocationData: tool({
-                    description: "Fetch geographic distribution of users by country with session counts and bounce rates.",
-                    parameters: z.object({
-                        startDate: z.string().describe("Start date in YYYY-MM-DD format"),
-                        endDate: z.string().describe("End date in YYYY-MM-DD format"),
-                        limit: z.number().optional().describe("Number of countries to return. Default 10."),
-                    }),
-                    execute: async ({ startDate: qStart, endDate: qEnd, limit }) => {
-                        if (isDemo) return DEMO_LOCATIONS
-                        try {
-                            return await getLocationsData(accessToken, propertyId, qStart, qEnd, limit ?? 10)
-                        } catch (e: any) {
-                            return { error: `Failed to fetch location data: ${e?.message || "Unknown error"}` }
-                        }
-                    },
-                }),
-
-                getRealtimeSnapshot: tool({
-                    description: "Fetch real-time active users and which pages they are currently viewing.",
-                    parameters: z.object({}),
-                    execute: async () => {
-                        if (isDemo) return DEMO_REALTIME
-                        try {
-                            return await getRealtimeData(accessToken, propertyId)
-                        } catch (e: any) {
-                            return { error: `Failed to fetch realtime data: ${e?.message || "Unknown error"}` }
-                        }
-                    },
-                }),
-
-                getTrafficByState: tool({
-                    description: "Fetch state/region level traffic breakdown within a specific country.",
-                    parameters: z.object({
-                        startDate: z.string().describe("Start date in YYYY-MM-DD format"),
-                        endDate: z.string().describe("End date in YYYY-MM-DD format"),
-                        country: z.string().optional().describe("Country to filter by. Defaults to 'United States'."),
-                        limit: z.number().optional().describe("Number of states to return. Default 10."),
-                    }),
-                    execute: async ({ startDate: qStart, endDate: qEnd, country, limit }) => {
-                        if (isDemo) return { states: [{ state: "California", sessions: 2100, users: 1800 }, { state: "New York", sessions: 1500, users: 1200 }, { state: "Texas", sessions: 900, users: 750 }], totalSessions: 5200 }
-                        try {
-                            return await getStatesData(accessToken, propertyId, qStart, qEnd, country ?? "United States", limit ?? 10)
-                        } catch (e: any) {
-                            return { error: `Failed to fetch state data: ${e?.message || "Unknown error"}` }
-                        }
-                    },
-                }),
-
-                getTrafficByCity: tool({
-                    description: "Fetch city-level traffic breakdown within a specific country.",
-                    parameters: z.object({
-                        startDate: z.string().describe("Start date in YYYY-MM-DD format"),
-                        endDate: z.string().describe("End date in YYYY-MM-DD format"),
-                        country: z.string().optional().describe("Country to filter by. Defaults to 'United States'."),
-                        limit: z.number().optional().describe("Number of cities to return. Default 10."),
-                    }),
-                    execute: async ({ startDate: qStart, endDate: qEnd, country, limit }) => {
-                        if (isDemo) return { cities: [{ city: "New York", sessions: 800, users: 650 }, { city: "Los Angeles", sessions: 600, users: 480 }, { city: "Chicago", sessions: 400, users: 320 }], totalSessions: 5200 }
-                        try {
-                            return await getCitiesData(accessToken, propertyId, qStart, qEnd, country ?? "United States", limit ?? 10)
-                        } catch (e: any) {
-                            return { error: `Failed to fetch city data: ${e?.message || "Unknown error"}` }
-                        }
-                    },
-                }),
+        // Wrap in a UI message stream so the useChat hook can consume it
+        const stream = createUIMessageStream({
+            execute: async ({ writer }) => {
+                // Write tool invocations from each step
+                for (const step of result.steps) {
+                    for (const tc of step.toolCalls) {
+                        writer.write({
+                            type: "tool-call",
+                            toolCallId: tc.toolCallId,
+                            toolName: tc.toolName,
+                            args: tc.args,
+                        })
+                    }
+                    for (const tr of step.toolResults) {
+                        writer.write({
+                            type: "tool-result",
+                            toolCallId: tr.toolCallId,
+                            result: tr.result,
+                        })
+                    }
+                }
+                // Write the final text
+                writer.write({ type: "text", text: result.text })
             },
         })
 
-        return result.toUIMessageStreamResponse()
+        return createUIMessageStreamResponse({ stream })
     } catch (e: any) {
+        console.error("[Kea] FATAL error:", e?.message, e?.cause?.message)
         return new Response(
-            JSON.stringify({ error: "AI Stream Error", details: e?.message || "Unknown" }),
+            JSON.stringify({ error: "AI Error", details: e?.message || "Unknown" }),
             { status: 500, headers: { "Content-Type": "application/json" } }
         )
     }
