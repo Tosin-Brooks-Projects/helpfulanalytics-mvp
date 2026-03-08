@@ -102,7 +102,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                 <CardContent className="px-2 sm:px-6">
                     <ChartContainer
                         config={chartConfig}
-                        className="aspect-auto h-[200px] sm:h-[300px] w-full"
+                        className="aspect-auto h-[200px] sm:h-[300px] w-full min-h-[220px]"
                     >
                         <AreaChart
                             accessibilityLayer
@@ -307,7 +307,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                         <CardDescription>Sessions by device type</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-1">
-                        <ChartContainer config={chartConfig} className="max-h-[200px] w-full">
+                        <ChartContainer config={chartConfig} className="max-h-[200px] w-full min-h-[200px]">
                             <BarChart
                                 accessibilityLayer
                                 data={data.deviceBreakdown || []}
