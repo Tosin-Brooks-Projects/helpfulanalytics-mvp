@@ -14,9 +14,12 @@ import {
 
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Download, FileSpreadsheet, Loader2, FileText, Sparkles } from "lucide-react"
+import { Download, FileSpreadsheet, Loader2, FileText, Sparkles, Mail } from "lucide-react"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { convertToCSV } from "@/lib/export-utils"
+import { format } from "date-fns"
+import jsPDF from "jspdf"
+import "jspdf-autotable"
 
 export function ExportDialog({ children }: { children?: React.ReactNode } = {}) {
     const [open, setOpen] = useState(false)
