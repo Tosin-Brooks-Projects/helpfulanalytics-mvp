@@ -32,7 +32,9 @@ export function CommandPalette() {
     const router = useRouter()
 
     React.useEffect(() => {
-        setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0)
+        if (typeof window !== "undefined") {
+            setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0)
+        }
 
         const down = (e: KeyboardEvent) => {
             if (e.key === "k" && (e.metaKey || e.ctrlKey)) {

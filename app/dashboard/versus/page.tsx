@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import { LinearShell } from "@/components/linear/linear-shell"
 import { VersusOverview } from "@/components/linear/versus-overview"
 import { LinearGreeting } from "@/components/linear"

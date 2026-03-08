@@ -5,10 +5,14 @@ import { useRouter } from "next/navigation"
 import { DateRange } from "react-day-picker"
 import useSWR from "swr"
 
-const fetcher = (url: string) => fetch(url).then((res) => {
-    if (!res.ok) throw new Error("Failed to fetch")
-    return res.json()
-})
+const fetcher = (url: string) => {
+    // During build/SSR, fetch might fail if it's a relative URL
+    if (typeof window === "undefined" && !url.startsWith("http")) return Promise.resolve(null)
+    return fetch(url).then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch")
+        return res.json()
+    })
+}
 
 interface Property {
     id: string
@@ -44,7 +48,12 @@ interface DashboardContextType {
 const LinearDashboardContext = createContext<DashboardContextType | undefined>(undefined)
 
 export function LinearDashboardProvider({ children }: { children: ReactNode }) {
+    const [isClient, setIsClient] = useState(false)
     const [selectedProperty, setSelectedProperty] = useState<string>("")
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
         from: new Date(new Date().setDate(new Date().getDate() - 30)),
         to: new Date(),
@@ -54,19 +63,19 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
     const router = useRouter()
 
     // 1. Fetch saved properties (Active)
-    const { data: savedData, isLoading: isLoadingSaved } = useSWR("/api/user/properties", fetcher, {
+    const { data: savedData, isLoading: isLoadingSaved } = useSWR(isClient ? "/api/user/properties" : null, fetcher, {
         revalidateOnFocus: false,
         dedupingInterval: 60000,
     })
 
     // 2. Fetch all GA4 properties (Available)
-    const { data: allData, isLoading: isLoadingAll } = useSWR("/api/analytics/properties", fetcher, {
+    const { data: allData, isLoading: isLoadingAll } = useSWR(isClient ? "/api/analytics/properties" : null, fetcher, {
         revalidateOnFocus: false,
         dedupingInterval: 60000,
     })
 
     // 3. Fetch user subscription
-    const { data: userData, isLoading: isLoadingUser } = useSWR("/api/user/me", fetcher, {
+    const { data: userData, isLoading: isLoadingUser } = useSWR(isClient ? "/api/user/me" : null, fetcher, {
         revalidateOnFocus: false,
         dedupingInterval: 60000,
     })
@@ -85,6 +94,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
 
     // Initial Selection Logic - only run once when properties load and we don't have a selection
     useEffect(() => {
+        if (!isClient) return
         if (!selectedProperty && properties.length > 0) {
             const saved = localStorage.getItem("linear_selected_property")
             if (saved && properties.find((p: Property) => p.id === saved)) {
@@ -97,6 +107,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
 
     // Persist selection
     useEffect(() => {
+        if (!isClient) return
         if (selectedProperty) {
             localStorage.setItem("linear_selected_property", selectedProperty)
         }
@@ -104,6 +115,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
 
     // Load date range from local storage
     useEffect(() => {
+        if (!isClient) return
         const savedDateRange = localStorage.getItem("linear_date_range")
         if (savedDateRange) {
             try {
@@ -122,6 +134,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
 
     // Load Versus state and compare date range
     useEffect(() => {
+        if (!isClient) return
         const savedCompareDate = localStorage.getItem("linear_compare_date_range")
         if (savedCompareDate) {
             try {
@@ -140,6 +153,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
 
     // Persist date range
     useEffect(() => {
+        if (!isClient) return
         if (dateRange) {
             localStorage.setItem("linear_date_range", JSON.stringify(dateRange))
         }
@@ -147,6 +161,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
 
     // Persist Compare Date Range
     useEffect(() => {
+        if (!isClient) return
         if (compareDateRange) {
             localStorage.setItem("linear_compare_date_range", JSON.stringify(compareDateRange))
         }

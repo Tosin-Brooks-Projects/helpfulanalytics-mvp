@@ -5,9 +5,15 @@ import { driver } from "driver.js"
 import "driver.js/dist/driver.css"
 
 export function DashboardTour() {
+    const [isClient, setIsClient] = useState(false)
     const [tourDriver, setTourDriver] = useState<any>(null)
 
     useEffect(() => {
+        setIsClient(true)
+    }, [])
+
+    useEffect(() => {
+        if (!isClient) return
         const hasSeenTour = localStorage.getItem("hasSeenTour")
 
         // Initialize driver

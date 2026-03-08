@@ -39,9 +39,8 @@ export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
                 description: `${property.name} has been added to your dashboard.`,
             })
             setOpen(false)
-            // Trigger a reload to refresh context data (since we don't have a re-fetch method exposed yet)
-            // Ideally we'd expose a refresh function from context
-            window.location.reload()
+            // Trigger a reload to refresh context data
+            router.refresh()
 
         } catch (error: any) {
             console.error(error)

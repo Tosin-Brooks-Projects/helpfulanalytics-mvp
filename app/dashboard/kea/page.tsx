@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import { useRef, useEffect, useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { LinearShell } from "@/components/linear/linear-shell"

@@ -1,5 +1,7 @@
 "use client"
 
+export const dynamic = "force-dynamic"
+
 import { LinearShell } from "@/components/linear/linear-shell"
 import { TopPagesView } from "@/components/linear/reports/top-pages-view"
 import { useDashboard } from "@/components/linear/dashboard-context"
