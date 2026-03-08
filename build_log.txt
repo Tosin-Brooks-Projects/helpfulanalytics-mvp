@@ -1,0 +1,246 @@
+
+> analytics-dashboard@0.1.0 build
+> NODE_OPTIONS='--no-deprecation' next build
+
+  ▲ Next.js 14.2.35
+  - Environments: .env
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Skipping validation of types
+   Skipping linting
+   Collecting page data ...
+✅ Firebase Admin initialized successfully.
+✅ Firebase Admin initialized successfully.
+✅ Firebase Admin initialized successfully.
+   Generating static pages (0/27) ...
+   Generating static pages (6/27) 
+   Generating static pages (13/27) 
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547) {
+  digest: '690825184'
+}
+
+Error occurred prerendering page "/dashboard/reports". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547) {
+  digest: '690825184'
+}
+
+Error occurred prerendering page "/dashboard/versus". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547) {
+  digest: '690825184'
+}
+
+Error occurred prerendering page "/dashboard/kea". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547) {
+  digest: '690825184'
+}
+
+Error occurred prerendering page "/dashboard/profile". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+   Generating static pages (20/27) 
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547) {
+  digest: '690825184'
+}
+
+Error occurred prerendering page "/dashboard/devices". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547) {
+  digest: '690825184'
+}
+
+Error occurred prerendering page "/dashboard/audience". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547) {
+  digest: '690825184'
+}
+
+Error occurred prerendering page "/dashboard/sources". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547) {
+  digest: '690825184'
+}
+
+Error occurred prerendering page "/dashboard". Read more: https://nextjs.org/docs/messages/prerender-error
+
+ReferenceError: Mail is not defined
+    at y (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/.next/server/chunks/6370.js:1:16604)
+    at nj (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:46252)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:47572)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nD (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:66681)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64854)
+    at nB (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:67539)
+    at nM (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:58561)
+    at nL (/Users/tosin/Nadiron/Mr.Brook/GA4-Analytics-dashboard/ga4/node_modules/.pnpm/next@14.2.35_@opentelemetry+api@1.9.0_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:12:64547)
+ ✓ Generating static pages (27/27)
+
+> Export encountered errors on following paths:
+	/dashboard/audience/page: /dashboard/audience
+	/dashboard/devices/page: /dashboard/devices
+	/dashboard/kea/page: /dashboard/kea
+	/dashboard/page: /dashboard
+	/dashboard/profile/page: /dashboard/profile
+	/dashboard/reports/page: /dashboard/reports
+	/dashboard/sources/page: /dashboard/sources
+	/dashboard/versus/page: /dashboard/versus
