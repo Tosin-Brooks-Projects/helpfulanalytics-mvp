@@ -1,24 +1,61 @@
-export function convertToCSV(data: any[], filename: string) {
-    if (!data || !data.length) return
+export interface CSVOptions {
+    filename?: string
+    metadata?: {
+        propertyName?: string
+        dateRange?: string
+        generatedAt?: string
+    }
+    download?: boolean
+}
 
+export function convertToCSV(data: any[], options: CSVOptions = { download: true }) {
+    if (!data || !data.length) return ""
+
+    const { filename = "export", metadata, download = true } = options
     const headers = Object.keys(data[0])
-    const csvContent = [
-        headers.join(","), // Header row
-        ...data.map(row => headers.map(fieldName => {
-            const val = row[fieldName]
-            // Handle strings with commas or newlines
-            return typeof val === 'string' ? `"${val.replace(/"/g, '""')}"` : val
-        }).join(","))
-    ].join("\n")
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.setAttribute("href", url)
-    link.setAttribute("download", `${filename}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    let csvRows: string[] = []
+
+    // Add Metadata Header if provided
+    if (metadata) {
+        if (metadata.propertyName) csvRows.push(`"Property:","${metadata.propertyName.replace(/"/g, '""')}"`)
+        if (metadata.dateRange) csvRows.push(`"Date Range:","${metadata.dateRange}"`)
+        if (metadata.generatedAt) csvRows.push(`"Generated At:","${metadata.generatedAt}"`)
+        csvRows.push("") // Spacer
+    }
+
+    // Add Main Headers
+    csvRows.push(headers.join(","))
+
+    // Add Data Rows
+    data.forEach(row => {
+        const values = headers.map(fieldName => {
+            const val = row[fieldName]
+            if (val === null || val === undefined) return ""
+            const stringVal = String(val)
+            // Escape quotes and wrap in quotes if contains comma, newline, or quote
+            if (stringVal.includes(",") || stringVal.includes("\n") || stringVal.includes('"')) {
+                return `"${stringVal.replace(/"/g, '""')}"`
+            }
+            return stringVal
+        })
+        csvRows.push(values.join(","))
+    })
+
+    const csvContent = csvRows.join("\n")
+
+    if (download && typeof window !== 'undefined') {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement("a")
+        link.setAttribute("href", url)
+        link.setAttribute("download", `${filename}.csv`)
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+
+    return csvContent
 }
 
 export function downloadJSON(data: any, filename: string) {
