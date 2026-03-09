@@ -187,35 +187,35 @@ function buildSchemaOnlyTools() {
         getMetricsOverview: tool({
             description: "Fetch high-level GA4 metrics: total sessions, active users, pageviews, bounce rate, and average session duration.",
             parameters: z.object({ startDate: z.string(), endDate: z.string() }),
-        } as any) as any,
+        }),
         getTrafficSources: tool({
             description: "Fetch top traffic sources with sessions, users, bounce rates.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
-        } as any) as any,
+        }),
         getTopPages: tool({
             description: "Fetch most visited pages with pageviews, bounce rate, avg time.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
-        } as any) as any,
+        }),
         getDeviceBreakdown: tool({
             description: "Fetch device category breakdown (mobile/desktop/tablet), browsers.",
             parameters: z.object({ startDate: z.string(), endDate: z.string() }),
-        } as any) as any,
+        }),
         getLocationData: tool({
             description: "Fetch geographic distribution of users by country.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
-        } as any) as any,
+        }),
         getRealtimeSnapshot: tool({
             description: "Fetch real-time active users and pages they are viewing.",
             parameters: z.object({}),
-        } as any) as any,
+        }),
         getTrafficByState: tool({
             description: "Fetch state/region level traffic within a country.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), country: z.string().optional(), limit: z.number().optional() }),
-        } as any) as any,
+        }),
         getTrafficByCity: tool({
             description: "Fetch city-level traffic within a country.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), country: z.string().optional(), limit: z.number().optional() }),
-        } as any) as any,
+        }),
     }
 }
 
@@ -308,7 +308,7 @@ export async function POST(request: Request) {
                 const executor = toolExecutors[tc.toolName]
                 if (executor) {
                     try {
-                        const data = await executor((tc as any).args)
+                        const data = await executor(tc.args)
                         executedTools.push({ name: tc.toolName, data })
                         console.log("[Kea Tool]", tc.toolName, "→", JSON.stringify(data).slice(0, 100))
                     } catch (err: any) {
