@@ -20,7 +20,7 @@ import { convertToCSV } from "@/lib/export-utils"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import jsPDF from "jspdf"
-import "jspdf-autotable"
+import autoTable from "jspdf-autotable"
 import { toast } from "sonner"
 
 export function ExportDialog({ children }: { children?: React.ReactNode } = {}) {
@@ -253,77 +253,77 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
             // Tables based on scope
             if (scope === "overview") {
                 const m = data?.metrics || {}
-                    ; (doc as any).autoTable({
-                        startY: currentY,
-                        head: [['Metric', 'Performance Value']],
-                        body: [
-                            ["Total Sessions", (m.sessions || 0).toLocaleString()],
-                            ["Active Users", (m.activeUsers || 0).toLocaleString()],
-                            ["Page Views", (m.screenPageViews || 0).toLocaleString()],
-                            ["Bounce Rate", `${(m.bounceRate || 0).toFixed(1)}%`],
-                            ["Avg Session Duration", `${Math.round(m.averageSessionDuration || 0)}s`],
-                            ["Conversion Rate", `${(m.transactions ? (m.transactions / m.sessions * 100).toFixed(2) : "0.00")}%`]
-                        ],
-                        theme: 'striped',
-                        headStyles: { fillColor: COLORS.primary, halign: 'center', fontSize: 10, fontStyle: 'bold' },
-                        bodyStyles: { fontSize: 10, textColor: COLORS.text },
-                        columnStyles: { 1: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent } },
-                        didDrawPage: addFooter
-                    })
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Metric', 'Performance Value']],
+                    body: [
+                        ["Total Sessions", (m.sessions || 0).toLocaleString()],
+                        ["Active Users", (m.activeUsers || 0).toLocaleString()],
+                        ["Page Views", (m.screenPageViews || 0).toLocaleString()],
+                        ["Bounce Rate", `${(m.bounceRate || 0).toFixed(1)}%`],
+                        ["Avg Session Duration", `${Math.round(m.averageSessionDuration || 0)}s`],
+                        ["Conversion Rate", `${(m.transactions ? (m.transactions / m.sessions * 100).toFixed(2) : "0.00")}%`]
+                    ],
+                    theme: 'striped',
+                    headStyles: { fillColor: COLORS.primary as any, halign: 'center', fontSize: 10, fontStyle: 'bold' },
+                    bodyStyles: { fontSize: 10, textColor: COLORS.text as any },
+                    columnStyles: { 1: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent as any } },
+                    didDrawPage: addFooter
+                })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
 
             if (scope === "pages" || scope === "performance") {
                 const pages = (data.pages || []).slice(0, 25)
-                    ; (doc as any).autoTable({
-                        startY: currentY,
-                        head: [['Page Path', 'Views', 'Unique', 'Bounce %']],
-                        body: pages.map((p: any) => [
-                            p.pagePath || "/",
-                            (p.pageViews || 0).toLocaleString(),
-                            (p.uniquePageViews || 0).toLocaleString(),
-                            (p.bounceRate || 0).toFixed(1) + "%"
-                        ]),
-                        theme: 'striped',
-                        headStyles: { fillColor: COLORS.primary, fontSize: 10 },
-                        bodyStyles: { fontSize: 9 },
-                        columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right', textColor: COLORS.accent } },
-                        didDrawPage: addFooter
-                    })
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Page Path', 'Views', 'Unique', 'Bounce %']],
+                    body: pages.map((p: any) => [
+                        p.pagePath || "/",
+                        (p.pageViews || 0).toLocaleString(),
+                        (p.uniquePageViews || 0).toLocaleString(),
+                        (p.bounceRate || 0).toFixed(1) + "%"
+                    ]),
+                    theme: 'striped',
+                    headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
+                    bodyStyles: { fontSize: 9 },
+                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right', textColor: COLORS.accent as any } },
+                    didDrawPage: addFooter
+                })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
 
             if (scope === "sources") {
                 const sources = (data.sources || []).slice(0, 20)
-                    ; (doc as any).autoTable({
-                        startY: currentY,
-                        head: [['Source', 'Medium', 'Sessions', 'Users']],
-                        body: sources.map((s: any) => [s.source, s.medium, (s.sessions || 0).toLocaleString(), (s.users || 0).toLocaleString()]),
-                        theme: 'striped',
-                        headStyles: { fillColor: COLORS.primary, fontSize: 10 },
-                        bodyStyles: { fontSize: 9 },
-                        columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent } },
-                        didDrawPage: addFooter
-                    })
+                autoTable(doc, {
+                    startY: currentY,
+                    head: [['Source', 'Medium', 'Sessions', 'Users']],
+                    body: sources.map((s: any) => [s.source, s.medium, (s.sessions || 0).toLocaleString(), (s.users || 0).toLocaleString()]),
+                    theme: 'striped',
+                    headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
+                    bodyStyles: { fontSize: 9 },
+                    columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent as any } },
+                    didDrawPage: addFooter
+                })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
 
             if (scope === "devices") {
-                ; (doc as any).autoTable({
+                autoTable(doc, {
                     startY: currentY,
                     head: [['Device Category', 'Sessions', 'Users']],
                     body: (data.devices || []).map((d: any) => [d.name, (d.sessions || 0).toLocaleString(), (d.users || 0).toLocaleString()]),
                     theme: 'grid',
-                    headStyles: { fillColor: COLORS.primary, fontSize: 10 },
+                    headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
                     bodyStyles: { fontSize: 9 },
-                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent } },
+                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent as any } },
                     didDrawPage: addFooter
                 })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
 
             if (scope === "audience") {
-                ; (doc as any).autoTable({
+                autoTable(doc, {
                     startY: currentY,
                     head: [['Country', 'Sessions', 'Users']],
                     body: (data.countries || []).slice(0, 20).map((c: any) => [c.country, (c.sessions || 0).toLocaleString(), (c.users || 0).toLocaleString()]),
@@ -435,7 +435,10 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[460px] bg-white text-zinc-900 border-zinc-100 shadow-2xl p-0 gap-0 overflow-hidden">
+            <DialogContent
+                className="sm:max-w-[460px] bg-white text-zinc-900 border-zinc-100 shadow-2xl p-0 gap-0 overflow-hidden"
+                aria-describedby={undefined}
+            >
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="text-lg font-bold text-zinc-900 flex items-center gap-2 mb-1">
                         <Sparkles className="h-4 w-4 text-amber-500" />
