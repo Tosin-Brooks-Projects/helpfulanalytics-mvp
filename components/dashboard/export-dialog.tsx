@@ -323,7 +323,7 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
             }
 
             if (scope === "audience") {
-                autoTable(doc, {
+                ; (doc as any).autoTable({
                     startY: currentY,
                     head: [['Country', 'Sessions', 'Users']],
                     body: (data.countries || []).slice(0, 20).map((c: any) => [c.country, (c.sessions || 0).toLocaleString(), (c.users || 0).toLocaleString()]),
