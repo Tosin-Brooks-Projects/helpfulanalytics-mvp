@@ -50,12 +50,13 @@ export async function POST(req: Request) {
         });
 
         if (data.error) {
+            console.error('Resend API Error:', data.error);
             return NextResponse.json({ error: data.error.message }, { status: 400 });
         }
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error('Email sending failed:', error);
+        console.error('Email Route exception:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

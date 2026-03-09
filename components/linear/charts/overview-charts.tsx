@@ -165,7 +165,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                 <CardContent className="flex-1 pb-0">
                     <ChartContainer
                         config={chartConfig}
-                        className="mx-auto aspect-square max-h-[200px]"
+                        className="mx-auto aspect-square h-[200px]"
                     >
                         <PieChart>
                             <ChartTooltip
@@ -227,7 +227,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                     <CardDescription>Sessions by channel</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1">
-                    <ChartContainer config={chartConfig} className="max-h-[200px] w-full">
+                    <ChartContainer config={chartConfig} className="h-[200px] w-full">
                         <BarChart
                             accessibilityLayer
                             data={trafficSourceData}
@@ -262,7 +262,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                     <CardDescription>Sessions by country</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1">
-                    <ChartContainer config={chartConfig} className="max-h-[200px] w-full">
+                    <ChartContainer config={chartConfig} className="h-[200px] w-full">
                         <BarChart
                             accessibilityLayer
                             data={countryData}
@@ -307,7 +307,7 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
                         <CardDescription>Sessions by device type</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-1">
-                        <ChartContainer config={chartConfig} className="max-h-[200px] w-full min-h-[200px]">
+                        <ChartContainer config={chartConfig} className="h-[200px] w-full">
                             <BarChart
                                 accessibilityLayer
                                 data={data.deviceBreakdown || []}
