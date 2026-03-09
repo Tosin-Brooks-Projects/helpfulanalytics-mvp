@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Outfit, Cormorant_Garamond } from "next/font/google"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { SessionProviderWrapper } from "@/components/SessionProviderWrapper"
+import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
@@ -83,6 +84,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <SessionProviderWrapper>
           <ErrorBoundary>{children}</ErrorBoundary>
+          <Toaster />
         </SessionProviderWrapper>
       </body>
     </html>

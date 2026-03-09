@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import jsPDF from "jspdf"
 import "jspdf-autotable"
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
 
 export function ExportDialog({ children }: { children?: React.ReactNode } = {}) {
     const [open, setOpen] = useState(false)
@@ -31,7 +31,6 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
     const [selectedScopes, setSelectedScopes] = useState<string[]>(["overview", "pages", "sources"])
     const [includeMetadata, setIncludeMetadata] = useState(true)
     const [sendToEmail, setSendToEmail] = useState(false)
-    const { toast } = useToast()
 
     const { selectedProperty, dateRange } = useDashboard()
 
