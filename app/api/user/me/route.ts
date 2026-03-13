@@ -1,3 +1,7 @@
+import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth-options"
+import { db } from "@/lib/firebase-admin"
 import { getSubscriptionStatus } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
