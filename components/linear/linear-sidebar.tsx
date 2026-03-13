@@ -101,7 +101,7 @@ export function LinearSidebar() {
                                     : 'bg-yellow-500/10 text-yellow-600'
                                     }`}>
                                     {subscription.status === 'trialing' ? 'Trial' : subscription.status}
-                                    <PlanCountdown subscription={subscription} />
+                                    {subscription.status === 'trialing' && <PlanCountdown subscription={subscription} />}
                                 </span>
                             </div>
                             <Link

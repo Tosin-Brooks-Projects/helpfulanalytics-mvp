@@ -58,14 +58,14 @@ export function LinearMetricsOverview({ propertyId }: LinearMetricsOverviewProps
                 />
                 <LinearStatCard
                     title="Bounce Rate"
-                    value={`${((metrics.bounceRate || 0) * 100).toFixed(1)}%`}
+                    value={`${(metrics.bounceRate || 0).toFixed(1)}%`}
                     icon={MousePointer2}
                     variant="rose"
                     description="The percentage of sessions that were not engaged (lasted less than 10 seconds, had no conversions, and had only one page or screen view)."
                 />
                 <LinearStatCard
                     title="Engagement"
-                    value={`${((metrics.engagementRate || 0) * 100).toFixed(1)}%`}
+                    value={`${(metrics.engagementRate || 0).toFixed(1)}%`}
                     icon={Activity}
                     variant="emerald"
                     description="The percentage of engaged sessions. An engaged session is a session that lasted longer than 10 seconds, or had a conversion event, or had 2 or more page or screen views."

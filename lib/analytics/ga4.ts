@@ -27,6 +27,27 @@ export async function runReport(accessToken: string, propertyId: string, request
 // ─── Mock Data ──────────────────────────────────────────────────
 
 export async function getMockOverviewData() {
+    const now = new Date();
+    const dates: string[] = [];
+    const sessionsOverTime: any[] = [];
+    const pageViewsData: number[] = [];
+    
+    // Generate last 30 days
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0].replace(/-/g, ''); // YYYYMMDD
+        const formattedDate = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        
+        dates.push(formattedDate);
+        const sessions = Math.floor(Math.random() * 500) + 800;
+        sessionsOverTime.push({
+            date: dateStr,
+            sessions: sessions
+        });
+        pageViewsData.push(Math.floor(sessions * 3.5));
+    }
+
     return {
         metrics: {
             sessions: 12543,
@@ -35,56 +56,33 @@ export async function getMockOverviewData() {
             activeUsersDelta: 18.2,
             screenPageViews: 45210,
             screenPageViewsDelta: 32.1,
-            bounceRate: 42.5,
+            bounceRate: 42.5, // 42.5%
             bounceRateDelta: -5.2,
             averageSessionDuration: 145,
             averageSessionDurationDelta: 12.5,
+            engagementRate: 57.5,
         },
         trafficSources: [
-            { name: "Organic Search", users: 4500 },
-            { name: "Direct", users: 2100 },
-            { name: "Referral", users: 1200 },
-            { name: "Social", users: 632 },
+            { source: "Organic Search", sessions: 4500 },
+            { source: "Direct", sessions: 2100 },
+            { source: "Referral", sessions: 1200 },
+            { source: "Social", sessions: 632 },
         ],
         devices: [
-            { name: "Mobile", users: 5120 },
-            { name: "Desktop", users: 2800 },
-            { name: "Tablet", users: 512 },
+            { name: "Mobile", sessions: 5120 },
+            { name: "Desktop", sessions: 2800 },
+            { name: "Tablet", sessions: 512 },
         ],
-        dates: ["Jan 1", "Jan 2", "Jan 3", "Jan 4", "Jan 5", "Jan 6", "Jan 7"],
-        sessionsData: [1200, 1400, 1100, 1600, 1800, 2100, 2400],
-        pageViewsData: [4500, 4800, 4200, 5100, 5800, 6200, 7100],
+        dates,
+        sessionsOverTime,
+        pageViewsData,
     }
 }
 
 export async function getMockOverviewComparisonData() {
+    const data = await getMockOverviewData();
     return {
-        metrics: {
-            sessions: 12543,
-            sessionsDelta: 25.4,
-            activeUsers: 8432,
-            activeUsersDelta: 18.2,
-            screenPageViews: 45210,
-            screenPageViewsDelta: 32.1,
-            bounceRate: 42.5,
-            bounceRateDelta: -5.2,
-            averageSessionDuration: 145,
-            averageSessionDurationDelta: 12.5,
-        },
-        trafficSources: [
-            { name: "Organic Search", users: 4500 },
-            { name: "Direct", users: 2100 },
-            { name: "Referral", users: 1200 },
-            { name: "Social", users: 632 },
-        ],
-        devices: [
-            { name: "Mobile", users: 5120 },
-            { name: "Desktop", users: 2800 },
-            { name: "Tablet", users: 512 },
-        ],
-        dates: ["Jan 1", "Jan 2", "Jan 3", "Jan 4", "Jan 5", "Jan 6", "Jan 7"],
-        sessionsData: [1200, 1400, 1100, 1600, 1800, 2100, 2400],
-        pageViewsData: [4500, 4800, 4200, 5100, 5800, 6200, 7100],
+        ...data,
         comparisonMetrics: {
             sessions: 10000,
             activeUsers: 7100,
@@ -92,9 +90,8 @@ export async function getMockOverviewComparisonData() {
             bounceRate: 45.0,
             averageSessionDuration: 128,
         },
-        comparisonDates: ["Dec 25", "Dec 26", "Dec 27", "Dec 28", "Dec 29", "Dec 30", "Dec 31"],
-        comparisonSessionsData: [1000, 1100, 950, 1300, 1500, 1700, 1900],
-        comparisonPageViewsData: [3500, 3800, 3200, 4100, 4800, 5200, 5800],
+        // For comparison charts, we could generate more, but for now we'll match the structure
+        comparisonSessionsData: data.sessionsOverTime.map(d => Math.floor(d.sessions * 0.8)),
     }
 }
 
@@ -195,24 +192,29 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
     const sessionsData = dates.map(d => dailySessionsMap.get(d) || 0)
     const pageViewsData = dates.map(d => dailyPageViewsMap.get(d) || 0)
 
-    return {
-        metrics: {
-            sessions: totalSessions,
-            sessionsDelta: 0,
-            activeUsers: totalActiveUsers,
-            activeUsersDelta: 0,
-            screenPageViews: totalPageViews,
-            screenPageViewsDelta: 0,
-            bounceRate: avgBounceRate,
-            bounceRateDelta: 0,
-            averageSessionDuration: avgDuration,
-            averageSessionDurationDelta: 0,
-        },
-        trafficSources,
-        devices,
-        dates,
-        sessionsData,
-        pageViewsData,
+        return {
+            metrics: {
+                sessions: totalSessions,
+                sessionsDelta: 0,
+                activeUsers: totalActiveUsers,
+                activeUsersDelta: 0,
+                screenPageViews: totalPageViews,
+                screenPageViewsDelta: 0,
+                bounceRate: avgBounceRate,
+                bounceRateDelta: 0,
+                averageSessionDuration: avgDuration,
+                averageSessionDurationDelta: 0,
+                engagementRate: 100 - avgBounceRate,
+            },
+            trafficSources,
+            devices,
+            dates,
+            sessionsOverTime: sortedDates.map(d => ({
+                date: d.replace(/[^0-9]/g, ''), // Fallback if formatted date is passed, but getOverviewData uses formattedDate in map
+                sessions: dailySessionsMap.get(d) || 0
+            })),
+            pageViewsData,
+        }
     }
 }
 

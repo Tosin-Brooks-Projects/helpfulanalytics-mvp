@@ -59,7 +59,7 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
                         <MousePointerClick className="h-4 w-4 text-zinc-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-zinc-900">{(data.metrics?.engagementRate * 100).toFixed(1)}%</div>
+                        <div className="text-2xl font-bold text-zinc-900">{(data.metrics?.engagementRate || 0).toFixed(1)}%</div>
                         <p className="text-xs text-zinc-500 mt-1 text-emerald-600">+4.3% from last month</p>
                     </CardContent>
                 </Card>

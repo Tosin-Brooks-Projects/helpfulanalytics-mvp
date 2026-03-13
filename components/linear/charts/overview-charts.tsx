@@ -31,11 +31,21 @@ export function OverviewCharts({ propertyId }: OverviewChartsProps) {
     if (!data) return null
 
     // Process data for charts
-    const sessionsData = data.sessionsOverTime?.map((item: any) => ({
-        date: new Date(item.date.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        fullDate: item.date,
-        sessions: item.sessions
-    })) || []
+    const sessionsData = data.sessionsOverTime?.map((item: any) => {
+        let displayDate = item.date;
+        if (typeof item.date === 'string' && item.date.length === 8) {
+            // YYYYMMDD to MMM DD
+            const year = item.date.substring(0, 4);
+            const month = item.date.substring(4, 6);
+            const day = item.date.substring(6, 8);
+            displayDate = new Date(`${year}-${month}-${day}`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+        return {
+            date: displayDate,
+            fullDate: item.date,
+            sessions: item.sessions
+        }
+    }) || []
 
     // Map traffic sources to pie colors
     const COLORS = [
