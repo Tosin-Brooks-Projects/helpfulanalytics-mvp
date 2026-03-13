@@ -27,8 +27,8 @@ export function getSubscriptionStatus(userData: any): {
     const trialEndsAt = new Date(createdAt.getTime() + trialDurationMs);
     const isTrialing = now < trialEndsAt;
 
-    // If NOT premium from Stripe, but still trialing, mark as trialing
-    if (!isPremium && isTrialing) {
+    // If NOT premium from Stripe, but still trialing, mark as trialing (Starter tier only)
+    if (!isPremium && isTrialing && tier === "starter") {
         status = "trialing";
         isPremium = true;
     }
