@@ -216,7 +216,6 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
             pageViewsData,
         }
     }
-}
 
 // ─── Top Pages ──────────────────────────────────────────────────
 
