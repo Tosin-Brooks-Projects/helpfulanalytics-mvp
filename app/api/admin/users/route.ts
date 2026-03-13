@@ -1,0 +1,40 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth-options"
+import { db } from "@/lib/firebase-admin"
+
+export const dynamic = "force-dynamic"
+
+export async function GET(req: NextRequest) {
+    const session = await getServerSession(authOptions)
+
+    if (!session) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    try {
+        const snapshot = await db.collection("users")
+            .orderBy("createdAt", "desc")
+            .limit(100)
+            .get()
+
+        const users = snapshot.docs.map(doc => {
+            const data = doc.data()
+            return {
+                id: doc.id,
+                email: data.email,
+                name: data.name,
+                image: data.image,
+                status: data.subscriptionStatus || "free",
+                createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
+                lastSeen: data.lastSeen?.toDate ? data.lastSeen.toDate().toISOString() : data.lastSeen,
+                isOnboarded: data.isOnboarded ?? false,
+            }
+        })
+
+        return NextResponse.json({ users })
+    } catch (error) {
+        console.error("Admin users error:", error)
+        return NextResponse.json({ error: "Failed to fetch users" }, { status: 500 })
+    }
+}
