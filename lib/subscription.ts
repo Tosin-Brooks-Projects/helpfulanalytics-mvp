@@ -19,13 +19,19 @@ export function getSubscriptionStatus(userData: any): {
     let stripeCurrentPeriodEnd = rawSub?.stripeCurrentPeriodEnd ? (typeof rawSub.stripeCurrentPeriodEnd.toDate === 'function' ? rawSub.stripeCurrentPeriodEnd.toDate() : new Date(rawSub.stripeCurrentPeriodEnd)) : undefined;
 
     // A user is "Premium" if they have an active or trialing Stripe subscription
-    const isPremium = status === "active" || status === "trialing";
+    let isPremium = status === "active" || status === "trialing";
 
     // Trial enforcement logic (30 days from createdAt)
     const now = new Date();
     const trialDurationMs = TRIAL_DAYS * 24 * 60 * 60 * 1000;
     const trialEndsAt = new Date(createdAt.getTime() + trialDurationMs);
     const isTrialing = now < trialEndsAt;
+
+    // If NOT premium from Stripe, but still trialing, mark as trialing
+    if (!isPremium && isTrialing) {
+        status = "trialing";
+        isPremium = true;
+    }
 
     return {
         tier,

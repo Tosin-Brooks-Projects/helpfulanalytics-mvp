@@ -126,18 +126,15 @@ export const authOptions: NextAuthOptions = {
 
                 try {
                     const { db } = await import("@/lib/firebase-admin")
+                    const { getSubscriptionStatus } = await import("@/lib/subscription")
                     const doc = await db.collection("users").doc(user.id).get()
                     if (doc.exists) {
                         const data = doc.data()
                         isOnboarded = data?.isOnboarded ?? false
-                        subscriptionStatus = data?.subscription?.status || 'free'
-                        // Convert Firestore specific date object to string if needed, or use directly if mapped
-                        // Usually timestamp.toDate()
-                        if (data?.createdAt && typeof data.createdAt.toDate === 'function') {
-                            createdAt = data.createdAt.toDate().toISOString()
-                        } else if (data?.createdAt) {
-                            createdAt = new Date(data.createdAt).toISOString()
-                        }
+                        
+                        const subInfo = getSubscriptionStatus(data)
+                        subscriptionStatus = subInfo.status
+                        createdAt = (data?.createdAt?.toDate ? data.createdAt.toDate() : new Date(data?.createdAt || Date.now())).toISOString()
                     }
                 } catch (e) {
                     console.error("Failed to fetch user metadata", e)
