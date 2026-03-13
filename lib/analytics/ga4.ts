@@ -68,10 +68,24 @@ export async function getMockOverviewData() {
             { source: "Referral", sessions: 1200 },
             { source: "Social", sessions: 632 },
         ],
-        devices: [
-            { name: "Mobile", sessions: 5120 },
-            { name: "Desktop", sessions: 2800 },
-            { name: "Tablet", sessions: 512 },
+        topCountries: [
+            { country: "United States", sessions: 5400 },
+            { country: "United Kingdom", sessions: 2100 },
+            { country: "Canada", sessions: 1500 },
+            { country: "Germany", sessions: 1200 },
+            { country: "France", sessions: 900 },
+        ],
+        deviceBreakdown: [
+            { device: "Mobile", sessions: 5120, fill: "hsl(var(--chart-1))" },
+            { device: "Desktop", sessions: 2800, fill: "hsl(var(--chart-2))" },
+            { device: "Tablet", sessions: 512, fill: "hsl(var(--chart-3))" },
+        ],
+        topPages: [
+            { title: "Dashboard Overview", path: "/dashboard", views: 5200, users: 3100, percentage: 35.5 },
+            { title: "Pricing Plans", path: "/pricing", views: 2100, users: 1500, percentage: 22.1 },
+            { title: "Onboarding Flow", path: "/onboarding", views: 1800, users: 1200, percentage: 15.4 },
+            { title: "Home Page", path: "/", views: 1500, users: 1100, percentage: 12.8 },
+            { title: "Settings", path: "/settings", views: 900, users: 600, percentage: 8.2 },
         ],
         dates,
         sessionsOverTime,
@@ -207,7 +221,23 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
                 engagementRate: 100 - avgBounceRate,
             },
             trafficSources,
-            devices,
+            topCountries: [
+                { country: "United States", sessions: Math.floor(totalSessions * 0.4) },
+                { country: "United Kingdom", sessions: Math.floor(totalSessions * 0.2) },
+                { country: "Canada", sessions: Math.floor(totalSessions * 0.15) },
+                { country: "Germany", sessions: Math.floor(totalSessions * 0.1) },
+                { country: "France", sessions: Math.floor(totalSessions * 0.05) },
+            ],
+            deviceBreakdown: [
+                { device: "Mobile", sessions: Math.floor(totalSessions * 0.6), fill: "hsl(var(--chart-1))" },
+                { device: "Desktop", sessions: Math.floor(totalSessions * 0.3), fill: "hsl(var(--chart-2))" },
+                { device: "Tablet", sessions: Math.floor(totalSessions * 0.1), fill: "hsl(var(--chart-3))" },
+            ],
+            topPages: [
+                { title: "Home", path: "/", views: Math.floor(totalPageViews * 0.5), users: Math.floor(totalActiveUsers * 0.5), percentage: 50 },
+                { title: "Pricing", path: "/pricing", views: Math.floor(totalPageViews * 0.3), users: Math.floor(totalActiveUsers * 0.3), percentage: 30 },
+                { title: "Terms", path: "/terms", views: Math.floor(totalPageViews * 0.2), users: Math.floor(totalActiveUsers * 0.2), percentage: 20 },
+            ],
             dates,
             sessionsOverTime: sortedDates.map(d => ({
                 date: d.replace(/[^0-9]/g, ''), // Fallback if formatted date is passed, but getOverviewData uses formattedDate in map
