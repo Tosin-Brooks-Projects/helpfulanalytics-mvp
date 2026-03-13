@@ -1,7 +1,4 @@
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth-options"
-import { db } from "@/lib/firebase-admin"
+import { getSubscriptionStatus } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
@@ -24,45 +21,14 @@ export async function GET() {
             return NextResponse.json({})
         }
 
-        // Build subscription with defaults
-        const rawSub = userData.subscription || {
-            tier: "starter",
-            status: "active",
-        }
+        const subInfo = getSubscriptionStatus(userData)
 
-        // Serialize Firestore Timestamps to ISO strings
-        const subscription: Record<string, any> = { ...rawSub }
-
-        if (subscription.stripeCurrentPeriodEnd) {
-            // Firestore Timestamp has toDate(), plain Date has toISOString()
-            const d = subscription.stripeCurrentPeriodEnd
-            subscription.stripeCurrentPeriodEnd = typeof d.toDate === 'function'
-                ? d.toDate().toISOString()
-                : d instanceof Date
-                    ? d.toISOString()
-                    : d
-        }
-
-        if (subscription.trialEndsAt) {
-            const d = subscription.trialEndsAt
-            subscription.trialEndsAt = typeof d.toDate === 'function'
-                ? d.toDate().toISOString()
-                : d instanceof Date
-                    ? d.toISOString()
-                    : d
-        }
-
-        // For trial/starter users without an explicit end date, compute from account creation
-        if (!subscription.stripeCurrentPeriodEnd && !subscription.trialEndsAt) {
-            const createdAt = userData.createdAt
-            if (createdAt) {
-                const created = typeof createdAt.toDate === 'function'
-                    ? createdAt.toDate()
-                    : new Date(createdAt)
-                subscription.trialEndsAt = new Date(created.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            } else {
-                subscription.trialEndsAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-            }
+        // Build subscription object for client consumption
+        const subscription: Record<string, any> = { 
+            tier: subInfo.tier,
+            status: subInfo.status,
+            trialEndsAt: subInfo.trialEndsAt?.toISOString(),
+            stripeCurrentPeriodEnd: subInfo.stripeCurrentPeriodEnd?.toISOString()
         }
 
         return NextResponse.json({

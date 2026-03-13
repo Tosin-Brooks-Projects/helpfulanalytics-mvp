@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { db } from "@/lib/firebase-admin"
 import { pricingData } from "@/config/subscriptions"
+import { getSubscriptionStatus } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
@@ -56,10 +57,11 @@ export async function POST(request: Request) {
         // Fetch user data and existing properties
         const userDoc = await db.collection("users").doc(userId).get()
         const userData = userDoc.data()
-        const subscription = userData?.subscription
+        
+        const subInfo = getSubscriptionStatus(userData)
 
-        const tierName = (subscription?.status === 'active' || subscription?.status === 'trialing')
-            ? subscription.tier
+        const tierName = subInfo.isPremium
+            ? subInfo.tier
             : 'starter'
 
         const tierConfig = pricingData.find(t => t.title.toLowerCase() === tierName?.toLowerCase())
@@ -93,7 +95,7 @@ export async function POST(request: Request) {
             ...(!userData?.subscription ? {
                 subscription: {
                     tier: "starter",
-                    status: "active",
+                    status: "free",
                 }
             } : {}),
         }, { merge: true })
