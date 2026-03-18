@@ -1,4 +1,19 @@
-import { getOverviewData, getMockOverviewData, getMockOverviewComparisonData, runReport, getTopPagesData, getDevicesData, getLocationsData, getAcquisitionData, getStatesData, getCitiesData, getRealtimeData } from "@/lib/analytics/ga4"
+import {
+    getOverviewData,
+    getMockOverviewData,
+    getMockOverviewComparisonData,
+    runReport,
+    getTopPagesData,
+    getDevicesData,
+    getLocationsData,
+    getAcquisitionData,
+    getStatesData,
+    getCitiesData,
+    getRealtimeData,
+    getEventsData,
+    getConversionsData,
+    getLandingPagesData,
+} from "@/lib/analytics/ga4"
 
 import { type NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
@@ -30,6 +45,19 @@ export async function GET(request: NextRequest) {
 
         if (!propertyId) {
             return NextResponse.json({ error: "Property ID is required" }, { status: 400 })
+        }
+
+        // Global feature flag check for advanced reports
+        const advancedTypes = new Set(["events", "conversions", "landing", "states"])
+        if (advancedTypes.has(reportType)) {
+            const settingsDoc = await (await import("@/lib/firebase-admin")).db
+                .collection("admin_settings")
+                .doc("global")
+                .get()
+            const settings = settingsDoc.exists ? settingsDoc.data() : {}
+            if (settings?.enableAdvancedReports === false) {
+                return NextResponse.json({ error: "Feature disabled" }, { status: 404 })
+            }
         }
 
         let response
@@ -139,6 +167,9 @@ export async function GET(request: NextRequest) {
                     response = await getMockStatesData(country || "United States")
                     break;
                 case "realtime": response = await getMockRealtimeData(); break;
+                case "events": response = await getMockEventsData(); break;
+                case "conversions": response = await getMockConversionsData(); break;
+                case "landing": response = await getMockLandingPagesData(); break;
                 default:
                     return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
             }
@@ -212,6 +243,15 @@ export async function GET(request: NextRequest) {
                 break
             case "realtime":
                 response = await getRealtimeData(accessToken, propertyId)
+                break
+            case "events":
+                response = await getEventsData(accessToken, propertyId, startDate, endDate, limit ?? 25)
+                break
+            case "conversions":
+                response = await getConversionsData(accessToken, propertyId, startDate, endDate, limit ?? 25)
+                break
+            case "landing":
+                response = await getLandingPagesData(accessToken, propertyId, startDate, endDate, limit ?? 25)
                 break
             default:
                 return NextResponse.json({ error: "Invalid report type" }, { status: 400 })
@@ -409,6 +449,55 @@ async function getMockRealtimeData() {
             { path: "/blog/analytics-tips", title: "Blog Post", active: Math.floor(Math.random() * 4) + 1 },
             { path: "/docs", title: "Documentation", active: Math.floor(Math.random() * 3) + 1 },
         ]
+    }
+}
+
+async function getMockEventsData() {
+    const events = [
+        { eventName: "page_view", eventCount: 58210, users: 11230 },
+        { eventName: "session_start", eventCount: 16240, users: 10950 },
+        { eventName: "scroll", eventCount: 14020, users: 8250 },
+        { eventName: "click", eventCount: 8200, users: 6100 },
+        { eventName: "first_visit", eventCount: 4200, users: 4200 },
+        { eventName: "sign_up", eventCount: 640, users: 610 },
+        { eventName: "purchase", eventCount: 120, users: 115 },
+    ]
+    const totalEvents = events.reduce((sum, e) => sum + e.eventCount, 0)
+    return {
+        events: events.map((e) => ({ ...e, percentage: totalEvents > 0 ? (e.eventCount / totalEvents) * 100 : 0 })),
+        totalEvents,
+    }
+}
+
+async function getMockConversionsData() {
+    const conversions = [
+        { eventName: "sign_up", keyEvents: 610, users: 600, eventCount: 640 },
+        { eventName: "generate_lead", keyEvents: 180, users: 160, eventCount: 220 },
+        { eventName: "purchase", keyEvents: 115, users: 110, eventCount: 120 },
+    ]
+    const totalKeyEvents = conversions.reduce((sum, e) => sum + e.keyEvents, 0)
+    return {
+        conversions: conversions.map((e) => ({ ...e, percentage: totalKeyEvents > 0 ? (e.keyEvents / totalKeyEvents) * 100 : 0 })),
+        totalKeyEvents,
+    }
+}
+
+async function getMockLandingPagesData() {
+    const landingPages = [
+        { path: "/", sessions: 5400, users: 4100, bounceRate: 0.38, avgSessionDuration: 210 },
+        { path: "/pricing", sessions: 2100, users: 1600, bounceRate: 0.44, avgSessionDuration: 185 },
+        { path: "/features", sessions: 1800, users: 1450, bounceRate: 0.36, avgSessionDuration: 230 },
+        { path: "/blog/analytics-tips", sessions: 1200, users: 980, bounceRate: 0.52, avgSessionDuration: 160 },
+        { path: "/login", sessions: 950, users: 780, bounceRate: 0.28, avgSessionDuration: 260 },
+    ]
+    const totalSessions = landingPages.reduce((sum, p) => sum + p.sessions, 0)
+    return {
+        landingPages: landingPages.map((p) => ({
+            ...p,
+            engagementRate: 1 - p.bounceRate,
+            percentage: totalSessions > 0 ? (p.sessions / totalSessions) * 100 : 0,
+        })),
+        totalSessions,
     }
 }
 

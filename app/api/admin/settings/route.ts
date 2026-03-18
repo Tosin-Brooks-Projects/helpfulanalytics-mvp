@@ -17,6 +17,7 @@ const settingsSchema = z.object({
   blockNewUsers: z.boolean().optional(),
   signupAllowlist: z.array(z.string().email()).max(500).optional(),
   allowAdminBootstrap: z.boolean().optional(),
+  enableAdvancedReports: z.boolean().optional(),
 })
 
 async function requireAdmin() {
@@ -49,6 +50,7 @@ export async function GET() {
       adminReplyToEmail: data?.adminReplyToEmail || "",
       blockNewUsers: !!data?.blockNewUsers,
       signupAllowlist: Array.isArray(data?.signupAllowlist) ? data.signupAllowlist : [],
+      enableAdvancedReports: data?.enableAdvancedReports !== false,
       allowAdminBootstrap: !!data?.allowAdminBootstrap,
       updatedAt: data?.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data?.updatedAt,
     },

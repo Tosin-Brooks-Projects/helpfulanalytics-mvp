@@ -13,6 +13,7 @@ import {
     Smartphone,
     Globe,
     Layers,
+    MousePointerClick,
     LogOut,
     ChevronLeft,
     ChevronRight,
@@ -35,7 +36,7 @@ const KeaAvatarIcon = ({ className }: { className?: string }) => (
     </div>
 )
 
-const items = [
+const baseItems = [
     { title: "Overview", href: "/dashboard", icon: LayoutGrid },
     { title: "Versus", href: "/dashboard/versus", icon: Swords },
     { title: "Devices", href: "/dashboard/devices", icon: Smartphone },
@@ -47,7 +48,18 @@ const items = [
 
 export function LinearSidebar() {
     const pathname = usePathname()
-    const { subscription, sidebarCollapsed, setSidebarCollapsed } = useDashboard()
+    const { subscription, sidebarCollapsed, setSidebarCollapsed, features } = useDashboard()
+
+    const items = [
+        ...baseItems,
+        ...(features?.advancedReports
+            ? [
+                  { title: "Events", href: "/dashboard/events", icon: Zap },
+                  { title: "Conversions", href: "/dashboard/conversions", icon: Bird },
+                  { title: "Landing", href: "/dashboard/landing", icon: MousePointerClick },
+              ]
+            : []),
+    ]
 
     return (
         <TooltipProvider delayDuration={0}>

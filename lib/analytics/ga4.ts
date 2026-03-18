@@ -591,3 +591,112 @@ export async function getRealtimeData(accessToken: string, propertyId: string) {
         })),
     }
 }
+
+// ─── Events ──────────────────────────────────────────────────────
+
+export async function getEventsData(
+    accessToken: string,
+    propertyId: string,
+    startDate: string,
+    endDate: string,
+    limit: number = 25,
+) {
+    const response = await runReport(accessToken, propertyId, {
+        dateRanges: [{ startDate, endDate }],
+        dimensions: [{ name: "eventName" }],
+        metrics: [{ name: "eventCount" }, { name: "totalUsers" }],
+        orderBys: [{ metric: { metricName: "eventCount" }, desc: true }],
+        limit,
+    })
+
+    const rows = response.rows || []
+    const totalEvents = rows.reduce((sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0", 10), 0)
+
+    return {
+        events: rows.map((row: any) => {
+            const count = Number.parseInt(row.metricValues?.[0]?.value || "0", 10)
+            return {
+                eventName: row.dimensionValues?.[0]?.value || "unknown",
+                eventCount: count,
+                users: Number.parseInt(row.metricValues?.[1]?.value || "0", 10),
+                percentage: totalEvents > 0 ? (count / totalEvents) * 100 : 0,
+            }
+        }),
+        totalEvents,
+    }
+}
+
+// ─── Conversions (Key Events) ─────────────────────────────────────
+
+export async function getConversionsData(
+    accessToken: string,
+    propertyId: string,
+    startDate: string,
+    endDate: string,
+    limit: number = 25,
+) {
+    const response = await runReport(accessToken, propertyId, {
+        dateRanges: [{ startDate, endDate }],
+        dimensions: [{ name: "eventName" }],
+        metrics: [{ name: "keyEvents" }, { name: "totalUsers" }, { name: "eventCount" }],
+        orderBys: [{ metric: { metricName: "keyEvents" }, desc: true }],
+        limit,
+    })
+
+    const rows = response.rows || []
+    const totalKeyEvents = rows.reduce((sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0", 10), 0)
+
+    return {
+        conversions: rows
+            .map((row: any) => {
+                const keyEvents = Number.parseInt(row.metricValues?.[0]?.value || "0", 10)
+                return {
+                    eventName: row.dimensionValues?.[0]?.value || "unknown",
+                    keyEvents,
+                    users: Number.parseInt(row.metricValues?.[1]?.value || "0", 10),
+                    eventCount: Number.parseInt(row.metricValues?.[2]?.value || "0", 10),
+                    percentage: totalKeyEvents > 0 ? (keyEvents / totalKeyEvents) * 100 : 0,
+                }
+            })
+            .filter((e: any) => e.keyEvents > 0),
+        totalKeyEvents,
+    }
+}
+
+// ─── Landing Pages ───────────────────────────────────────────────
+
+export async function getLandingPagesData(
+    accessToken: string,
+    propertyId: string,
+    startDate: string,
+    endDate: string,
+    limit: number = 25,
+) {
+    const response = await runReport(accessToken, propertyId, {
+        dateRanges: [{ startDate, endDate }],
+        dimensions: [{ name: "landingPagePlusQueryString" }],
+        metrics: [{ name: "sessions" }, { name: "totalUsers" }, { name: "bounceRate" }, { name: "averageSessionDuration" }],
+        orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+        limit,
+    })
+
+    const rows = response.rows || []
+    const totalSessions = rows.reduce((sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0", 10), 0)
+
+    return {
+        landingPages: rows.map((row: any) => {
+            const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0", 10)
+            const bounceRate = Number.parseFloat(row.metricValues?.[2]?.value || "0") // ratio (0-1)
+            return {
+                path: row.dimensionValues?.[0]?.value || "/",
+                sessions,
+                users: Number.parseInt(row.metricValues?.[1]?.value || "0", 10),
+                bounceRate,
+                engagementRate: 1 - bounceRate,
+                avgSessionDuration: Number.parseFloat(row.metricValues?.[3]?.value || "0"),
+                percentage: totalSessions > 0 ? (sessions / totalSessions) * 100 : 0,
+            }
+        }),
+        totalSessions,
+    }
+}

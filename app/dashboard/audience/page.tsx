@@ -10,9 +10,10 @@ import { useDashboard } from "@/components/linear/dashboard-context"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Users, Globe, MapPin, ChevronLeft } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts"
+import { format } from "date-fns"
 
 export default function AudiencePage() {
-    const { selectedProperty } = useDashboard()
+    const { selectedProperty, dateRange } = useDashboard()
     const [devicesData, setDevicesData] = useState<any>(null)
     const [locationsData, setLocationsData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
@@ -21,15 +22,20 @@ export default function AudiencePage() {
     const [selectedCountry, setSelectedCountry] = useState<string | null>(null)
     const [citiesData, setCitiesData] = useState<any>(null)
     const [citiesLoading, setCitiesLoading] = useState(false)
+    const [statesData, setStatesData] = useState<any>(null)
+    const [statesLoading, setStatesLoading] = useState(false)
+    const [geoTab, setGeoTab] = useState<"cities" | "states">("cities")
 
     useEffect(() => {
         async function fetchData() {
             if (!selectedProperty) return
             setLoading(true)
             try {
+                const start = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "30daysAgo"
+                const end = dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "today"
                 const [devicesRes, locationsRes] = await Promise.all([
-                    fetch(`/api/analytics?propertyId=${selectedProperty}&reportType=devices`),
-                    fetch(`/api/analytics?propertyId=${selectedProperty}&reportType=locations`)
+                    fetch(`/api/analytics?propertyId=${selectedProperty}&reportType=devices&startDate=${start}&endDate=${end}`),
+                    fetch(`/api/analytics?propertyId=${selectedProperty}&reportType=locations&startDate=${start}&endDate=${end}`)
                 ])
 
                 const devicesJson = await devicesRes.json()
@@ -45,29 +51,40 @@ export default function AudiencePage() {
         }
 
         fetchData()
-    }, [selectedProperty])
+    }, [selectedProperty, dateRange])
 
     const handleCountryClick = useCallback(async (countryName: string) => {
         if (!selectedProperty) return
         setSelectedCountry(countryName)
+        setGeoTab("cities")
         setCitiesLoading(true)
         setCitiesData(null)
+        setStatesLoading(true)
+        setStatesData(null)
         try {
-            const res = await fetch(
-                `/api/analytics?propertyId=${selectedProperty}&reportType=cities&country=${encodeURIComponent(countryName)}`
-            )
-            const json = await res.json()
-            setCitiesData(json)
+            const start = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "30daysAgo"
+            const end = dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "today"
+
+            const [citiesRes, statesRes] = await Promise.all([
+                fetch(`/api/analytics?propertyId=${selectedProperty}&reportType=cities&country=${encodeURIComponent(countryName)}&startDate=${start}&endDate=${end}`),
+                fetch(`/api/analytics?propertyId=${selectedProperty}&reportType=states&country=${encodeURIComponent(countryName)}&startDate=${start}&endDate=${end}`)
+            ])
+
+            const [citiesJson, statesJson] = await Promise.all([citiesRes.json(), statesRes.json()])
+            setCitiesData(citiesJson)
+            setStatesData(statesJson)
         } catch (error) {
             console.error("Failed to fetch cities data", error)
         } finally {
             setCitiesLoading(false)
+            setStatesLoading(false)
         }
-    }, [selectedProperty])
+    }, [selectedProperty, dateRange])
 
     const handleBackToCountries = useCallback(() => {
         setSelectedCountry(null)
         setCitiesData(null)
+        setStatesData(null)
     }, [])
 
     const COLORS = ["hsl(var(--chart-1))", "#6366f1", "#10b981", "#f43f5e", "#0ea5e9"]
@@ -101,6 +118,8 @@ export default function AudiencePage() {
     if (selectedCountry) {
         const cities = citiesData?.cities || []
         const topCity = cities.length > 0 ? cities[0] : null
+        const states = statesData?.states || []
+        const topState = states.length > 0 ? states[0] : null
 
         return (
             <LinearShell>
@@ -120,34 +139,61 @@ export default function AudiencePage() {
                         <DateFilterBar />
                     </div>
 
-                    {citiesLoading ? (
+                    {(citiesLoading || statesLoading) ? (
                         <div className="flex items-center justify-center h-64 text-zinc-500 animate-pulse">
-                            Loading city data...
+                            Loading regional data...
                         </div>
                     ) : (
                         <>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setGeoTab("cities")}
+                                    className={`text-xs font-semibold px-3 py-1.5 rounded-md border transition-colors ${
+                                        geoTab === "cities"
+                                            ? "bg-amber-500 text-white border-amber-500"
+                                            : "bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"
+                                    }`}
+                                >
+                                    Cities
+                                </button>
+                                <button
+                                    onClick={() => setGeoTab("states")}
+                                    className={`text-xs font-semibold px-3 py-1.5 rounded-md border transition-colors ${
+                                        geoTab === "states"
+                                            ? "bg-amber-500 text-white border-amber-500"
+                                            : "bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"
+                                    }`}
+                                >
+                                    States / Regions
+                                </button>
+                            </div>
+
                             {/* City KPI Cards */}
                             <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
                                 <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-zinc-600">Top City</CardTitle>
+                                        <CardTitle className="text-sm font-medium text-zinc-600">{geoTab === "cities" ? "Top City" : "Top State"}</CardTitle>
                                         <MapPin className="h-4 w-4 text-zinc-400" />
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-zinc-900">{topCity?.city || "--"}</div>
+                                        <div className="text-2xl font-bold text-zinc-900">
+                                            {geoTab === "cities" ? (topCity?.city || "--") : (topState?.state || "--")}
+                                        </div>
                                         <p className="text-xs text-zinc-500 mt-1">
-                                            {topCity ? `${topCity.percentage.toFixed(1)}% of country sessions` : "No data"}
+                                            {geoTab === "cities"
+                                                ? (topCity ? `${topCity.percentage.toFixed(1)}% of country sessions` : "No data")
+                                                : (topState ? `${topState.percentage.toFixed(1)}% of country sessions` : "No data")}
                                         </p>
                                     </CardContent>
                                 </Card>
                                 <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-zinc-600">Active Cities</CardTitle>
+                                        <CardTitle className="text-sm font-medium text-zinc-600">{geoTab === "cities" ? "Active Cities" : "Active States"}</CardTitle>
                                         <Globe className="h-4 w-4 text-zinc-400" />
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-zinc-900">{cities.length}</div>
-                                        <p className="text-xs text-zinc-500 mt-1">Cities with traffic</p>
+                                        <div className="text-2xl font-bold text-zinc-900">{geoTab === "cities" ? cities.length : states.length}</div>
+                                        <p className="text-xs text-zinc-500 mt-1">{geoTab === "cities" ? "Cities with traffic" : "States with traffic"}</p>
                                     </CardContent>
                                 </Card>
                                 <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
@@ -157,7 +203,7 @@ export default function AudiencePage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-zinc-900">
-                                            {citiesData?.totalSessions?.toLocaleString() || 0}
+                                            {(geoTab === "cities" ? citiesData?.totalSessions : statesData?.totalSessions)?.toLocaleString() || 0}
                                         </div>
                                         <p className="text-xs text-zinc-500 mt-1">In {selectedCountry}</p>
                                     </CardContent>
@@ -167,17 +213,20 @@ export default function AudiencePage() {
                             {/* Chart + Table — stacked on mobile, side-by-side on desktop */}
                             <div className="space-y-6 lg:space-y-0 lg:grid lg:gap-6 lg:grid-cols-2">
                                 {/* Top Cities Bar Chart */}
-                                <LinearGraphCard title={`Top Cities in ${selectedCountry}`} className="h-[280px] sm:h-[380px]">
+                                <LinearGraphCard
+                                    title={`${geoTab === "cities" ? "Top Cities" : "Top States"} in ${selectedCountry}`}
+                                    className="h-[280px] sm:h-[380px]"
+                                >
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart
                                             layout="vertical"
-                                            data={cities.slice(0, 6)}
+                                            data={(geoTab === "cities" ? cities : states).slice(0, 6)}
                                             margin={{ top: 5, right: 15, left: 0, bottom: 5 }}
                                         >
                                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
                                             <XAxis type="number" hide />
                                             <YAxis
-                                                dataKey="city"
+                                                dataKey={geoTab === "cities" ? "city" : "state"}
                                                 type="category"
                                                 tickLine={false}
                                                 axisLine={false}
@@ -189,7 +238,7 @@ export default function AudiencePage() {
                                                 contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                                             />
                                             <Bar dataKey="sessions" fill="#6366f1" radius={[0, 4, 4, 0]} barSize={20}>
-                                                {cities.slice(0, 6).map((_: any, index: number) => (
+                                                {(geoTab === "cities" ? cities : states).slice(0, 6).map((_: any, index: number) => (
                                                     <Cell key={`city-cell-${index}`} fill={index === 0 ? "hsl(var(--chart-1))" : "#6366f1"} />
                                                 ))}
                                             </Bar>
@@ -198,11 +247,11 @@ export default function AudiencePage() {
                                 </LinearGraphCard>
 
                                 {/* City Table */}
-                                <LinearGraphCard title="City Breakdown">
+                                <LinearGraphCard title={geoTab === "cities" ? "City Breakdown" : "State Breakdown"}>
                                     <LinearDataTable
-                                        data={cities}
+                                        data={geoTab === "cities" ? cities : states}
                                         columns={[
-                                            { header: "City", accessorKey: "city" as any },
+                                            { header: geoTab === "cities" ? "City" : "State", accessorKey: (geoTab === "cities" ? "city" : "state") as any },
                                             { header: "Sessions", accessorKey: "sessions" as any, className: "text-right" },
                                             { header: "Users", accessorKey: "users" as any, className: "text-right", mobileHidden: true },
                                             {

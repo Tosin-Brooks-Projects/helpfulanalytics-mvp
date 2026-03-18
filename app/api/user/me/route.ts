@@ -27,6 +27,9 @@ export async function GET() {
 
         const subInfo = getSubscriptionStatus(userData)
 
+        const settingsDoc = await db.collection("admin_settings").doc("global").get()
+        const settings = settingsDoc.exists ? settingsDoc.data() : {}
+
         // Build subscription object for client consumption
         const subscription: Record<string, any> = { 
             tier: subInfo.tier,
@@ -38,7 +41,10 @@ export async function GET() {
         return NextResponse.json({
             id: userId,
             email: session.user?.email,
-            subscription
+            subscription,
+            features: {
+                advancedReports: settings?.enableAdvancedReports !== false,
+            },
         })
 
     } catch (error) {

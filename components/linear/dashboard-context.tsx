@@ -40,6 +40,7 @@ interface DashboardContextType {
     compareDateRange: DateRange | undefined
     setCompareDateRange: (date: DateRange | undefined) => void
     subscription: Subscription | null
+    features: { advancedReports: boolean } | null
     sidebarCollapsed: boolean
     setSidebarCollapsed: (collapsed: boolean) => void
     deletionUsage: { count: number, resetAt: number } | null
@@ -85,6 +86,10 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
     const properties = useMemo(() => savedData?.properties || [], [savedData])
     const deletionUsage = useMemo(() => savedData?.deletionUsage || null, [savedData])
     const subscription = useMemo(() => userData?.subscription || null, [userData])
+    const features = useMemo(
+        () => (userData?.features ? { advancedReports: !!userData.features.advancedReports } : null),
+        [userData],
+    )
 
     const availableProperties = useMemo(() => {
         const allProps = allData?.properties || []
@@ -181,7 +186,8 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
             subscription,
             sidebarCollapsed,
             setSidebarCollapsed,
-            deletionUsage
+            deletionUsage,
+            features,
         }}>
             {children}
         </LinearDashboardContext.Provider>

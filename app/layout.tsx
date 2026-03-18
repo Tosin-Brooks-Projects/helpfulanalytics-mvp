@@ -18,10 +18,10 @@ const cormorant = Cormorant_Garamond({
 export const metadata: Metadata = {
   metadataBase: new URL("https://helpfulanalytics.com"),
   title: {
-    default: "Helpful Analytics - The Best Google Analytics Dashboard & GA4 Alternative",
+    default: "Helpful Analytics - The Best Google Analytics Dashboard for GA4",
     template: "%s | Helpful Analytics",
   },
-  description: "Learn how to use Google Analytics 4 (GA4) with our easy-to-use dashboard. The perfect Google Analytics alternative for small businesses, research, and setting up tracking. Understand your data without the confusion.",
+  description: "Simple, privacy-friendly Google Analytics metrics with our easy to use dashboard. Understand your traffic without the confusion of GA4.",
   keywords: [
     "google analytics dashboard",
     "ga4 setup",
@@ -41,8 +41,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://helpfulanalytics.com",
-    title: "Helpful Analytics - The Best Google Analytics Dashboard",
-    description: "Understand your data without the confusion. The perfect Google Analytics alternative for small businesses.",
+    title: "Helpful Analytics - The Best Google Analytics Dashboard for GA4",
+    description: "Simple, privacy-friendly Google Analytics metrics with our easy to use dashboard. Understand your traffic without the confusion of GA4.",
     siteName: "Helpful Analytics",
     images: [
       {
@@ -55,8 +55,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Helpful Analytics - The Best Google Analytics Dashboard",
-    description: "Understand your data without the confusion. The perfect Google Analytics alternative for small businesses.",
+    title: "Helpful Analytics - The Best Google Analytics Dashboard for GA4",
+    description: "Simple, privacy-friendly Google Analytics metrics with our easy to use dashboard. Understand your traffic without the confusion of GA4.",
     creator: "@brooksconkle",
     images: ["/landingpage.png"],
   },

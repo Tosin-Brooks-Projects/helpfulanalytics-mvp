@@ -19,6 +19,7 @@ type AdminSettings = {
   adminReplyToEmail: string
   blockNewUsers: boolean
   signupAllowlist: string[]
+  enableAdvancedReports: boolean
   allowAdminBootstrap: boolean
   updatedAt?: string
 }
@@ -37,6 +38,7 @@ export default function AdminSettingsPage() {
     adminReplyToEmail: "",
     blockNewUsers: false,
     signupAllowlist: [],
+    enableAdvancedReports: true,
     allowAdminBootstrap: false,
   })
 
@@ -229,6 +231,23 @@ export default function AdminSettingsPage() {
               }
               placeholder={"owner@domain.com\nteammate@domain.com"}
               className="min-h-[120px]"
+              disabled={loading}
+            />
+          </div>
+        </Card>
+
+        <Card className="p-6 border-zinc-200 bg-white shadow-sm space-y-4">
+          <div className="text-sm font-semibold text-zinc-900">Feature flags</div>
+          <div className="flex items-start justify-between gap-6">
+            <div>
+              <div className="text-sm font-medium text-zinc-900">Advanced GA4 reports</div>
+              <div className="text-xs text-zinc-500">
+                Controls Events, Conversions, Landing Pages, and States drilldown in the dashboard.
+              </div>
+            </div>
+            <Switch
+              checked={settings.enableAdvancedReports}
+              onCheckedChange={(v) => setSettings((s) => ({ ...s, enableAdvancedReports: v }))}
               disabled={loading}
             />
           </div>
