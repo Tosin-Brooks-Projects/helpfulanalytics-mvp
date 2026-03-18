@@ -5,6 +5,7 @@ import { AdminShell } from "@/components/admin/admin-shell"
 import { Card } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 
 export default function AdminUsersPage() {

@@ -14,7 +14,8 @@ export interface SubscriptionTier {
 
 export interface UserSubscription {
     tier: string
-    status: "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "trialing" | "unpaid"
+    // Stripe statuses + app-level "free" for users not on a paid plan yet.
+    status: "free" | "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "trialing" | "unpaid"
     stripeCustomerId?: string
     stripeSubscriptionId?: string
     stripePriceId?: string

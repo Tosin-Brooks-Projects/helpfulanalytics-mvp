@@ -163,9 +163,6 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
 
     for (const row of rows) {
         const dateStr = row.dimensionValues?.[0]?.value || ""
-        const formattedDate = dateStr
-            ? new Date(`${dateStr.substring(0, 4)}-${dateStr.substring(4, 6)}-${dateStr.substring(6, 8)}`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-            : ""
         const source = row.dimensionValues?.[1]?.value || "Unknown"
         const device = row.dimensionValues?.[2]?.value || "Unknown"
 
@@ -183,28 +180,40 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
             totalDuration += duration * sessions
         }
 
-        sourcesMap.set(source, (sourcesMap.get(source) || 0) + activeUsers)
+        // Keep trafficSources in sessions (to match charts + common GA reporting)
+        sourcesMap.set(source, (sourcesMap.get(source) || 0) + sessions)
         devicesMap.set(device, (devicesMap.get(device) || 0) + sessions)
-        dailySessionsMap.set(formattedDate, (dailySessionsMap.get(formattedDate) || 0) + sessions)
-        dailyPageViewsMap.set(formattedDate, (dailyPageViewsMap.get(formattedDate) || 0) + pageViews)
+        // Use raw GA4 "date" dimension (YYYYMMDD) as key to preserve chronology
+        if (dateStr) {
+            dailySessionsMap.set(dateStr, (dailySessionsMap.get(dateStr) || 0) + sessions)
+            dailyPageViewsMap.set(dateStr, (dailyPageViewsMap.get(dateStr) || 0) + pageViews)
+        }
     }
 
     const avgBounceRate = totalSessions > 0 ? (totalBounceRate / totalSessions) * 100 : 0
     const avgDuration = totalSessions > 0 ? (totalDuration / totalSessions) : 0
 
     const trafficSources = Array.from(sourcesMap.entries())
-        .map(([name, users]) => ({ name, users }))
-        .sort((a, b) => b.users - a.users)
-        .slice(0, 5)
+        .map(([source, sessions]) => ({ source, sessions }))
+        .sort((a, b) => b.sessions - a.sessions)
+        .slice(0, limit)
 
     const devices = Array.from(devicesMap.entries())
         .map(([name, users]) => ({ name, users }))
         .sort((a, b) => b.users - a.users)
 
-    const sortedDates = Array.from(dailySessionsMap.keys()).sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
-    const dates = sortedDates
-    const sessionsData = dates.map(d => dailySessionsMap.get(d) || 0)
-    const pageViewsData = dates.map(d => dailyPageViewsMap.get(d) || 0)
+    const sortedDateStrs = Array.from(dailySessionsMap.keys()).sort()
+    const formatDate = (yyyymmdd: string) =>
+        new Date(`${yyyymmdd.substring(0, 4)}-${yyyymmdd.substring(4, 6)}-${yyyymmdd.substring(6, 8)}`).toLocaleDateString(
+            "en-US",
+            { month: "short", day: "numeric" },
+        )
+    const dates = sortedDateStrs.map(formatDate)
+    const pageViewsData = sortedDateStrs.map((d) => dailyPageViewsMap.get(d) || 0)
+    const sessionsOverTime = sortedDateStrs.map((d) => ({
+        date: d, // YYYYMMDD
+        sessions: dailySessionsMap.get(d) || 0,
+    }))
 
         return {
             metrics: {
@@ -239,10 +248,7 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
                 { title: "Terms", path: "/terms", views: Math.floor(totalPageViews * 0.2), users: Math.floor(totalActiveUsers * 0.2), percentage: 20 },
             ],
             dates,
-            sessionsOverTime: sortedDates.map(d => ({
-                date: d.replace(/[^0-9]/g, ''), // Fallback if formatted date is passed, but getOverviewData uses formattedDate in map
-                sessions: dailySessionsMap.get(d) || 0
-            })),
+            sessionsOverTime,
             pageViewsData,
         }
     }

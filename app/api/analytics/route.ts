@@ -531,14 +531,14 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
         const prev = (previousData as any).trafficSources.find((p: any) => p.source === source.source)
         return {
             ...source,
-            previousSessions: prev ? prev.users : 0,
-            delta: calculateDelta(source.users, prev ? prev.users : 0)
+            previousSessions: prev ? prev.sessions : 0,
+            delta: calculateDelta(source.sessions, prev ? prev.sessions : 0)
         }
     })
 
     // Merge Top Pages
-    const topPagesWithDelta = (currentData as any).pages.slice(0, 10).map((page: any) => {
-        const prev = (previousData as any).pages.find((p: any) => p.path === page.path)
+    const topPagesWithDelta = (currentData as any).topPages.slice(0, 10).map((page: any) => {
+        const prev = (previousData as any).topPages.find((p: any) => p.path === page.path)
         return {
             ...page,
             previousViews: prev ? prev.views : 0,
@@ -550,8 +550,8 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
     // They likely have different lengths or start dates. 
     // We returns them as two separate arrays for the frontend to align by "Day N" or similar.
     const chartData = {
-        current: currentData.sessionsData,
-        previous: previousData.sessionsData
+        current: currentData.sessionsOverTime,
+        previous: previousData.sessionsOverTime
     }
 
     return {
@@ -560,7 +560,7 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
         trafficSources: trafficSourcesWithDelta,
         topPages: topPagesWithDelta,
         chartData: chartData,
-        deviceBreakdown: currentData.devices // Just show current for donut usually
+        deviceBreakdown: currentData.deviceBreakdown // Just show current for donut usually
     }
 }
 

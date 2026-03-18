@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth-options"
 import { db } from "@/lib/firebase-admin"
+import { getSubscriptionStatus } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
@@ -29,10 +30,11 @@ export async function GET(req: NextRequest) {
 
         usersSnapshot.forEach(doc => {
             const data = doc.data()
+            const subInfo = getSubscriptionStatus(data)
             
             // App-specific status logic
-            if (data.subscriptionStatus === 'active') paidSubs++
-            if (data.subscriptionStatus === 'trialing') activeTrials++
+            if (subInfo.status === "active") paidSubs++
+            if (subInfo.status === "trialing") activeTrials++
             
             const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt)
             if (createdAt > dayAgo) newUsersLast24h++

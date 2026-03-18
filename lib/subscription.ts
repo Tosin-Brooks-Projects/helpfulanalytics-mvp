@@ -15,7 +15,8 @@ export function getSubscriptionStatus(userData: any): {
     
     // Default values
     let tier = rawSub?.tier || "starter";
-    let status = rawSub?.status || "free";
+    // Support both legacy flat `subscriptionStatus` and nested `subscription.status`
+    let status: UserSubscription["status"] = rawSub?.status || userData?.subscriptionStatus || "free";
     let stripeCurrentPeriodEnd = rawSub?.stripeCurrentPeriodEnd ? (typeof rawSub.stripeCurrentPeriodEnd.toDate === 'function' ? rawSub.stripeCurrentPeriodEnd.toDate() : new Date(rawSub.stripeCurrentPeriodEnd)) : undefined;
 
     // A user is "Premium" if they have an active or trialing Stripe subscription

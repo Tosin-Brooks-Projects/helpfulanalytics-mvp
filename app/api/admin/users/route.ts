@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth-options"
 import { db } from "@/lib/firebase-admin"
+import { getSubscriptionStatus } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
@@ -20,12 +21,13 @@ export async function GET(req: NextRequest) {
 
         const users = snapshot.docs.map(doc => {
             const data = doc.data()
+            const subInfo = getSubscriptionStatus(data)
             return {
                 id: doc.id,
                 email: data.email,
                 name: data.name,
                 image: data.image,
-                status: data.subscriptionStatus || "free",
+                status: subInfo.status,
                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
                 lastSeen: data.lastSeen?.toDate ? data.lastSeen.toDate().toISOString() : data.lastSeen,
                 isOnboarded: data.isOnboarded ?? false,
