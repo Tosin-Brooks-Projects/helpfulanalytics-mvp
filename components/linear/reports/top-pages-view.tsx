@@ -7,19 +7,34 @@ import { ArrowUpRight, Eye, MousePointerClick, Clock, ArrowRight } from "lucide-
 import { DateFilterBar } from "@/components/linear/date-filter-bar"
 
 export function TopPagesView({ propertyId }: { propertyId: string }) {
-    const { data, loading } = useAnalytics(propertyId)
+    const { data, loading } = useAnalytics(propertyId, "pages")
 
-    if (loading || !data || !data.topPages) {
+    const topPages =
+        (data?.topPages as any[]) ||
+        (data?.pages
+            ? (data.pages as any[]).map((p: any) => ({
+                  title: p.pageTitle,
+                  path: p.pagePath,
+                  views: p.pageViews,
+                  percentage: p.percentage ?? 0,
+              }))
+            : null)
+
+    if (loading || !data || !topPages) {
         return <div className="p-8 text-center text-zinc-500">Loading top pages data...</div>
     }
 
     // Sort pages by views for the chart
-    const chartData = [...data.topPages].sort((a: any, b: any) => b.views - a.views).slice(0, 10).map((p: any, i: number) => ({
+    const chartData = [...topPages].sort((a: any, b: any) => b.views - a.views).slice(0, 10).map((p: any, i: number) => ({
         ...p,
         fill: i === 0 ? "#f59e0b" : "rgba(251, 191, 36, 0.3)" // Amber-500 for top, lighter for others
     }))
 
-    const totalViews = data.metrics?.pageViews || 0
+    const totalViews =
+        (data?.metrics?.pageViews as number | undefined) ||
+        (data?.metrics?.screenPageViews as number | undefined) ||
+        (data?.totalPageViews as number | undefined) ||
+        0
 
     return (
         <div className="space-y-6">
@@ -118,7 +133,7 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-100">
-                            {data.topPages?.map((page: any, i: number) => (
+                            {topPages?.map((page: any, i: number) => (
                                 <tr key={i} className="hover:bg-amber-500/5 transition-colors group">
                                     <td className="px-3 sm:px-6 py-3">
                                         <div className="flex flex-col">

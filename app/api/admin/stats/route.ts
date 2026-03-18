@@ -9,13 +9,15 @@ export const dynamic = "force-dynamic"
 export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
-    if (!session) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // In a real app, check for admin role
-    // const userDoc = await db.collection("users").doc(session.user.id).get()
-    // if (userDoc.data()?.role !== "admin") return ...
+    const requesterDoc = await db.collection("users").doc(session.user.id).get()
+    const requesterRole = requesterDoc.exists ? requesterDoc.data()?.role : undefined
+    if (requesterRole !== "admin") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    }
 
     try {
         const usersSnapshot = await db.collection("users").get()

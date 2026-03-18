@@ -9,8 +9,14 @@ export const dynamic = "force-dynamic"
 export async function GET(req: NextRequest) {
     const session = await getServerSession(authOptions)
 
-    if (!session) {
+    if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const requesterDoc = await db.collection("users").doc(session.user.id).get()
+    const requesterRole = requesterDoc.exists ? requesterDoc.data()?.role : undefined
+    if (requesterRole !== "admin") {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
 
     try {
@@ -27,6 +33,8 @@ export async function GET(req: NextRequest) {
                 email: data.email,
                 name: data.name,
                 image: data.image,
+                role: data.role || "user",
+                tier: (data.subscription?.tier as string) || "starter",
                 status: subInfo.status,
                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
                 lastSeen: data.lastSeen?.toDate ? data.lastSeen.toDate().toISOString() : data.lastSeen,

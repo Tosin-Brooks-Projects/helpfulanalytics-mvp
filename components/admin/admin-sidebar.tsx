@@ -8,7 +8,7 @@ import {
     Users,
     Settings,
     Shield,
-    ChevronLeft,
+    Activity,
     LogOut,
     Home
 } from "lucide-react"
@@ -18,6 +18,7 @@ const menuItems = [
     { title: "Overview", href: "/admin", icon: LayoutGrid },
     { title: "Users", href: "/admin/users", icon: Users },
     { title: "Settings", href: "/admin/settings", icon: Settings },
+    { title: "Activity", href: "/admin/activity", icon: Activity },
 ]
 
 export function AdminSidebar() {

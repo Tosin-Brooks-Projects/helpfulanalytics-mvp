@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
 import { Resend } from 'resend';
+import { db } from "@/lib/firebase-admin"
 
 // Use dummy key for build/dev if missing, but logging warning in dev
 const resendKey = process.env.RESEND_API_KEY || "re_dummy_key_for_build"
@@ -25,8 +26,16 @@ export async function POST(req: Request) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = (file as any).name || 'analytics-report.pdf';
 
+        const settingsDoc = await db.collection("admin_settings").doc("global").get()
+        const settings = settingsDoc.exists ? settingsDoc.data() : {}
+        const from = (settings?.reportFromEmail && String(settings.reportFromEmail)) || 'Analytics Report <onboarding@resend.dev>'
+        const replyTo =
+            (settings?.supportEmail && String(settings.supportEmail)) ||
+            (settings?.adminReplyToEmail && String(settings.adminReplyToEmail)) ||
+            undefined
+
         const data = await resend.emails.send({
-            from: 'Analytics Report <onboarding@resend.dev>',
+            from,
             to: session.user.email,
             subject: `Your ${filename.endsWith('.csv') ? 'CSV Data' : 'PDF Report'} - Helpful Analytics`,
             html: `
@@ -47,6 +56,7 @@ export async function POST(req: Request) {
                     content: buffer,
                 },
             ],
+            ...(replyTo ? { replyTo } : {}),
         });
 
         if (data.error) {

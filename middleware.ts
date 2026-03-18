@@ -12,6 +12,32 @@ export default withAuth(
         const isOnboarded = token?.isOnboarded
         const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard")
         const isOnboardingPage = req.nextUrl.pathname.startsWith("/onboarding")
+        const isAdminPage = req.nextUrl.pathname.startsWith("/admin")
+        const isAdmin = token?.role === "admin"
+        const isDisabled = token?.disabled === true
+        const maintenanceMode = token?.maintenanceMode === true
+
+        const pathname = req.nextUrl.pathname
+        const isFrameworkPath =
+            pathname.startsWith("/_next") ||
+            pathname.startsWith("/static") ||
+            pathname.startsWith("/favicon") ||
+            pathname.startsWith("/api")
+
+        // Block disabled users everywhere (except auth pages / framework paths)
+        if (isAuth && isDisabled && !isFrameworkPath && pathname !== "/disabled" && pathname !== "/login") {
+            return NextResponse.redirect(new URL("/disabled", req.url))
+        }
+
+        // Maintenance mode gate (non-admin only)
+        if (isAuth && maintenanceMode && !isAdmin && !isFrameworkPath && pathname !== "/maintenance" && pathname !== "/login") {
+            return NextResponse.redirect(new URL("/maintenance", req.url))
+        }
+
+        // 0. Admin Gate
+        if (isAdminPage && isAuth && !isAdmin) {
+            return NextResponse.redirect(new URL("/dashboard", req.url))
+        }
 
         // 1. If trying to access dashboard and not onboarded -> Redirect to onboarding
         if (isDashboardPage && isAuth && isOnboarded === false) {
@@ -36,7 +62,6 @@ export default withAuth(
             // If expired and not premium, redirect to pricing
             // Allow /pricing, /api (for checkout), /logout, etc.
             if (isExpired && !isPremium) {
-                const pathname = req.nextUrl.pathname
                 const isExcluded =
                     pathname.startsWith('/pricing') ||
                     pathname.startsWith('/api') ||
@@ -62,5 +87,5 @@ export default withAuth(
 )
 
 export const config = {
-    matcher: ["/dashboard/:path*", "/onboarding/:path*"],
+    matcher: ["/dashboard/:path*", "/onboarding/:path*", "/admin/:path*"],
 }

@@ -514,9 +514,10 @@ async function getOverviewComparisonData(accessToken: string, propertyId: string
             delta: currentData.metrics.bounceRate - previousData.metrics.bounceRate // Percentage point diff for rates
         },
         engagementRate: {
-            value: 100 - currentData.metrics.bounceRate,
-            previous: 100 - previousData.metrics.bounceRate,
-            delta: (100 - currentData.metrics.bounceRate) - (100 - previousData.metrics.bounceRate)
+            // bounceRate is a ratio (0-1), so engagementRate is also a ratio (0-1)
+            value: 1 - currentData.metrics.bounceRate,
+            previous: 1 - previousData.metrics.bounceRate,
+            delta: (1 - currentData.metrics.bounceRate) - (1 - previousData.metrics.bounceRate)
         },
         avgSessionDuration: {
             value: currentData.metrics.averageSessionDuration,

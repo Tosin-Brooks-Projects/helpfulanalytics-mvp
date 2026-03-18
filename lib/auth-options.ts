@@ -65,6 +65,21 @@ export const authOptions: NextAuthOptions = {
                     const userRef = db.collection("users").doc(user.id)
                     const doc = await userRef.get()
 
+                    // Optional: lock down new signups at the door
+                    if (!doc.exists) {
+                        const settingsDoc = await db.collection("admin_settings").doc("global").get()
+                        const settings = settingsDoc.exists ? settingsDoc.data() : {}
+                        const blockNewUsers = settings?.blockNewUsers === true
+                        if (blockNewUsers) {
+                            const email = (user.email || "").toLowerCase().trim()
+                            const allowlist: string[] = Array.isArray(settings?.signupAllowlist) ? settings.signupAllowlist : []
+                            const allowed = email && allowlist.map((e) => String(e).toLowerCase().trim()).includes(email)
+                            if (!allowed) {
+                                return false
+                            }
+                        }
+                    }
+
                     if (!doc.exists) {
                         // New user
                         await userRef.set(
@@ -75,6 +90,7 @@ export const authOptions: NextAuthOptions = {
                                 lastSeen: new Date(),
                                 createdAt: new Date(), // Start 30-day trial
                                 subscriptionStatus: 'free',
+                                role: "user",
                                 isOnboarded: false, // Flag as new
                                 tokens: {
                                     google: {
@@ -105,8 +121,18 @@ export const authOptions: NextAuthOptions = {
                         if (!data?.createdAt) {
                             updates.createdAt = new Date()
                         }
+                        if (!data?.role) {
+                            updates.role = "user"
+                        }
 
                         await userRef.set(updates, { merge: true })
+                    }
+
+                    // Block sign-in for disabled accounts
+                    const freshDoc = await userRef.get()
+                    const freshData = freshDoc.exists ? freshDoc.data() : undefined
+                    if (freshData?.disabled === true) {
+                        return false
                     }
                 } catch (error) {
                     console.error("Error saving user to Firestore", error)
@@ -123,6 +149,10 @@ export const authOptions: NextAuthOptions = {
                 let isOnboarded = false
                 let subscriptionStatus = 'free'
                 let createdAt = new Date().toISOString()
+                let role: "admin" | "user" = "user"
+                let disabled = false
+                let maintenanceMode = false
+                let maintenanceMessage = ""
 
                 try {
                     const { db } = await import("@/lib/firebase-admin")
@@ -131,11 +161,17 @@ export const authOptions: NextAuthOptions = {
                     if (doc.exists) {
                         const data = doc.data()
                         isOnboarded = data?.isOnboarded ?? false
+                        role = data?.role === "admin" ? "admin" : "user"
+                        disabled = data?.disabled === true
                         
                         const subInfo = getSubscriptionStatus(data)
                         subscriptionStatus = subInfo.status
                         createdAt = (data?.createdAt?.toDate ? data.createdAt.toDate() : new Date(data?.createdAt || Date.now())).toISOString()
                     }
+
+                    const settingsDoc = await db.collection("admin_settings").doc("global").get()
+                    maintenanceMode = settingsDoc.exists ? settingsDoc.data()?.maintenanceMode === true : false
+                    maintenanceMessage = settingsDoc.exists ? (settingsDoc.data()?.maintenanceMessage || "") : ""
                 } catch (e) {
                     console.error("Failed to fetch user metadata", e)
                 }
@@ -148,7 +184,11 @@ export const authOptions: NextAuthOptions = {
                     userId: user.id,
                     isOnboarded,
                     subscriptionStatus,
-                    createdAt
+                    createdAt,
+                    role,
+                    disabled,
+                    maintenanceMode,
+                    maintenanceMessage,
                 }
             }
 
@@ -159,6 +199,35 @@ export const authOptions: NextAuthOptions = {
                     ...token,
                     ...(session.isOnboarded !== undefined && { isOnboarded: session.isOnboarded }),
                     ...(session.subscriptionStatus !== undefined && { subscriptionStatus: session.subscriptionStatus })
+                }
+            }
+
+            // Ensure role is present for already-signed-in users (older tokens won't have it).
+            if ((!token.role || token.disabled === undefined || token.maintenanceMode === undefined || token.maintenanceMessage === undefined) && (token.userId || token.sub)) {
+                try {
+                    const { db } = await import("@/lib/firebase-admin")
+                    const userId = (token.userId as string) || (token.sub as string)
+                    const doc = await db.collection("users").doc(userId).get()
+                    if (doc.exists) {
+                        const data = doc.data()
+                        token.role = data?.role === "admin" ? "admin" : "user"
+                        if (token.disabled === undefined) token.disabled = data?.disabled === true
+                    } else {
+                        token.role = "user"
+                        if (token.disabled === undefined) token.disabled = false
+                    }
+
+                    if (token.maintenanceMode === undefined || token.maintenanceMessage === undefined) {
+                        const settingsDoc = await db.collection("admin_settings").doc("global").get()
+                        token.maintenanceMode = settingsDoc.exists ? settingsDoc.data()?.maintenanceMode === true : false
+                        token.maintenanceMessage = settingsDoc.exists ? (settingsDoc.data()?.maintenanceMessage || "") : ""
+                    }
+                } catch (e) {
+                    // Default to non-admin if we can't verify.
+                    token.role = "user"
+                    if (token.disabled === undefined) token.disabled = false
+                    if (token.maintenanceMode === undefined) token.maintenanceMode = false
+                    if (token.maintenanceMessage === undefined) token.maintenanceMessage = ""
                 }
             }
 
@@ -181,6 +250,11 @@ export const authOptions: NextAuthOptions = {
                 session.user.isOnboarded = token.isOnboarded as boolean
                 session.user.createdAt = token.createdAt as string
                 session.user.subscriptionStatus = token.subscriptionStatus as string
+                // @ts-ignore
+                session.user.role = token.role as any
+                session.user.disabled = token.disabled as boolean
+                session.user.maintenanceMode = token.maintenanceMode as boolean
+                session.user.maintenanceMessage = token.maintenanceMessage as any
             }
             // @ts-ignore
             session.userId = token.userId || token.sub

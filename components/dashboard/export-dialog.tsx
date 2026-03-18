@@ -260,7 +260,7 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         ["Total Sessions", (m.sessions || 0).toLocaleString()],
                         ["Active Users", (m.activeUsers || 0).toLocaleString()],
                         ["Page Views", (m.screenPageViews || 0).toLocaleString()],
-                        ["Bounce Rate", `${(m.bounceRate || 0).toFixed(1)}%`],
+                        ["Bounce Rate", `${((m.bounceRate || 0) * 100).toFixed(1)}%`],
                         ["Avg Session Duration", `${Math.round(m.averageSessionDuration || 0)}s`],
                         ["Conversion Rate", `${(m.transactions ? (m.transactions / m.sessions * 100).toFixed(2) : "0.00")}%`]
                     ],
@@ -282,7 +282,7 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         p.pagePath || "/",
                         (p.pageViews || 0).toLocaleString(),
                         (p.uniquePageViews || 0).toLocaleString(),
-                        (p.bounceRate || 0).toFixed(1) + "%"
+                        ((p.bounceRate || 0) * 100).toFixed(1) + "%"
                     ]),
                     theme: 'striped',
                     headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
@@ -328,9 +328,9 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                     head: [['Country', 'Sessions', 'Users']],
                     body: (data.countries || []).slice(0, 20).map((c: any) => [c.country, (c.sessions || 0).toLocaleString(), (c.users || 0).toLocaleString()]),
                     theme: 'striped',
-                    headStyles: { fillColor: COLORS.primary, fontSize: 10 },
+                    headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
                     bodyStyles: { fontSize: 9 },
-                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent } },
+                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent as any } },
                     didDrawPage: addFooter
                 })
                 currentY = (doc as any).lastAutoTable.finalY + 15
@@ -456,7 +456,7 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                                 <Loader2 className="h-10 w-10 text-amber-500 animate-spin" />
                                 <div className="text-center space-y-1">
                                     <p className="text-sm font-semibold text-zinc-900">AI Analysis in Progress</p>
-                                    <p className="text-xs text-zinc-500 italic">"{loadingStep || "Consulting Kea..."}"</p>
+                                    <p className="text-xs text-zinc-500 italic">&quot;{loadingStep || "Consulting Kea..."}&quot;</p>
                                 </div>
                             </div>
                         ) : (

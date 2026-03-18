@@ -366,7 +366,7 @@ export default function DebugPage() {
                   <div>
                     <h4 className="font-medium mb-2">Next Steps</h4>
                     <ol className="list-decimal list-inside space-y-1 text-sm">
-                      <li>Review the "Endpoint Tests" tab to see which APIs are responding</li>
+                      <li>Review the &quot;Endpoint Tests&quot; tab to see which APIs are responding</li>
                       <li>Check if any working endpoints found your properties</li>
                       <li>Verify GA4 properties exist in your Google Analytics console</li>
                       <li>Try manual property input if auto-discovery continues to fail</li>
@@ -404,7 +404,7 @@ export default function DebugPage() {
         {!debugData && (
           <Card>
             <CardContent className="text-center py-8">
-              <p className="text-gray-600">Click "Fetch Debug Info" to start comprehensive endpoint testing</p>
+              <p className="text-gray-600">Click &quot;Fetch Debug Info&quot; to start comprehensive endpoint testing</p>
             </CardContent>
           </Card>
         )}

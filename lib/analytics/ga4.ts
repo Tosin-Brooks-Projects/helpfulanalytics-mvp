@@ -56,11 +56,12 @@ export async function getMockOverviewData() {
             activeUsersDelta: 18.2,
             screenPageViews: 45210,
             screenPageViewsDelta: 32.1,
-            bounceRate: 42.5, // 42.5%
+            // Keep rates as decimals (0-1) for consistency across app.
+            bounceRate: 0.425, // 42.5%
             bounceRateDelta: -5.2,
             averageSessionDuration: 145,
             averageSessionDurationDelta: 12.5,
-            engagementRate: 57.5,
+            engagementRate: 0.575, // 57.5%
         },
         trafficSources: [
             { source: "Organic Search", sessions: 4500 },
@@ -101,7 +102,7 @@ export async function getMockOverviewComparisonData() {
             sessions: 10000,
             activeUsers: 7100,
             screenPageViews: 34200,
-            bounceRate: 45.0,
+            bounceRate: 0.45,
             averageSessionDuration: 128,
         },
         // For comparison charts, we could generate more, but for now we'll match the structure
@@ -190,7 +191,8 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
         }
     }
 
-    const avgBounceRate = totalSessions > 0 ? (totalBounceRate / totalSessions) * 100 : 0
+    // GA4 bounceRate metric is a ratio (0-1). Keep it as a ratio here.
+    const avgBounceRate = totalSessions > 0 ? (totalBounceRate / totalSessions) : 0
     const avgDuration = totalSessions > 0 ? (totalDuration / totalSessions) : 0
 
     const trafficSources = Array.from(sourcesMap.entries())
@@ -227,7 +229,8 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
                 bounceRateDelta: 0,
                 averageSessionDuration: avgDuration,
                 averageSessionDurationDelta: 0,
-                engagementRate: 100 - avgBounceRate,
+                // Engagement rate is also a ratio (0-1)
+                engagementRate: 1 - avgBounceRate,
             },
             trafficSources,
             topCountries: [

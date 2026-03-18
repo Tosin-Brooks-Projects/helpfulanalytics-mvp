@@ -184,35 +184,35 @@ You have tools connected to the user's live GA4 property. You MUST call your too
 
 function buildSchemaOnlyTools() {
     return {
-        getMetricsOverview: tool({
+        getMetricsOverview: (tool as any)({
             description: "Fetch high-level GA4 metrics: total sessions, active users, pageviews, bounce rate, and average session duration.",
             parameters: z.object({ startDate: z.string(), endDate: z.string() }),
         }),
-        getTrafficSources: tool({
+        getTrafficSources: (tool as any)({
             description: "Fetch top traffic sources with sessions, users, bounce rates.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
         }),
-        getTopPages: tool({
+        getTopPages: (tool as any)({
             description: "Fetch most visited pages with pageviews, bounce rate, avg time.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
         }),
-        getDeviceBreakdown: tool({
+        getDeviceBreakdown: (tool as any)({
             description: "Fetch device category breakdown (mobile/desktop/tablet), browsers.",
             parameters: z.object({ startDate: z.string(), endDate: z.string() }),
         }),
-        getLocationData: tool({
+        getLocationData: (tool as any)({
             description: "Fetch geographic distribution of users by country.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
         }),
-        getRealtimeSnapshot: tool({
+        getRealtimeSnapshot: (tool as any)({
             description: "Fetch real-time active users and pages they are viewing.",
             parameters: z.object({}),
         }),
-        getTrafficByState: tool({
+        getTrafficByState: (tool as any)({
             description: "Fetch state/region level traffic within a country.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), country: z.string().optional(), limit: z.number().optional() }),
         }),
-        getTrafficByCity: tool({
+        getTrafficByCity: (tool as any)({
             description: "Fetch city-level traffic within a country.",
             parameters: z.object({ startDate: z.string(), endDate: z.string(), country: z.string().optional(), limit: z.number().optional() }),
         }),
@@ -305,14 +305,16 @@ export async function POST(request: Request) {
             const toolExecutors = buildToolExecutors(isDemo, accessToken, propertyId)
 
             for (const tc of step1.toolCalls) {
-                const executor = toolExecutors[tc.toolName]
+                const toolName = (tc as any).toolName || (tc as any).name
+                const executor = toolExecutors[toolName]
                 if (executor) {
                     try {
-                        const data = await executor(tc.args)
-                        executedTools.push({ name: tc.toolName, data })
-                        console.log("[Kea Tool]", tc.toolName, "→", JSON.stringify(data).slice(0, 100))
+                        const args = (tc as any).args ?? (tc as any).input ?? (tc as any).parameters ?? {}
+                        const data = await executor(args)
+                        executedTools.push({ name: toolName, data })
+                        console.log("[Kea Tool]", toolName, "→", JSON.stringify(data).slice(0, 100))
                     } catch (err: any) {
-                        executedTools.push({ name: tc.toolName, data: { error: err?.message || "Unknown" } })
+                        executedTools.push({ name: toolName, data: { error: err?.message || "Unknown" } })
                     }
                 }
             }

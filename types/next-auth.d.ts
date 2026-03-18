@@ -13,6 +13,10 @@ declare module "next-auth" {
             isOnboarded?: boolean
             createdAt?: string
             subscriptionStatus?: string
+            role?: "admin" | "user"
+            disabled?: boolean
+            maintenanceMode?: boolean
+            maintenanceMessage?: string
         } & DefaultSession["user"]
     }
 
@@ -33,5 +37,9 @@ declare module "next-auth/jwt" {
         isOnboarded?: boolean
         createdAt?: string
         subscriptionStatus?: string
+        role?: "admin" | "user"
+        disabled?: boolean
+        maintenanceMode?: boolean
+        maintenanceMessage?: string
     }
 }

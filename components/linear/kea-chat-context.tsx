@@ -95,7 +95,6 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const { messages, sendMessage, setMessages, stop, status } = useChat({
-        initialMessages: INITIAL_MESSAGES as any,
         transport: new DefaultChatTransport({
             api: "/api/ai/chat",
             body: {
