@@ -40,8 +40,6 @@ export function DatePickerWithRange({
     setDate,
 }: DatePickerWithRangeProps) {
     const [open, setOpen] = React.useState(false)
-
-    // Draft state — committed on Apply
     const [draftStart, setDraftStart] = React.useState<Date | null>(date?.from ?? null)
     const [draftEnd, setDraftEnd] = React.useState<Date | null>(date?.to ?? null)
     const [selectedPreset, setSelectedPreset] = React.useState("custom")
@@ -50,15 +48,12 @@ export function DatePickerWithRange({
         return new Date(d.getFullYear(), d.getMonth(), 1)
     })
 
-    // Sync draft when popover opens
     React.useEffect(() => {
         if (open) {
             setDraftStart(date?.from ?? null)
             setDraftEnd(date?.to ?? null)
             const d = date?.from ?? new Date()
             setViewDate(new Date(d.getFullYear(), d.getMonth(), 1))
-
-            // Detect active preset
             const match = PRESETS.find(p => {
                 if (p.id === "custom") return false
                 const v = p.getValue()
@@ -72,12 +67,10 @@ export function DatePickerWithRange({
 
     const handleDateClick = (clickedDate: Date) => {
         if (!draftStart || (draftStart && draftEnd)) {
-            // Start new selection
             setDraftStart(clickedDate)
             setDraftEnd(null)
             setSelectedPreset("custom")
         } else {
-            // Complete the range
             if (clickedDate < draftStart) {
                 setDraftStart(clickedDate)
                 setDraftEnd(draftStart)
@@ -91,7 +84,6 @@ export function DatePickerWithRange({
     const handlePresetSelect = (preset: typeof PRESETS[number]) => {
         setSelectedPreset(preset.id)
         if (preset.id === "custom") return
-
         const value = preset.getValue()
         if (value) {
             setDraftStart(value.from)
@@ -107,11 +99,6 @@ export function DatePickerWithRange({
         setOpen(false)
     }
 
-    const handleCancel = () => {
-        setOpen(false)
-    }
-
-    // Keyboard shortcut: "d" to toggle
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const tag = document.activeElement?.tagName
@@ -120,7 +107,6 @@ export function DatePickerWithRange({
                 setOpen((prev) => !prev)
             }
         }
-
         const handlePresetEvent = (e: CustomEvent) => {
             const days = e.detail
             if (days === "year") {
@@ -129,7 +115,6 @@ export function DatePickerWithRange({
                 setDate({ from: subDays(new Date(), days), to: new Date() })
             }
         }
-
         document.addEventListener("keydown", handleKeyDown)
         // @ts-ignore
         document.addEventListener("set-date-preset", handlePresetEvent)
@@ -142,107 +127,81 @@ export function DatePickerWithRange({
 
     const canApply = draftStart && draftEnd
 
-    const renderMonthGrid = (
-        monthDate: Date,
-        showLeftNav = false,
-        showRightNav = false,
-    ) => {
+    const renderMonthGrid = (monthDate: Date, showLeftNav = false, showRightNav = false) => {
         const year = monthDate.getFullYear()
         const month = monthDate.getMonth()
         const firstDay = (new Date(year, month, 1).getDay() + 6) % 7
         const daysInMonth = new Date(year, month + 1, 0).getDate()
-        const monthName = monthDate.toLocaleString("default", {
-            month: "long",
-            year: "numeric",
-        })
+        const monthName = monthDate.toLocaleString("default", { month: "short", year: "numeric" })
 
         return (
-            <div className="min-w-[224px] flex-1">
-                <div className="mb-4 flex items-center justify-between px-2">
+            <div className="w-[196px]">
+                <div className="mb-2 flex items-center justify-between">
                     {showLeftNav ? (
                         <button
                             title="Previous month"
                             onClick={() => setViewDate(new Date(year, month - 1, 1))}
-                            className="p-1 text-zinc-400 transition-colors hover:text-zinc-900"
+                            className="p-0.5 text-zinc-400 hover:text-zinc-700 transition-colors rounded"
                         >
-                            <ChevronLeft size={18} strokeWidth={2.5} />
+                            <ChevronLeft size={14} strokeWidth={2.5} />
                         </button>
                     ) : (
-                        <div className="w-7" />
+                        <div className="w-5" />
                     )}
-                    <span className="text-[13px] font-semibold tracking-tight text-zinc-800">
-                        {monthName}
-                    </span>
+                    <span className="text-[11px] font-semibold text-zinc-700">{monthName}</span>
                     {showRightNav ? (
                         <button
                             title="Next month"
                             onClick={() => setViewDate(new Date(year, month + 1, 1))}
-                            className="p-1 text-zinc-400 transition-colors hover:text-zinc-900"
+                            className="p-0.5 text-zinc-400 hover:text-zinc-700 transition-colors rounded"
                         >
-                            <ChevronRight size={18} strokeWidth={2.5} />
+                            <ChevronRight size={14} strokeWidth={2.5} />
                         </button>
                     ) : (
-                        <div className="w-7" />
+                        <div className="w-5" />
                     )}
                 </div>
 
-                <div className="relative grid grid-cols-7 gap-y-1 text-center">
+                <div className="grid grid-cols-7 text-center mb-1">
                     {DAYS.map((d) => (
-                        <span
-                            key={d}
-                            className="mb-2 text-[11px] font-medium text-zinc-400"
-                        >
-                            {d}
-                        </span>
+                        <span key={d} className="text-[9px] font-medium text-zinc-400 leading-6">{d}</span>
                     ))}
+                </div>
+
+                <div className="grid grid-cols-7 text-center">
                     {Array.from({ length: firstDay }).map((_, i) => (
-                        <div key={`empty-${i}`} className="h-8" />
+                        <div key={`e-${i}`} className="h-6" />
                     ))}
                     {Array.from({ length: daysInMonth }).map((_, i) => {
                         const day = i + 1
-                        const currentDayDate = new Date(year, month, day)
-                        const isStart = draftStart?.toDateString() === currentDayDate.toDateString()
-                        const isEnd = draftEnd?.toDateString() === currentDayDate.toDateString()
-                        const isInRange =
-                            draftStart &&
-                            draftEnd &&
-                            currentDayDate > draftStart &&
-                            currentDayDate < draftEnd
+                        const d = new Date(year, month, day)
+                        const isStart = draftStart?.toDateString() === d.toDateString()
+                        const isEnd = draftEnd?.toDateString() === d.toDateString()
+                        const isInRange = draftStart && draftEnd && d > draftStart && d < draftEnd
 
                         return (
                             <div
                                 key={day}
-                                onClick={() => handleDateClick(currentDayDate)}
-                                className="group relative flex h-8 cursor-pointer items-center justify-center"
+                                onClick={() => handleDateClick(d)}
+                                className="group relative flex h-6 cursor-pointer items-center justify-center"
                             >
                                 {(isInRange || isStart || isEnd) && (
-                                    <div
-                                        className={cn(
-                                            "absolute z-0 h-8",
-                                            "border-y border-amber-200/60 bg-amber-50",
-                                            isStart ? "left-1/2 rounded-l-lg border-l" : "left-0",
-                                            isEnd ? "right-1/2 rounded-r-lg border-r" : "right-0",
-                                            isInRange && !isStart && !isEnd ? "w-full" : "",
-                                        )}
-                                    />
+                                    <div className={cn(
+                                        "absolute inset-y-0 z-0 border-y border-amber-200/50 bg-amber-50/70",
+                                        isStart ? "left-1/2 rounded-l-md border-l" : "left-0",
+                                        isEnd ? "right-1/2 rounded-r-md border-r" : "right-0",
+                                        isInRange && !isStart && !isEnd && "w-full",
+                                    )} />
                                 )}
                                 {isStart || isEnd ? (
-                                    <div className="absolute z-10 flex h-8 w-8 flex-col items-center justify-center rounded-lg border border-amber-600 bg-gradient-to-b from-amber-500 to-amber-600 shadow-xl">
-                                        <span className="text-xs font-bold text-white">{day}</span>
-                                        <motion.div
-                                            layoutId="dateThumb"
-                                            className="absolute bottom-1 h-[1.5px] w-2 rounded-full bg-white shadow"
-                                        />
+                                    <div className="absolute z-10 flex h-6 w-6 items-center justify-center rounded-md border border-amber-500 bg-gradient-to-b from-amber-500 to-amber-600 shadow-sm">
+                                        <span className="text-[10px] font-bold text-white leading-none">{day}</span>
                                     </div>
                                 ) : (
-                                    <span
-                                        className={cn(
-                                            "relative z-10 text-[13px] font-normal transition-colors",
-                                            isInRange
-                                                ? "text-zinc-900"
-                                                : "text-zinc-500 group-hover:text-zinc-900",
-                                        )}
-                                    >
+                                    <span className={cn(
+                                        "relative z-10 text-[11px] leading-none transition-colors",
+                                        isInRange ? "text-zinc-800 font-medium" : "text-zinc-500 group-hover:text-zinc-900",
+                                    )}>
                                         {day}
                                     </span>
                                 )}
@@ -284,35 +243,31 @@ export function DatePickerWithRange({
                 <PopoverContent
                     className="w-auto p-0 border-zinc-200 bg-white text-zinc-900 shadow-2xl rounded-xl overflow-hidden"
                     align="end"
-                    sideOffset={8}
+                    sideOffset={6}
                 >
                     <div className="flex min-h-0 w-full flex-col md:flex-row">
                         {/* Presets Sidebar */}
-                        <aside className="no-scrollbar flex w-full shrink-0 flex-row gap-1 overflow-x-auto border-b border-zinc-200 bg-zinc-50/50 py-3 md:w-44 md:flex-col md:border-r md:border-b-0">
+                        <aside className="no-scrollbar flex w-full shrink-0 flex-row gap-0.5 overflow-x-auto border-b border-zinc-100 bg-zinc-50/50 py-2 md:w-[120px] md:flex-col md:border-r md:border-b-0">
                             {PRESETS.map((preset, idx) => (
                                 <React.Fragment key={preset.id}>
                                     {[2, 5, 8].includes(idx) && (
-                                        <div className="mx-3 my-1 hidden h-px bg-zinc-200 md:block" />
+                                        <div className="mx-2.5 my-0.5 hidden h-px bg-zinc-200/70 md:block" />
                                     )}
                                     <button
                                         onClick={() => handlePresetSelect(preset)}
                                         className={cn(
-                                            "group mx-2 flex items-center justify-between rounded-lg px-3 py-1.5 text-xs whitespace-nowrap transition-all duration-200 md:mx-3 md:text-[13px]",
+                                            "mx-1.5 flex items-center justify-between rounded-md px-2 py-1 text-[10px] whitespace-nowrap transition-all md:mx-2 md:text-[11px]",
                                             selectedPreset === preset.id
                                                 ? preset.id === "custom"
                                                     ? "border border-zinc-300 bg-gradient-to-b from-zinc-100 to-zinc-200 font-medium text-zinc-900"
-                                                    : "bg-zinc-200 text-zinc-900"
+                                                    : "bg-zinc-200 text-zinc-900 font-medium"
                                                 : "hover:bg-zinc-100 hover:text-zinc-900 text-zinc-500",
                                         )}
                                     >
                                         <span>{preset.label}</span>
                                         {selectedPreset === preset.id && preset.id === "custom" && (
-                                            <motion.div
-                                                initial={{ scale: 0 }}
-                                                animate={{ scale: 1 }}
-                                                className="ml-2"
-                                            >
-                                                <Check size={12} />
+                                            <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="ml-1.5">
+                                                <Check size={10} />
                                             </motion.div>
                                         )}
                                     </button>
@@ -321,20 +276,20 @@ export function DatePickerWithRange({
                         </aside>
 
                         {/* Main Content */}
-                        <main className="flex min-w-0 flex-1 flex-col gap-5 overflow-hidden bg-white p-4 md:p-5">
+                        <main className="flex min-w-0 flex-1 flex-col gap-3 overflow-hidden bg-white p-3">
                             {/* Date Inputs */}
-                            <div className="grid shrink-0 grid-cols-2 gap-3">
-                                <DateInput label="Start date" date={draftStart} />
-                                <DateInput label="End date" date={draftEnd} />
+                            <div className="grid grid-cols-2 gap-2">
+                                <CompactDateInput label="Start date" date={draftStart} />
+                                <CompactDateInput label="End date" date={draftEnd} />
                             </div>
 
                             {/* Calendars */}
-                            <div className="no-scrollbar flex snap-x snap-mandatory flex-row items-start gap-8 overflow-x-auto overflow-y-hidden pb-2">
-                                <div className="shrink-0 snap-start">
+                            <div className="no-scrollbar flex flex-row items-start gap-4 overflow-x-auto overflow-y-hidden">
+                                <div className="shrink-0">
                                     {renderMonthGrid(viewDate, true, false)}
                                 </div>
-                                <div className="hidden h-40 w-px shrink-0 self-center bg-zinc-200 opacity-50 lg:block" />
-                                <div className="shrink-0 snap-start">
+                                <div className="hidden h-32 w-px shrink-0 self-center bg-zinc-100 lg:block" />
+                                <div className="hidden lg:block shrink-0">
                                     {renderMonthGrid(
                                         new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1),
                                         false,
@@ -346,8 +301,8 @@ export function DatePickerWithRange({
                     </div>
 
                     {/* Footer */}
-                    <footer className="flex h-14 shrink-0 items-center justify-between border-t border-zinc-200 bg-zinc-50/50 px-5">
-                        <div className="text-[11px] text-zinc-400">
+                    <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50/50 px-3 py-2">
+                        <div className="text-[10px] text-zinc-400">
                             {draftStart && draftEnd ? (
                                 <span className="text-zinc-600 font-medium">
                                     {format(draftStart, "MMM dd")} – {format(draftEnd, "MMM dd, yyyy")}
@@ -358,45 +313,37 @@ export function DatePickerWithRange({
                                 <span>No dates selected</span>
                             )}
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5">
                             <button
-                                onClick={handleCancel}
-                                className="rounded-full border border-zinc-200 px-4 py-1.5 text-xs font-medium text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+                                onClick={() => setOpen(false)}
+                                className="rounded-full border border-zinc-200 px-2.5 py-1 text-[10px] font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleApply}
                                 disabled={!canApply}
-                                className="rounded-full bg-zinc-900 px-5 py-1.5 text-xs font-semibold text-white shadow-lg transition-all hover:opacity-90 active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
+                                className="rounded-full bg-zinc-900 px-3 py-1 text-[10px] font-semibold text-white shadow transition-all hover:bg-zinc-800 active:scale-95 disabled:opacity-40 disabled:pointer-events-none"
                             >
                                 Apply
                             </button>
                         </div>
-                    </footer>
+                    </div>
                 </PopoverContent>
             </Popover>
         </div>
     )
 }
 
-function DateInput({ label, date }: { label: string; date: Date | null }) {
+function CompactDateInput({ label, date }: { label: string; date: Date | null }) {
     return (
-        <div className="flex flex-1 flex-col gap-1.5">
-            <label className="ml-1 text-[12px] font-normal text-zinc-400">
-                {label}
-            </label>
-            <div className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600 transition-colors hover:border-zinc-300 md:text-[13px]">
-                <span>
-                    {date
-                        ? date.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                        })
-                        : "Select Date"}
+        <div className="flex flex-col gap-0.5">
+            <label className="text-[9px] font-medium text-zinc-400 ml-0.5">{label}</label>
+            <div className="flex items-center justify-between rounded-lg border border-zinc-200 bg-zinc-50/80 px-2 py-1.5 text-[11px] text-zinc-600">
+                <span className="truncate">
+                    {date ? format(date, "MMM dd, yyyy") : "Select"}
                 </span>
-                <ChevronDown size={14} className="text-zinc-400" />
+                <ChevronDown size={10} className="text-zinc-400 shrink-0 ml-1" />
             </div>
         </div>
     )
