@@ -33,7 +33,7 @@ export default function AdminSettingsPage() {
     maintenanceMode: false,
     maintenanceMessage: "",
     supportEmail: "",
-    reportFromEmail: "Analytics Report <onboarding@resend.dev>",
+    reportFromEmail: "Analytics Report <no-reply@helpfulanalytics.com>",
     adminFromEmail: "",
     adminReplyToEmail: "",
     blockNewUsers: false,
@@ -163,7 +163,7 @@ export default function AdminSettingsPage() {
               <Input
                 value={settings.reportFromEmail}
                 onChange={(e) => setSettings((s) => ({ ...s, reportFromEmail: e.target.value }))}
-                placeholder='Helpful Analytics <onboarding@resend.dev>'
+                placeholder='Helpful Analytics <no-reply@helpfulanalytics.com>'
                 disabled={loading}
               />
               <div className="text-[11px] text-zinc-500">Used by `/api/email/send-report`.</div>
@@ -176,7 +176,7 @@ export default function AdminSettingsPage() {
               <Input
                 value={settings.adminFromEmail}
                 onChange={(e) => setSettings((s) => ({ ...s, adminFromEmail: e.target.value }))}
-                placeholder='Admin <onboarding@resend.dev>'
+                placeholder='Admin <no-reply@helpfulanalytics.com>'
                 disabled={loading}
               />
               <div className="text-[11px] text-zinc-500">Used by `/api/admin/email/send`.</div>
