@@ -45,7 +45,7 @@ export async function GET() {
       maintenanceMode: !!data?.maintenanceMode,
       maintenanceMessage: data?.maintenanceMessage || "",
       supportEmail: data?.supportEmail || "",
-      reportFromEmail: data?.reportFromEmail || "Analytics Report <onboarding@resend.dev>",
+      reportFromEmail: data?.reportFromEmail || "Analytics Report <no-reply@helpfulanalytics.com>",
       adminFromEmail: data?.adminFromEmail || "",
       adminReplyToEmail: data?.adminReplyToEmail || "",
       blockNewUsers: !!data?.blockNewUsers,
