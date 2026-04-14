@@ -200,7 +200,7 @@ export function LinearHeader() {
                             <TooltipTrigger asChild>
                                 <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-white/20 shadow-sm px-2">
                                     <div id="header-date-picker">
-                                        <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                                        <DatePickerWithRange date={dateRange} setDate={setDateRange} hidePresets={pathname.includes("/versus")} />
                                     </div>
 
                                     {pathname.includes("/versus") && (
@@ -211,6 +211,7 @@ export function LinearHeader() {
                                                     date={compareDateRange}
                                                     setDate={setCompareDateRange}
                                                     className="border-amber-200 bg-amber-50/50"
+                                                    hidePresets
                                                 />
                                             </div>
                                         </>

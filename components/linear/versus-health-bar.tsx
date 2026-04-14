@@ -11,8 +11,8 @@ interface VersusHealthBarProps {
     isWinning: boolean
 }
 
-export function VersusHealthBar({ currentValue, previousValue, metricLabel, isWinning }: VersusHealthBarProps) {
-    const total = currentValue + previousValue
+export function VersusHealthBar({ currentValue = 0, previousValue = 0, metricLabel, isWinning }: VersusHealthBarProps) {
+    const total = (currentValue || 0) + (previousValue || 0)
     // Avoid division by zero
     const currentPercent = total > 0 ? (currentValue / total) * 100 : 50
     const previousPercent = total > 0 ? (previousValue / total) * 100 : 50
@@ -22,10 +22,10 @@ export function VersusHealthBar({ currentValue, previousValue, metricLabel, isWi
             <div className="flex flex-col sm:flex-row sm:items-center justify-between text-sm font-medium gap-2">
                 <div className={cn("flex items-center gap-2", isWinning ? "text-amber-600" : "text-zinc-500")}>
                     <span className="font-bold">This Period</span>
-                    <span className="text-xs opacity-70">({currentValue.toLocaleString()})</span>
+                    <span className="text-xs opacity-70">({(currentValue || 0).toLocaleString()})</span>
                 </div>
                 <div className="flex items-center gap-2 text-zinc-400">
-                    <span className="text-xs opacity-70">({previousValue.toLocaleString()})</span>
+                    <span className="text-xs opacity-70">({(previousValue || 0).toLocaleString()})</span>
                     <span className="font-bold">Last Period</span>
                 </div>
             </div>

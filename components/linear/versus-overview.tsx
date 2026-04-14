@@ -99,7 +99,7 @@ export function VersusOverview() {
         )
     }
 
-    const currentWins = data.metrics.sessions.delta > 0
+    const currentWins = (data.metrics?.sessions?.delta ?? 0) > 0
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-8">
@@ -132,8 +132,8 @@ export function VersusOverview() {
                                 </div>
 
                                 <VersusHealthBar
-                                    currentValue={data.metrics.sessions.value}
-                                    previousValue={data.metrics.sessions.previous}
+                                    currentValue={data.metrics?.sessions?.value ?? 0}
+                                    previousValue={data.metrics?.sessions?.previous ?? 0}
                                     metricLabel="Sessions"
                                     isWinning={currentWins}
                                 />
@@ -350,9 +350,14 @@ function TabComparisonList({ reportType, dateRange, compareDateRange, propertyId
 }
 
 function MetricBattleRow({ title, metric, icon, isTime = false, isInverse = false }: { title: string, metric: MetricComparison, icon: ReactNode, isTime?: boolean, isInverse?: boolean }) {
+    const safeMetric = {
+        value: metric?.value ?? 0,
+        previous: metric?.previous ?? 0,
+        delta: metric?.delta ?? 0,
+    }
     // For normal metrics, delta > 0 is good (green).
     // For inverse metrics (Bounce Rate), delta < 0 is good (green).
-    const isGood = isInverse ? metric.delta <= 0 : metric.delta >= 0
+    const isGood = isInverse ? safeMetric.delta <= 0 : safeMetric.delta >= 0
 
     const format = (val: number | undefined | null) => {
         const num = val ?? 0
@@ -367,10 +372,10 @@ function MetricBattleRow({ title, metric, icon, isTime = false, isInverse = fals
                 </span>
                 <div className="flex items-baseline gap-2">
                     <span className="text-lg font-bold tracking-tight text-zinc-900">
-                        {format(metric.value)}
+                        {format(safeMetric.value)}
                     </span>
                     <span className="text-xs text-zinc-400">
-                        vs {format(metric.previous)}
+                        vs {format(safeMetric.previous)}
                     </span>
                 </div>
             </div>
@@ -379,8 +384,8 @@ function MetricBattleRow({ title, metric, icon, isTime = false, isInverse = fals
                 "text-[10px] font-bold inline-flex items-center gap-1 px-2 py-1 rounded-full",
                 isGood ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
             )}>
-                {metric.delta > 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
-                {Math.abs(metric.delta).toFixed(1)}%
+                {safeMetric.delta > 0 ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                {Math.abs(safeMetric.delta).toFixed(1)}%
             </div>
         </div>
     )

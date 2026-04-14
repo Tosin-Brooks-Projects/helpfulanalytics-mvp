@@ -18,12 +18,14 @@ interface DatePickerWithRangeProps {
     className?: string
     date: DateRange | undefined
     setDate: (date: DateRange | undefined) => void
+    hidePresets?: boolean
 }
 
 export function DatePickerWithRange({
     className,
     date,
     setDate,
+    hidePresets = false,
 }: DatePickerWithRangeProps) {
     const [open, setOpen] = React.useState(false)
 
@@ -96,8 +98,9 @@ export function DatePickerWithRange({
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 border-zinc-200 bg-white text-zinc-900 shadow-2xl rounded-lg overflow-hidden" align="end">
-                    <div className="flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-zinc-100">
+                    <div className={cn("flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-zinc-100", hidePresets && "divide-y-0 md:divide-x-0")}>
                         {/* Presets Sidebar */}
+                        {!hidePresets && (
                         <div className="flex flex-col p-2 min-w-[140px] bg-zinc-50/30">
                             <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2 px-3 py-1">Presets</span>
                             <div className="space-y-0.5">
@@ -123,19 +126,22 @@ export function DatePickerWithRange({
                                 })}
                             </div>
                         </div>
+                        )}
 
                         {/* Calendar Section */}
                         <div className="flex flex-col">
+                            {!hidePresets && (
                             <div className="p-3 border-b border-zinc-100 bg-white">
                                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">Custom Range</span>
                             </div>
+                            )}
                             <Calendar
                                 initialFocus
                                 mode="range"
                                 defaultMonth={date?.from}
                                 selected={date}
                                 onSelect={setDate}
-                                numberOfMonths={2}
+                                numberOfMonths={hidePresets ? 1 : 2}
                                 className="bg-white"
                                 classNames={{
                                     months: "flex flex-col sm:flex-row space-y-4 sm:space-x-2 sm:space-y-0 p-3",
