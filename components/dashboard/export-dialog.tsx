@@ -29,7 +29,6 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
     const [loading, setLoading] = useState(false)
     const [loadingStep, setLoadingStep] = useState<string>("")
     const [selectedScopes, setSelectedScopes] = useState<string[]>(["overview", "pages", "sources"])
-    const [includeMetadata, setIncludeMetadata] = useState(true)
     const [sendToEmail, setSendToEmail] = useState(false)
 
     const { selectedProperty, dateRange } = useDashboard()
@@ -90,185 +89,159 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
         }
     }
 
-    const generateDetailedPDF = (results: { scope: string, data: any, insights: any }[], filename: string) => {
-        setLoadingStep("Drafting final PDF with AI insights...")
+    const generateDetailedPDF = (results: { scope: string, data: any, insights: any }[]): jsPDF => {
+        setLoadingStep("Building PDF report...")
         const doc = new jsPDF()
 
         const COLORS = {
-            primary: [30, 41, 59], // Slate 800 / Deep Charcoal
-            accent: [245, 158, 11], // Amber 500
-            lightAccent: [255, 251, 235], // Amber 50
-            border: [254, 243, 199], // Amber 200
-            text: [15, 23, 42], // Slate 900
-            muted: [100, 116, 139], // Slate 500
-            white: [255, 255, 255]
+            primary: [30, 41, 59],
+            accent: [100, 116, 139],
+            lightBg: [248, 250, 252],
+            border: [226, 232, 240],
+            text: [15, 23, 42],
+            muted: [100, 116, 139],
         }
 
-        // --- Cover Page (Deep Charcoal Masthead) ---
+        // --- Cover Page ---
         doc.setFillColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-        doc.rect(0, 0, 210, 297, 'F') // Full page fill
-
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(48)
-        doc.setTextColor(COLORS.accent[0], COLORS.accent[1], COLORS.accent[2])
-        doc.text("Helpful", 30, 60)
-        doc.setTextColor(255, 255, 255)
-        doc.text("Analytics", 30, 80)
-
-        doc.setDrawColor(COLORS.accent[0], COLORS.accent[1], COLORS.accent[2])
-        doc.setLineWidth(2)
-        doc.line(30, 90, 80, 90)
-
-        doc.setFontSize(18)
-        doc.setFont("helvetica", "normal")
-        doc.setTextColor(255, 255, 255)
-        doc.text("Professional Architecture. Stunning Insights.", 30, 110)
-
-        doc.setFontSize(14)
-        doc.setTextColor(180, 180, 180)
-        doc.text("EXECUTIVE PERFORMANCE REPORT", 30, 180)
-
-        doc.setFontSize(12)
-        doc.setTextColor(255, 255, 255)
-        const dateStr = dateRange?.from ? `${format(dateRange.from, "MMMM d, yyyy")} — ${format(dateRange.to!, "MMMM d, yyyy")}` : "All Time"
-        doc.text(`Reporting Period: ${dateStr}`, 30, 200)
-        doc.text(`Property: ${selectedProperty === 'demo-property' ? 'Demo Property' : (selectedProperty || 'Standard Property')}`, 30, 210)
-
-        // Footer for Cover
-        doc.setFontSize(10)
-        doc.setTextColor(100, 100, 100)
-        doc.text("CONFIDENTIAL | © 2026 Helpful Analytics Engine", 105, 280, { align: "center" })
-
-        // --- Kea Executive Summary (Glassmorphic Card Feel) ---
-        doc.addPage()
-        doc.setFillColor(248, 250, 252) // Very light slate gray background
         doc.rect(0, 0, 210, 297, 'F')
 
-        // Design Accent
-        doc.setFillColor(COLORS.accent[0], COLORS.accent[1], COLORS.accent[2])
-        doc.rect(15, 15, 10, 2, 'F')
-
         doc.setFont("helvetica", "bold")
-        doc.setFontSize(24)
-        doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-        doc.text("KEA EXECUTIVE SUMMARY", 15, 35)
+        doc.setFontSize(36)
+        doc.setTextColor(255, 255, 255)
+        doc.text("Analytics Report", 30, 70)
+
+        doc.setDrawColor(255, 255, 255)
+        doc.setLineWidth(0.5)
+        doc.line(30, 80, 100, 80)
+
+        const dateStr = dateRange?.from
+            ? `${format(dateRange.from, "MMMM d, yyyy")} — ${format(dateRange.to!, "MMMM d, yyyy")}`
+            : "All Time"
+
+        doc.setFontSize(13)
+        doc.setFont("helvetica", "normal")
+        doc.setTextColor(200, 200, 200)
+        doc.text(dateStr, 30, 100)
+
+        const propertyName = selectedProperty === 'demo-property' ? 'Demo Property' : (selectedProperty || 'Property')
+        doc.text(propertyName, 30, 112)
 
         doc.setFontSize(10)
-        doc.setTextColor(COLORS.muted[0], COLORS.muted[1], COLORS.muted[2])
-        doc.setFont("helvetica", "normal")
-        doc.text("A STRATEGIC SNAPSHOT OF YOUR DATA ECOSYSTEM", 15, 45)
+        doc.setTextColor(120, 120, 120)
+        doc.text(`Generated ${format(new Date(), "MMMM d, yyyy")}`, 30, 270)
 
-        // Summary Card
-        doc.setDrawColor(226, 232, 240)
-        doc.setFillColor(255, 255, 255)
-        doc.roundedRect(15, 55, 180, 45, 3, 3, 'FD')
+        // --- Executive Summary ---
+        doc.addPage()
+        doc.setFillColor(COLORS.lightBg[0], COLORS.lightBg[1], COLORS.lightBg[2])
+        doc.rect(0, 0, 210, 297, 'F')
 
-        doc.setFontSize(11)
-        doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2])
-        doc.setFont("helvetica", "italic")
+        doc.setFont("helvetica", "bold")
+        doc.setFontSize(20)
+        doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
+        doc.text("Executive Summary", 15, 30)
+
+        doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
+        doc.setLineWidth(0.5)
+        doc.line(15, 35, 195, 35)
 
         const overviewInsights = results.find(r => r.scope === "overview")?.insights?.insights || []
         const summaryText = overviewInsights.length > 0
             ? overviewInsights[0].content
-            : "Hey — I'm Kea. Looking at your metrics for this period, it's clear you've got some interesting movements. The reports following this summary will break down exactly where your wins are coming from."
+            : "A summary of your analytics data for the selected reporting period. The sections that follow break down each area in detail."
 
-        const splitText = doc.splitTextToSize(summaryText, 170)
-        doc.text(splitText, 20, 68)
+        doc.setFontSize(10)
+        doc.setFont("helvetica", "normal")
+        doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2])
+        const splitText = doc.splitTextToSize(summaryText, 175)
+        doc.text(splitText, 15, 48)
 
-        // Key Wins Section
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(12)
-        doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-        doc.text("CRITICAL INSIGHTS", 15, 115)
-
-        let insightY = 125
-        overviewInsights.slice(0, 3).forEach((ins: any) => {
-            doc.setFillColor(COLORS.lightAccent[0], COLORS.lightAccent[1], COLORS.lightAccent[2])
-            doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
-            doc.roundedRect(15, insightY, 180, 25, 2, 2, 'FD')
-
-            doc.setFontSize(10)
+        // Key Insights
+        if (overviewInsights.length > 0) {
+            let insightY = 80
             doc.setFont("helvetica", "bold")
-            doc.setTextColor(COLORS.accent[0], COLORS.accent[1], COLORS.accent[2])
-            doc.text(`${ins.title.toUpperCase()}`, 20, insightY + 8)
+            doc.setFontSize(13)
+            doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
+            doc.text("Key Insights", 15, insightY)
+            insightY += 10
 
-            doc.setFontSize(9)
-            doc.setFont("helvetica", "normal")
-            doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2])
-            const desc = doc.splitTextToSize(ins.description, 170)
-            doc.text(desc, 20, insightY + 16)
+            overviewInsights.slice(0, 3).forEach((ins: any) => {
+                doc.setFillColor(255, 255, 255)
+                doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
+                doc.roundedRect(15, insightY, 180, 22, 2, 2, 'FD')
 
-            insightY += 32
-        })
+                doc.setFontSize(9)
+                doc.setFont("helvetica", "bold")
+                doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
+                doc.text(ins.title, 20, insightY + 8)
 
-        // Footer Helper
-        const addFooter = (data: any) => {
-            const pageCount = doc.getNumberOfPages()
-            doc.setFontSize(9)
-            doc.setTextColor(COLORS.muted[0], COLORS.muted[1], COLORS.muted[2])
-            doc.text(`Helpful Analytics — Professional AI Report`, 15, 285)
-            doc.text(`Page ${data.pageNumber} of ${pageCount}`, 195, 285, { align: "right" })
+                doc.setFont("helvetica", "normal")
+                doc.setTextColor(COLORS.muted[0], COLORS.muted[1], COLORS.muted[2])
+                const desc = doc.splitTextToSize(ins.description, 170)
+                doc.text(desc, 20, insightY + 15)
+
+                insightY += 28
+            })
         }
 
+        // --- Data Pages ---
         doc.addPage()
         let currentY = 25
 
         results.forEach(({ scope, data, insights }) => {
-            if (currentY > 200) {
+            if (currentY > 220) {
                 doc.addPage()
                 currentY = 25
             }
 
             // Section Header
             doc.setFont("helvetica", "bold")
-            doc.setFontSize(18)
+            doc.setFontSize(15)
             doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-            doc.text(scope.toUpperCase() + " ANALYSIS", 15, currentY)
+            const sectionTitle = scope.charAt(0).toUpperCase() + scope.slice(1)
+            doc.text(sectionTitle, 15, currentY)
 
-            doc.setDrawColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-            doc.setLineWidth(0.8)
+            doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
+            doc.setLineWidth(0.5)
             doc.line(15, currentY + 3, 195, currentY + 3)
-            currentY += 12
+            currentY += 10
 
-            // AI Insight Box for Section
+            // AI Insight for section
             if (insights?.insights?.length > 0) {
-                doc.setFillColor(COLORS.lightAccent[0], COLORS.lightAccent[1], COLORS.lightAccent[2])
+                doc.setFillColor(COLORS.lightBg[0], COLORS.lightBg[1], COLORS.lightBg[2])
                 doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
-                doc.roundedRect(15, currentY, 180, 24, 2, 2, 'FD')
+                doc.roundedRect(15, currentY, 180, 18, 2, 2, 'FD')
 
-                doc.setFontSize(9)
-                doc.setFont("helvetica", "bold")
-                doc.setTextColor(COLORS.accent[0], COLORS.accent[1], COLORS.accent[2])
-                doc.text("KEA ANALYTICS INSIGHT", 20, currentY + 8)
-
+                doc.setFontSize(8)
                 doc.setFont("helvetica", "normal")
-                doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2])
-                doc.setFontSize(9)
+                doc.setTextColor(COLORS.muted[0], COLORS.muted[1], COLORS.muted[2])
                 const insightLine = doc.splitTextToSize(insights.insights[0].description, 170)
-                doc.text(insightLine, 20, currentY + 16)
+                doc.text(insightLine, 20, currentY + 7)
 
-                currentY += 32
+                currentY += 24
             }
 
-            // Tables based on scope
+            const tableStyles = {
+                theme: 'striped' as const,
+                headStyles: { fillColor: COLORS.primary as any, fontSize: 9, fontStyle: 'bold' as const },
+                bodyStyles: { fontSize: 9, textColor: COLORS.text as any },
+            }
+
             if (scope === "overview") {
                 const m = data?.metrics || {}
                 autoTable(doc, {
                     startY: currentY,
-                    head: [['Metric', 'Performance Value']],
+                    head: [['Metric', 'Value']],
                     body: [
-                        ["Total Sessions", (m.sessions || 0).toLocaleString()],
+                        ["Sessions", (m.sessions || 0).toLocaleString()],
                         ["Active Users", (m.activeUsers || 0).toLocaleString()],
                         ["Page Views", (m.screenPageViews || 0).toLocaleString()],
                         ["Bounce Rate", `${((m.bounceRate || 0) * 100).toFixed(1)}%`],
                         ["Avg Session Duration", `${Math.round(m.averageSessionDuration || 0)}s`],
                         ["Conversion Rate", `${(m.transactions ? (m.transactions / m.sessions * 100).toFixed(2) : "0.00")}%`]
                     ],
-                    theme: 'striped',
-                    headStyles: { fillColor: COLORS.primary as any, halign: 'center', fontSize: 10, fontStyle: 'bold' },
-                    bodyStyles: { fontSize: 10, textColor: COLORS.text as any },
-                    columnStyles: { 1: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent as any } },
-                    didDrawPage: addFooter
+                    ...tableStyles,
+                    columnStyles: { 1: { halign: 'right' } },
                 })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
@@ -284,11 +257,8 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         (p.uniquePageViews || 0).toLocaleString(),
                         ((p.bounceRate || 0) * 100).toFixed(1) + "%"
                     ]),
-                    theme: 'striped',
-                    headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
-                    bodyStyles: { fontSize: 9 },
-                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right', textColor: COLORS.accent as any } },
-                    didDrawPage: addFooter
+                    ...tableStyles,
+                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
                 })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
@@ -299,11 +269,8 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                     startY: currentY,
                     head: [['Source', 'Medium', 'Sessions', 'Users']],
                     body: sources.map((s: any) => [s.source, s.medium, (s.sessions || 0).toLocaleString(), (s.users || 0).toLocaleString()]),
-                    theme: 'striped',
-                    headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
-                    bodyStyles: { fontSize: 9 },
-                    columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent as any } },
-                    didDrawPage: addFooter
+                    ...tableStyles,
+                    columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right' } },
                 })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
@@ -313,11 +280,8 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                     startY: currentY,
                     head: [['Device Category', 'Sessions', 'Users']],
                     body: (data.devices || []).map((d: any) => [d.name, (d.sessions || 0).toLocaleString(), (d.users || 0).toLocaleString()]),
-                    theme: 'grid',
-                    headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
-                    bodyStyles: { fontSize: 9 },
-                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent as any } },
-                    didDrawPage: addFooter
+                    ...tableStyles,
+                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } },
                 })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
@@ -327,27 +291,24 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                     startY: currentY,
                     head: [['Country', 'Sessions', 'Users']],
                     body: (data.countries || []).slice(0, 20).map((c: any) => [c.country, (c.sessions || 0).toLocaleString(), (c.users || 0).toLocaleString()]),
-                    theme: 'striped',
-                    headStyles: { fillColor: COLORS.primary as any, fontSize: 10 },
-                    bodyStyles: { fontSize: 9 },
-                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right', fontStyle: 'bold', textColor: COLORS.accent as any } },
-                    didDrawPage: addFooter
+                    ...tableStyles,
+                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } },
                 })
                 currentY = (doc as any).lastAutoTable.finalY + 15
             }
         })
 
-        doc.save(`${filename}.pdf`)
+        return doc
     }
 
     const handleExport = async () => {
         if (!selectedProperty) return toast.error("No property selected")
 
         setLoading(true)
-        setLoadingStep("Commencing AI analysis...")
+        setLoadingStep("Fetching data...")
         try {
             const timestamp = format(new Date(), "yyyy-MM-dd")
-            const baseFilename = `HelpfulAnalytics_AI_Report_${timestamp}`
+            const baseFilename = `Analytics_Report_${timestamp}`
 
             const results = await Promise.all(
                 selectedScopes.map(async (scope) => {
@@ -361,12 +322,6 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
             if (exportFormat === "csv") {
                 const { flattenAnalyticsData } = await import("@/lib/export-utils")
 
-                const csvMetadata = includeMetadata ? {
-                    propertyName: selectedProperty === 'demo-property' ? 'Demo Property' : selectedProperty || 'Current Property',
-                    dateRange: dateRange?.from ? `${format(dateRange.from, "yyyy-MM-dd")} to ${format(dateRange.to!, "yyyy-MM-dd")}` : "All Time",
-                    generatedAt: new Date().toLocaleString()
-                } : undefined
-
                 let combinedData: any[] = []
                 results.forEach(({ scope, data }) => {
                     const flatData = flattenAnalyticsData(data)
@@ -377,7 +332,6 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
 
                 const csvContent = convertToCSV(combinedData, {
                     filename: baseFilename,
-                    metadata: csvMetadata,
                     download: !sendToEmail
                 })
 
@@ -392,29 +346,43 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         body: formData
                     })
 
-                    if (!emailRes.ok) throw new Error("Failed to send email")
+                    if (!emailRes.ok) {
+                        const errBody = await emailRes.json().catch(() => ({}))
+                        throw new Error(errBody.error || "Failed to send email")
+                    }
                     toast.success("CSV Report sent to your email")
                 } else {
-                    toast.success("CSV Export successful")
+                    toast.success("CSV exported successfully")
                 }
             } else {
+                const doc = generateDetailedPDF(results)
+
                 if (sendToEmail) {
-                    setLoadingStep("Preparing PDF for email...")
-                    // For PDF email, we need to get the blob instead of saving
-                    const doc = new jsPDF()
-                    // ... (This would require refactoring generateDetailedPDF to return a blob/doc)
-                    // For now, let's keep it simple and just do CSV email
-                    toast.error("Email delivery currently supported for CSV only")
+                    setLoadingStep("Sending PDF report via email...")
+                    const pdfBlob = doc.output("blob")
+                    const formData = new FormData()
+                    formData.append("file", pdfBlob, `${baseFilename}.pdf`)
+
+                    const emailRes = await fetch("/api/email/send-report", {
+                        method: "POST",
+                        body: formData,
+                    })
+
+                    if (!emailRes.ok) {
+                        const errBody = await emailRes.json().catch(() => ({}))
+                        throw new Error(errBody.error || "Failed to send email")
+                    }
+                    toast.success("PDF Report sent to your email")
                 } else {
-                    generateDetailedPDF(results, baseFilename)
-                    toast.success("Professional AI Report downloaded")
+                    doc.save(`${baseFilename}.pdf`)
+                    toast.success("Report downloaded")
                 }
             }
 
             setOpen(false)
-        } catch (error) {
+        } catch (error: any) {
             console.error(error)
-            toast.error("Process interrupted. Please verify your property selection.")
+            toast.error(error?.message || "Something went wrong. Please try again.")
         } finally {
             setLoading(false)
             setLoadingStep("")
@@ -431,7 +399,7 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                         className="h-8 gap-2 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-900 shadow-sm transition-colors text-[11px] font-medium"
                     >
                         <Download className="h-3.5 w-3.5" />
-                        <span className="hidden sm:inline">Export Insights</span>
+                        <span className="hidden sm:inline">Export</span>
                     </Button>
                 )}
             </DialogTrigger>
@@ -442,10 +410,10 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                 <DialogHeader className="p-6 pb-2">
                     <DialogTitle className="text-lg font-bold text-zinc-900 flex items-center gap-2 mb-1">
                         <Sparkles className="h-4 w-4 text-amber-500" />
-                        AI Analytics Report
+                        Export Report
                     </DialogTitle>
                     <DialogDescription className="text-zinc-500 text-xs">
-                        Generate professional PDF reports with AI-powered trend analysis and segment rundowns.
+                        Generate a report with AI-powered insights for the selected date range.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -455,14 +423,14 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                             <div className="flex flex-col items-center justify-center h-full py-8 space-y-4">
                                 <Loader2 className="h-10 w-10 text-amber-500 animate-spin" />
                                 <div className="text-center space-y-1">
-                                    <p className="text-sm font-semibold text-zinc-900">AI Analysis in Progress</p>
-                                    <p className="text-xs text-zinc-500 italic">&quot;{loadingStep || "Consulting Kea..."}&quot;</p>
+                                    <p className="text-sm font-semibold text-zinc-900">Generating report...</p>
+                                    <p className="text-xs text-zinc-500 italic">{loadingStep || "Preparing..."}</p>
                                 </div>
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 <div className="space-y-3">
-                                    <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Report Composition</Label>
+                                    <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Sections</Label>
                                     <div className="grid grid-cols-1 gap-2">
                                         {scopes.map((scope) => (
                                             <div key={scope.id} className="flex items-start space-x-3 p-2.5 rounded-xl border border-transparent hover:border-amber-100 hover:bg-amber-50/30 transition-all group">
@@ -488,30 +456,18 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                                     </div>
                                 </div>
 
-                                <div className="space-y-3 pt-2">
-                                    <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Options</Label>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="flex items-center space-x-2 p-2 rounded-lg border border-zinc-100 bg-zinc-50/50">
-                                            <Checkbox
-                                                id="metadata"
-                                                checked={includeMetadata}
-                                                onCheckedChange={(checked) => setIncludeMetadata(checked === true)}
-                                                className="border-zinc-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
-                                            />
-                                            <Label htmlFor="metadata" className="text-xs font-medium text-zinc-600 cursor-pointer">Include Headers</Label>
-                                        </div>
-                                        <div className="flex items-center space-x-2 p-2 rounded-lg border border-zinc-100 bg-zinc-50/50">
-                                            <Checkbox
-                                                id="email"
-                                                checked={sendToEmail}
-                                                onCheckedChange={(checked) => setSendToEmail(checked === true)}
-                                                className="border-zinc-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
-                                            />
-                                            <Label htmlFor="email" className="text-xs font-medium text-zinc-600 cursor-pointer flex items-center gap-1">
-                                                <Mail className="h-3 w-3" />
-                                                Send via Email
-                                            </Label>
-                                        </div>
+                                <div className="pt-2">
+                                    <div className="flex items-center space-x-2 p-2 rounded-lg border border-zinc-100 bg-zinc-50/50 w-fit">
+                                        <Checkbox
+                                            id="email"
+                                            checked={sendToEmail}
+                                            onCheckedChange={(checked) => setSendToEmail(checked === true)}
+                                            className="border-zinc-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
+                                        />
+                                        <Label htmlFor="email" className="text-xs font-medium text-zinc-600 cursor-pointer flex items-center gap-1">
+                                            <Mail className="h-3 w-3" />
+                                            Send via Email
+                                        </Label>
                                     </div>
                                 </div>
                             </div>
@@ -551,8 +507,8 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                             disabled={loading || selectedScopes.length === 0}
                             className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 text-xs px-8 h-9 font-bold rounded-lg transition-transform active:scale-95"
                         >
-                            {loading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Sparkles className="mr-2 h-3.5 w-3.5" />}
-                            Generate Report
+                            {loading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Download className="mr-2 h-3.5 w-3.5" />}
+                            Generate
                         </Button>
                     </div>
                 </div>
