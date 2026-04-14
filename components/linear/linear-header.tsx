@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePickerWithRange } from "./date-range-picker"
+import { VersusDatePicker } from "./versus-date-picker"
 import { SyncButton } from "./sync-button"
 import { ExportDialog } from "@/components/dashboard/export-dialog"
 import { pricingData } from "@/config/subscriptions"
@@ -199,22 +200,19 @@ export function LinearHeader() {
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <div className="flex items-center gap-2 bg-white/50 backdrop-blur-sm p-1 rounded-lg border border-white/20 shadow-sm px-2">
-                                    <div id="header-date-picker">
-                                        <DatePickerWithRange date={dateRange} setDate={setDateRange} hidePresets={pathname.includes("/versus")} />
-                                    </div>
-
-                                    {pathname.includes("/versus") && (
-                                        <>
-                                            <div className="text-[10px] font-bold text-zinc-400">VS</div>
-                                            <div id="header-compare-picker">
-                                                <DatePickerWithRange
-                                                    date={compareDateRange}
-                                                    setDate={setCompareDateRange}
-                                                    className="border-amber-200 bg-amber-50/50"
-                                                    hidePresets
-                                                />
-                                            </div>
-                                        </>
+                                    {pathname.includes("/versus") ? (
+                                        <div id="header-versus-picker">
+                                            <VersusDatePicker
+                                                dateRange={dateRange}
+                                                setDateRange={setDateRange}
+                                                compareDateRange={compareDateRange}
+                                                setCompareDateRange={setCompareDateRange}
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div id="header-date-picker">
+                                            <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                                        </div>
                                     )}
                                 </div>
                             </TooltipTrigger>
