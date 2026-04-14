@@ -4,11 +4,15 @@ import { authOptions } from "@/lib/auth-options";
 import { Resend } from 'resend';
 import { db } from "@/lib/firebase-admin"
 
-// Use dummy key for build/dev if missing, but logging warning in dev
-const resendKey = process.env.RESEND_API_KEY || "re_dummy_key_for_build"
-const resend = new Resend(resendKey);
-
 export async function POST(req: Request) {
+    const resendKey = process.env.RESEND_API_KEY
+    if (!resendKey) {
+        console.error('RESEND_API_KEY is not configured')
+        return NextResponse.json({ error: 'Email service is not configured. Add RESEND_API_KEY to your environment.' }, { status: 500 });
+    }
+
+    const resend = new Resend(resendKey);
+
     const session = await getServerSession(authOptions);
 
     if (!session?.user?.email) {
@@ -26,13 +30,24 @@ export async function POST(req: Request) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = (file as any).name || 'analytics-report.pdf';
 
-        const settingsDoc = await db.collection("admin_settings").doc("global").get()
-        const settings = settingsDoc.exists ? settingsDoc.data() : {}
-        const from = (settings?.reportFromEmail && String(settings.reportFromEmail)) || 'Analytics Report <onboarding@resend.dev>'
-        const replyTo =
-            (settings?.supportEmail && String(settings.supportEmail)) ||
-            (settings?.adminReplyToEmail && String(settings.adminReplyToEmail)) ||
-            undefined
+        let from = 'Analytics Report <no-reply@helpfulanalytics.com>'
+        let replyTo: string | undefined
+
+        try {
+            const settingsDoc = await db.collection("admin_settings").doc("global").get()
+            const settings = settingsDoc.exists ? settingsDoc.data() : {}
+            if (settings?.reportFromEmail) {
+                from = String(settings.reportFromEmail)
+            }
+            replyTo =
+                (settings?.supportEmail && String(settings.supportEmail)) ||
+                (settings?.adminReplyToEmail && String(settings.adminReplyToEmail)) ||
+                undefined
+        } catch (settingsErr) {
+            console.warn('Could not load admin_settings, using default from address:', settingsErr)
+        }
+
+        console.log(`Sending report email: from="${from}" to="${session.user.email}" file="${filename}" size=${buffer.length}`)
 
         const data = await resend.emails.send({
             from,
@@ -60,13 +75,18 @@ export async function POST(req: Request) {
         });
 
         if (data.error) {
-            console.error('Resend API Error:', data.error);
-            return NextResponse.json({ error: data.error.message }, { status: 400 });
+            console.error('Resend API Error:', JSON.stringify(data.error));
+            const msg = data.error.message || 'Failed to send email'
+            // Surface actionable info
+            if (msg.includes('not verified') || msg.includes('not a verified')) {
+                return NextResponse.json({ error: `The sender domain is not verified in Resend. Current from: "${from}". Verify your domain at resend.com/domains or change reportFromEmail in admin settings.` }, { status: 400 });
+            }
+            return NextResponse.json({ error: msg }, { status: 400 });
         }
 
         return NextResponse.json({ success: true });
-    } catch (error) {
-        console.error('Email Route exception:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    } catch (error: any) {
+        console.error('Email Route exception:', error?.message || error);
+        return NextResponse.json({ error: error?.message || 'Internal Server Error' }, { status: 500 });
     }
 }
