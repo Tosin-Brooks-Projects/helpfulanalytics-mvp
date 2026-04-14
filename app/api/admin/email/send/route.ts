@@ -52,7 +52,7 @@ export async function POST(req: Request) {
   const from =
     (settings?.adminFromEmail && String(settings.adminFromEmail)) ||
     process.env.ADMIN_FROM_EMAIL ||
-    "Admin <onboarding@resend.dev>"
+    "Admin <no-reply@helpfulanalytics.com>"
   const replyTo =
     (settings?.adminReplyToEmail && String(settings.adminReplyToEmail)) ||
     process.env.ADMIN_REPLY_TO_EMAIL ||
