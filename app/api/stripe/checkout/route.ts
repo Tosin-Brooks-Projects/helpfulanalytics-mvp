@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { stripe } from "@/lib/stripe"
 import { pricingData } from "@/config/subscriptions"
+import { db } from "@/lib/firebase-admin"
+import { TRIAL_DAYS } from "@/lib/subscription"
 
 export async function POST(req: Request) {
     try {
@@ -27,13 +29,41 @@ export async function POST(req: Request) {
         // @ts-ignore
         const userEmail = session.user.email
 
-        // Simple checkout session creation
-        // In production, you might want to check if the user already has a stripeCustomerId
-        // and re-use it. For simplicity here, we let Stripe handle it or use email to match if possible (though creating new customer is safer for now unless we store ID)
+        // The app grants a 30-day trial automatically from signup
+        // (see lib/subscription.ts). Only grant Stripe's trial_period_days
+        // for users who (a) have never subscribed before, and (b) still have
+        // time left on their signup trial. Otherwise they'd get a second free
+        // trial at checkout instead of being charged.
+        let signupTrialRemainingDays = 0
+        let existingStripeCustomerId: string | undefined
+        let hasSubscribedBefore = false
+        try {
+            const userDoc = await db.collection("users").doc(userId).get()
+            const data = userDoc.data()
+            existingStripeCustomerId = data?.subscription?.stripeCustomerId
+            hasSubscribedBefore = Boolean(
+                existingStripeCustomerId || data?.subscription?.stripeSubscriptionId
+            )
 
-        // Check if we have trial days
-        const subscription_data = tier.trialDays
-            ? { trial_period_days: tier.trialDays }
+            if (tier.trialDays && !hasSubscribedBefore) {
+                const createdAtRaw = data?.createdAt
+                const createdAt = createdAtRaw
+                    ? (typeof createdAtRaw.toDate === "function"
+                        ? createdAtRaw.toDate()
+                        : new Date(createdAtRaw))
+                    : null
+                if (createdAt) {
+                    const msPerDay = 24 * 60 * 60 * 1000
+                    const elapsedDays = Math.floor((Date.now() - createdAt.getTime()) / msPerDay)
+                    signupTrialRemainingDays = Math.max(0, TRIAL_DAYS - elapsedDays)
+                }
+            }
+        } catch (e) {
+            console.error("[STRIPE_CHECKOUT] Failed to read user record", e)
+        }
+
+        const subscription_data = signupTrialRemainingDays > 0
+            ? { trial_period_days: signupTrialRemainingDays }
             : undefined
 
         const settingsUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.helpfulanalytics.com"
@@ -44,7 +74,9 @@ export async function POST(req: Request) {
             payment_method_types: ["card"],
             mode: "subscription",
             billing_address_collection: "auto",
-            customer_email: userEmail || undefined,
+            ...(existingStripeCustomerId
+                ? { customer: existingStripeCustomerId }
+                : { customer_email: userEmail || undefined }),
             line_items: [
                 {
                     price: priceId,
