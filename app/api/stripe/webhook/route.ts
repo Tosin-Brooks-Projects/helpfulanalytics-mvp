@@ -38,7 +38,9 @@ export async function POST(req: Request) {
         const userId = session.metadata?.userId
         if (userId) {
             const priceId = subscription.items.data[0].price.id
-            const tier = pricingData.find(t => (t as any).priceId === priceId)
+            const tier = pricingData.find(
+                t => t.priceIdMonthly === priceId || t.priceIdYearly === priceId
+            )
 
             await db.collection("users").doc(userId).set({
                 subscription: {
