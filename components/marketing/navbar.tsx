@@ -57,6 +57,12 @@ export function Navbar() {
                         >
                             Pricing
                         </Link>
+                        <Link
+                            href="/blog"
+                            className="transition-colors hover:text-primary"
+                        >
+                            Blog
+                        </Link>
                     </nav>
                 </div>
                 <div className="flex items-center space-x-4">

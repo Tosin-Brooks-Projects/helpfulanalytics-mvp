@@ -73,6 +73,7 @@
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "latest",
     "recharts": "latest",
+    "remark-gfm": "^4.0.1",
     "resend": "^6.6.0",
     "sonner": "latest",
     "stripe": "^20.0.0",

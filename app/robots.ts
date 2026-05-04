@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: ['/api/', '/dashboard/'],
+            disallow: ['/dashboard', '/admin', '/api', '/onboarding', '/debug'],
         },
         sitemap: 'https://helpfulanalytics.com/sitemap.xml',
     }
