@@ -72,30 +72,26 @@ export function PropertySwitcher({ properties, selectedProperty, setSelectedProp
         return () => document.removeEventListener("mousedown", handler)
     }, [open])
 
-    const rowVariants = {
-        hidden: { opacity: 0, y: reduced ? 0 : 4 },
-        visible: (i: number) => ({
-            opacity: 1, y: 0,
-            transition: { duration: 0.18, delay: reduced ? 0 : i * 0.04, ease: [0.25, 0.1, 0.25, 1] }
-        }),
-    }
-
     return (
         <div ref={ref} className="relative">
             {/* Trigger */}
             <motion.button
                 onClick={() => setOpen(v => !v)}
                 className={cn(
-                    "flex items-center gap-1.5 h-8 px-2.5 rounded-md text-[11px] font-medium transition-colors",
+                    "flex items-center gap-1.5 h-8 px-2.5 rounded-md text-[11px] font-medium",
                     "bg-white/50 hover:bg-white/80 border border-white/20 shadow-sm backdrop-blur-sm",
                     "text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400",
+                    "transition-colors duration-150",
                     open && "bg-white/80"
                 )}
                 whileTap={{ scale: 0.97 }}
             >
                 <ActiveDot active={true} />
                 <span className="max-w-[120px] truncate">{current?.name ?? "Select property"}</span>
-                <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                <motion.span
+                    animate={{ rotate: open ? 180 : 0 }}
+                    transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                >
                     <ChevronDown className="h-3 w-3 text-zinc-400" />
                 </motion.span>
             </motion.button>
@@ -104,55 +100,58 @@ export function PropertySwitcher({ properties, selectedProperty, setSelectedProp
             <AnimatePresence>
                 {open && (
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                        initial={{ opacity: 0, scale: 0.95, y: -6 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -6 }}
                         transition={{ duration: reduced ? 0 : 0.18, ease: [0.25, 0.1, 0.25, 1] }}
                         className="absolute right-0 top-[calc(100%+6px)] z-50 w-[220px] rounded-xl bg-white border border-zinc-200/80 shadow-xl shadow-zinc-900/8 overflow-hidden"
                         style={{ transformOrigin: "top right" }}
                     >
-                        {/* Property list */}
+                        {/* Property list — clip-path reveal, no per-item stagger */}
                         <div className="p-1.5">
-                            <p className="text-[10px] font-semibold text-zinc-400 tracking-wider uppercase px-2 pt-1 pb-1.5">
+                            <p className="text-[10px] font-medium text-zinc-400 px-2 pt-1 pb-1.5 tracking-wide">
                                 Properties
                             </p>
-                            {properties.map((prop, i) => {
-                                const isActive = prop.id === selectedProperty
-                                return (
-                                    <motion.button
-                                        key={prop.id}
-                                        custom={i}
-                                        variants={rowVariants}
-                                        initial="hidden"
-                                        animate="visible"
-                                        onClick={() => { setSelectedProperty(prop.id); setOpen(false) }}
-                                        className={cn(
-                                            "group w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-left transition-colors",
-                                            isActive ? "bg-amber-50" : "hover:bg-zinc-50"
-                                        )}
-                                    >
-                                        <ActiveDot active={isActive} />
-                                        <span className={cn(
-                                            "flex-1 truncate text-[12px] font-medium",
-                                            isActive ? "text-amber-700" : "text-zinc-700 group-hover:text-zinc-900"
-                                        )}>
-                                            {prop.name}
-                                        </span>
-                                        <AnimatePresence>
-                                            {isActive && (
-                                                <motion.span
-                                                    initial={{ scale: 0, opacity: 0 }}
-                                                    animate={{ scale: 1, opacity: 1 }}
-                                                    exit={{ scale: 0, opacity: 0 }}
-                                                    transition={{ duration: 0.15 }}
-                                                >
-                                                    <Check className="h-3 w-3 text-amber-500 shrink-0" />
-                                                </motion.span>
+                            <motion.div
+                                initial={reduced ? { opacity: 0 } : { clipPath: "inset(0 0 100% 0 round 8px)", opacity: 0 }}
+                                animate={reduced ? { opacity: 1 } : { clipPath: "inset(0 0 0% 0 round 8px)", opacity: 1 }}
+                                transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+                            >
+                                {properties.map((prop) => {
+                                    const isActive = prop.id === selectedProperty
+                                    return (
+                                        <button
+                                            key={prop.id}
+                                            onClick={() => { setSelectedProperty(prop.id); setOpen(false) }}
+                                            className={cn(
+                                                "group w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-left",
+                                                "transition-colors duration-150",
+                                                isActive ? "bg-amber-50" : "hover:bg-zinc-50"
                                             )}
-                                        </AnimatePresence>
-                                    </motion.button>
-                                )
-                            })}
+                                        >
+                                            <ActiveDot active={isActive} />
+                                            <span className={cn(
+                                                "flex-1 truncate text-[12px] font-medium",
+                                                isActive ? "text-amber-700" : "text-zinc-700 group-hover:text-zinc-900"
+                                            )}>
+                                                {prop.name}
+                                            </span>
+                                            <AnimatePresence>
+                                                {isActive && (
+                                                    <motion.span
+                                                        initial={{ scale: 0, opacity: 0 }}
+                                                        animate={{ scale: 1, opacity: 1 }}
+                                                        exit={{ scale: 0, opacity: 0 }}
+                                                        transition={{ duration: 0.15 }}
+                                                    >
+                                                        <Check className="h-3 w-3 text-amber-500 shrink-0" />
+                                                    </motion.span>
+                                                )}
+                                            </AnimatePresence>
+                                        </button>
+                                    )
+                                })}
+                            </motion.div>
                         </div>
 
                         {/* Footer actions */}
@@ -160,11 +159,10 @@ export function PropertySwitcher({ properties, selectedProperty, setSelectedProp
                             {freeSlots > 0 && (
                                 <AddPropertyModal>
                                     <motion.div
-                                        className="relative group flex items-center gap-2 w-full px-2 py-2 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors cursor-pointer overflow-hidden"
-                                        custom={properties.length}
-                                        variants={rowVariants}
-                                        initial="hidden"
-                                        animate="visible"
+                                        className="relative group flex items-center gap-2 w-full px-2 py-2 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-colors duration-150 cursor-pointer overflow-hidden"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        transition={{ duration: 0.18, delay: 0.08 }}
                                         onMouseEnter={() => setAddHovered(true)}
                                         onMouseLeave={() => setAddHovered(false)}
                                     >
@@ -182,10 +180,9 @@ export function PropertySwitcher({ properties, selectedProperty, setSelectedProp
 
                             {showUpgrade && (
                                 <motion.div
-                                    custom={properties.length + 1}
-                                    variants={rowVariants}
-                                    initial="hidden"
-                                    animate="visible"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ duration: 0.18, delay: 0.12 }}
                                 >
                                     <Link
                                         href="/dashboard/settings"

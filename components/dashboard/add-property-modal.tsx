@@ -77,7 +77,7 @@ export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setQuery("") }}>
             <DialogTrigger asChild>{children}</DialogTrigger>
 
-            <DialogContent className="p-0 gap-0 sm:max-w-[420px] bg-white border-zinc-200/80 shadow-xl shadow-zinc-900/8 rounded-2xl overflow-hidden">
+            <DialogContent className="p-0 gap-0 sm:max-w-[400px] bg-white border-zinc-200/80 shadow-xl shadow-zinc-900/8 rounded-2xl overflow-hidden">
 
                 {/* Header */}
                 <div className="px-5 pt-5 pb-4 border-b border-zinc-100">
@@ -184,7 +184,7 @@ export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
                                                 {isLoading ? (
                                                     <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-500" />
                                                 ) : (
-                                                    <ChevronRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-amber-500 transition-all duration-150 group-hover:translate-x-0.5" />
+                                                    <ChevronRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-amber-500 group-hover:translate-x-0.5 transition-[color,transform] duration-150" />
                                                 )}
                                             </div>
                                         </motion.button>

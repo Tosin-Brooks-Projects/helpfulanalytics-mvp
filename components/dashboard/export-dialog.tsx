@@ -2,19 +2,10 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Download, FileSpreadsheet, Loader2, FileText, Sparkles, Mail } from "lucide-react"
+import { Download, FileSpreadsheet, Loader2, FileText, Mail, Check, BarChart2 } from "lucide-react"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { convertToCSV } from "@/lib/export-utils"
 import { cn } from "@/lib/utils"
@@ -22,495 +13,348 @@ import { format } from "date-fns"
 import jsPDF from "jspdf"
 import autoTable from "jspdf-autotable"
 import { toast } from "sonner"
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
+
+const SCOPES = [
+    { id: "overview",  label: "Overview",        detail: "Sessions, users, bounce rate" },
+    { id: "devices",   label: "Devices",          detail: "OS, browser, screen breakdown" },
+    { id: "pages",     label: "Top pages",        detail: "Most visited paths" },
+    { id: "audience",  label: "Audience",         detail: "Countries and cities" },
+    { id: "sources",   label: "Traffic sources",  detail: "Source / medium acquisition" },
+]
 
 export function ExportDialog({ children }: { children?: React.ReactNode } = {}) {
     const [open, setOpen] = useState(false)
-    const [exportFormat, setExportFormat] = useState<"csv" | "pdf">("pdf")
+    const [fmt, setFmt] = useState<"csv" | "pdf">("pdf")
     const [loading, setLoading] = useState(false)
-    const [loadingStep, setLoadingStep] = useState<string>("")
-    const [selectedScopes, setSelectedScopes] = useState<string[]>(["overview", "pages", "sources"])
-    const [sendToEmail, setSendToEmail] = useState(false)
+    const [step, setStep] = useState<string>("")
+    const [done, setDone] = useState<string[]>([])
+    const [selected, setSelected] = useState<string[]>(["overview", "pages", "sources"])
+    const [email, setEmail] = useState(false)
+    const reduced = useReducedMotion()
 
     const { selectedProperty, dateRange } = useDashboard()
 
-    const scopes = [
-        { id: "overview", label: "Overview Metrics", description: "Sessions, Users, Bounce Rate" },
-        { id: "devices", label: "Devices & Tech", description: "OS, Browser, Screen Res breakdown" },
-        { id: "pages", label: "Top Pages", description: "Most visited page paths" },
-        { id: "audience", label: "Audience Locations", description: "Top countries and cities" },
-        { id: "sources", label: "Traffic Sources", description: "Source/Medium acquisition data" },
-    ]
+    const toggle = (id: string) =>
+        setSelected(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])
 
-    const handleScopeToggle = (id: string) => {
-        setSelectedScopes(prev =>
-            prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-        )
+    const dates = () => {
+        const s = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : undefined
+        const e = dateRange?.to   ? format(dateRange.to,   "yyyy-MM-dd") : undefined
+        return { s, e }
     }
 
-    const fetchReportData = async (scope: string) => {
-        let reportTypeParam = scope === "sources" ? "sources" : scope
-        if (scope === "performance") reportTypeParam = "pages"
-
-        const startDate = dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined
-        const endDate = dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined
-
+    const fetchScope = async (scope: string) => {
+        const { s, e } = dates()
         const q = new URLSearchParams()
-        if (startDate) q.set("startDate", startDate)
-        if (endDate) q.set("endDate", endDate)
+        if (s) q.set("startDate", s)
+        if (e) q.set("endDate", e)
         q.set("propertyId", selectedProperty || "")
-        q.set("reportType", reportTypeParam)
+        q.set("reportType", scope === "performance" ? "pages" : scope)
         q.set("limit", "1000")
-
-        const res = await fetch(`/api/analytics?${q.toString()}`)
-        if (!res.ok) throw new Error(`Failed to fetch ${scope}`)
-        return res.json()
+        const r = await fetch(`/api/analytics?${q}`)
+        if (!r.ok) throw new Error(`Failed to fetch ${scope}`)
+        return r.json()
     }
 
-    const fetchAIInsights = async (scope: string) => {
-        const startDate = dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined
-        const endDate = dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined
-
+    const fetchInsights = async (scope: string) => {
+        const { s, e } = dates()
         try {
-            const res = await fetch("/api/ai/insights", {
+            const r = await fetch("/api/ai/insights", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    propertyId: selectedProperty || "demo-property",
-                    reportType: scope,
-                    startDate,
-                    endDate
-                })
+                body: JSON.stringify({ propertyId: selectedProperty || "demo-property", reportType: scope, startDate: s, endDate: e }),
             })
-            if (!res.ok) return null
-            return await res.json()
-        } catch (e) {
-            console.error("AI Fetch Failure:", e)
-            return null
-        }
+            return r.ok ? r.json() : null
+        } catch { return null }
     }
 
-    const generateDetailedPDF = (results: { scope: string, data: any, insights: any }[]): jsPDF => {
-        setLoadingStep("Building PDF report...")
+    const buildPDF = (results: { scope: string; data: any; insights: any }[]): jsPDF => {
+        setStep("Building PDF…")
         const doc = new jsPDF()
-
-        const COLORS = {
-            primary: [30, 41, 59],
-            accent: [100, 116, 139],
-            lightBg: [248, 250, 252],
-            border: [226, 232, 240],
-            text: [15, 23, 42],
-            muted: [100, 116, 139],
+        const C = {
+            dark:   [30, 41, 59]  as [number,number,number],
+            light:  [248, 250, 252] as [number,number,number],
+            border: [226, 232, 240] as [number,number,number],
+            text:   [15, 23, 42]  as [number,number,number],
+            muted:  [100, 116, 139] as [number,number,number],
         }
 
-        // --- Cover Page ---
-        doc.setFillColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-        doc.rect(0, 0, 210, 297, 'F')
-
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(36)
-        doc.setTextColor(255, 255, 255)
-        doc.text("Analytics Report", 30, 70)
-
-        doc.setDrawColor(255, 255, 255)
-        doc.setLineWidth(0.5)
-        doc.line(30, 80, 100, 80)
-
-        const dateStr = dateRange?.from
-            ? `${format(dateRange.from, "MMMM d, yyyy")} — ${format(dateRange.to!, "MMMM d, yyyy")}`
-            : "All Time"
-
-        doc.setFontSize(13)
-        doc.setFont("helvetica", "normal")
-        doc.setTextColor(200, 200, 200)
-        doc.text(dateStr, 30, 100)
-
-        const propertyName = selectedProperty === 'demo-property' ? 'Demo Property' : (selectedProperty || 'Property')
-        doc.text(propertyName, 30, 112)
-
-        doc.setFontSize(10)
-        doc.setTextColor(120, 120, 120)
+        // Cover
+        doc.setFillColor(...C.dark); doc.rect(0, 0, 210, 297, "F")
+        doc.setFont("helvetica", "bold"); doc.setFontSize(36)
+        doc.setTextColor(255, 255, 255); doc.text("Analytics Report", 30, 70)
+        doc.setDrawColor(255, 255, 255); doc.setLineWidth(0.5); doc.line(30, 80, 100, 80)
+        const dStr = dateRange?.from
+            ? `${format(dateRange.from, "MMMM d, yyyy")} – ${format(dateRange.to!, "MMMM d, yyyy")}`
+            : "All time"
+        doc.setFontSize(13); doc.setFont("helvetica", "normal"); doc.setTextColor(200, 200, 200)
+        doc.text(dStr, 30, 100)
+        doc.text(selectedProperty === "demo-property" ? "Demo Property" : (selectedProperty || "Property"), 30, 112)
+        doc.setFontSize(10); doc.setTextColor(120, 120, 120)
         doc.text(`Generated ${format(new Date(), "MMMM d, yyyy")}`, 30, 270)
 
-        // --- Executive Summary ---
+        // Executive summary
         doc.addPage()
-        doc.setFillColor(COLORS.lightBg[0], COLORS.lightBg[1], COLORS.lightBg[2])
-        doc.rect(0, 0, 210, 297, 'F')
-
-        doc.setFont("helvetica", "bold")
-        doc.setFontSize(20)
-        doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-        doc.text("Executive Summary", 15, 30)
-
-        doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
-        doc.setLineWidth(0.5)
-        doc.line(15, 35, 195, 35)
-
-        const overviewInsights = results.find(r => r.scope === "overview")?.insights?.insights || []
-        const summaryText = overviewInsights.length > 0
-            ? overviewInsights[0].content
-            : "A summary of your analytics data for the selected reporting period. The sections that follow break down each area in detail."
-
-        doc.setFontSize(10)
-        doc.setFont("helvetica", "normal")
-        doc.setTextColor(COLORS.text[0], COLORS.text[1], COLORS.text[2])
-        const splitText = doc.splitTextToSize(summaryText, 175)
-        doc.text(splitText, 15, 48)
-
-        // Key Insights
-        if (overviewInsights.length > 0) {
-            let insightY = 80
-            doc.setFont("helvetica", "bold")
-            doc.setFontSize(13)
-            doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-            doc.text("Key Insights", 15, insightY)
-            insightY += 10
-
-            overviewInsights.slice(0, 3).forEach((ins: any) => {
-                doc.setFillColor(255, 255, 255)
-                doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
-                doc.roundedRect(15, insightY, 180, 22, 2, 2, 'FD')
-
-                doc.setFontSize(9)
-                doc.setFont("helvetica", "bold")
-                doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-                doc.text(ins.title, 20, insightY + 8)
-
-                doc.setFont("helvetica", "normal")
-                doc.setTextColor(COLORS.muted[0], COLORS.muted[1], COLORS.muted[2])
-                const desc = doc.splitTextToSize(ins.description, 170)
-                doc.text(desc, 20, insightY + 15)
-
-                insightY += 28
+        doc.setFillColor(...C.light); doc.rect(0, 0, 210, 297, "F")
+        doc.setFont("helvetica", "bold"); doc.setFontSize(20)
+        doc.setTextColor(...C.dark); doc.text("Executive Summary", 15, 30)
+        doc.setDrawColor(...C.border); doc.setLineWidth(0.5); doc.line(15, 35, 195, 35)
+        const overviewIns = results.find(r => r.scope === "overview")?.insights?.insights || []
+        const summary = overviewIns[0]?.content || "Summary of your analytics for the selected period."
+        doc.setFontSize(10); doc.setFont("helvetica", "normal")
+        doc.setTextColor(...C.text); doc.text(doc.splitTextToSize(summary, 175), 15, 48)
+        if (overviewIns.length > 0) {
+            let y = 80
+            doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(...C.dark)
+            doc.text("Key insights", 15, y); y += 10
+            overviewIns.slice(0, 3).forEach((ins: any) => {
+                doc.setFillColor(255, 255, 255); doc.setDrawColor(...C.border)
+                doc.roundedRect(15, y, 180, 22, 2, 2, "FD")
+                doc.setFontSize(9); doc.setFont("helvetica", "bold"); doc.setTextColor(...C.dark)
+                doc.text(ins.title, 20, y + 8)
+                doc.setFont("helvetica", "normal"); doc.setTextColor(...C.muted)
+                doc.text(doc.splitTextToSize(ins.description, 170), 20, y + 15)
+                y += 28
             })
         }
 
-        // --- Data Pages ---
-        doc.addPage()
-        let currentY = 25
-
+        // Data pages
+        doc.addPage(); let cy = 25
+        const ts = { theme: "striped" as const, headStyles: { fillColor: C.dark, fontSize: 9, fontStyle: "bold" as const }, bodyStyles: { fontSize: 9, textColor: C.text } }
         results.forEach(({ scope, data, insights }) => {
-            if (currentY > 220) {
-                doc.addPage()
-                currentY = 25
-            }
-
-            // Section Header
-            doc.setFont("helvetica", "bold")
-            doc.setFontSize(15)
-            doc.setTextColor(COLORS.primary[0], COLORS.primary[1], COLORS.primary[2])
-            const sectionTitle = scope.charAt(0).toUpperCase() + scope.slice(1)
-            doc.text(sectionTitle, 15, currentY)
-
-            doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
-            doc.setLineWidth(0.5)
-            doc.line(15, currentY + 3, 195, currentY + 3)
-            currentY += 10
-
-            // AI Insight for section
+            if (cy > 220) { doc.addPage(); cy = 25 }
+            doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(...C.dark)
+            doc.text(scope.charAt(0).toUpperCase() + scope.slice(1), 15, cy)
+            doc.setDrawColor(...C.border); doc.setLineWidth(0.5); doc.line(15, cy + 3, 195, cy + 3); cy += 10
             if (insights?.insights?.length > 0) {
-                doc.setFillColor(COLORS.lightBg[0], COLORS.lightBg[1], COLORS.lightBg[2])
-                doc.setDrawColor(COLORS.border[0], COLORS.border[1], COLORS.border[2])
-                doc.roundedRect(15, currentY, 180, 18, 2, 2, 'FD')
-
-                doc.setFontSize(8)
-                doc.setFont("helvetica", "normal")
-                doc.setTextColor(COLORS.muted[0], COLORS.muted[1], COLORS.muted[2])
-                const insightLine = doc.splitTextToSize(insights.insights[0].description, 170)
-                doc.text(insightLine, 20, currentY + 7)
-
-                currentY += 24
+                doc.setFillColor(...C.light); doc.setDrawColor(...C.border)
+                doc.roundedRect(15, cy, 180, 18, 2, 2, "FD")
+                doc.setFontSize(8); doc.setFont("helvetica", "normal"); doc.setTextColor(...C.muted)
+                doc.text(doc.splitTextToSize(insights.insights[0].description, 170), 20, cy + 7)
+                cy += 24
             }
-
-            const tableStyles = {
-                theme: 'striped' as const,
-                headStyles: { fillColor: COLORS.primary as any, fontSize: 9, fontStyle: 'bold' as const },
-                bodyStyles: { fontSize: 9, textColor: COLORS.text as any },
-            }
-
             if (scope === "overview") {
                 const m = data?.metrics || {}
-                autoTable(doc, {
-                    startY: currentY,
-                    head: [['Metric', 'Value']],
-                    body: [
-                        ["Sessions", (m.sessions || 0).toLocaleString()],
-                        ["Active Users", (m.activeUsers || 0).toLocaleString()],
-                        ["Page Views", (m.screenPageViews || 0).toLocaleString()],
-                        ["Bounce Rate", `${((m.bounceRate || 0) * 100).toFixed(1)}%`],
-                        ["Avg Session Duration", `${Math.round(m.averageSessionDuration || 0)}s`],
-                        ["Conversion Rate", `${(m.transactions ? (m.transactions / m.sessions * 100).toFixed(2) : "0.00")}%`]
-                    ],
-                    ...tableStyles,
-                    columnStyles: { 1: { halign: 'right' } },
-                })
-                currentY = (doc as any).lastAutoTable.finalY + 15
+                autoTable(doc, { startY: cy, head: [["Metric", "Value"]], body: [["Sessions",(m.sessions||0).toLocaleString()],["Active users",(m.activeUsers||0).toLocaleString()],["Page views",(m.screenPageViews||0).toLocaleString()],["Bounce rate",`${((m.bounceRate||0)*100).toFixed(1)}%`],["Avg session",`${Math.round(m.averageSessionDuration||0)}s`]], ...ts, columnStyles: { 1: { halign: "right" } } })
+                cy = (doc as any).lastAutoTable.finalY + 15
             }
-
-            if (scope === "pages" || scope === "performance") {
-                const pages = (data.pages || []).slice(0, 25)
-                autoTable(doc, {
-                    startY: currentY,
-                    head: [['Page Path', 'Views', 'Unique', 'Bounce %']],
-                    body: pages.map((p: any) => [
-                        p.pagePath || "/",
-                        (p.pageViews || 0).toLocaleString(),
-                        (p.uniquePageViews || 0).toLocaleString(),
-                        ((p.bounceRate || 0) * 100).toFixed(1) + "%"
-                    ]),
-                    ...tableStyles,
-                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' }, 3: { halign: 'right' } },
-                })
-                currentY = (doc as any).lastAutoTable.finalY + 15
+            if (scope === "pages") {
+                autoTable(doc, { startY: cy, head: [["Path","Views","Unique","Bounce"]], body: (data.pages||[]).slice(0,25).map((p:any)=>[p.pagePath||"/",(p.pageViews||0).toLocaleString(),(p.uniquePageViews||0).toLocaleString(),((p.bounceRate||0)*100).toFixed(1)+"%"]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"},3:{halign:"right"} } })
+                cy = (doc as any).lastAutoTable.finalY + 15
             }
-
             if (scope === "sources") {
-                const sources = (data.sources || []).slice(0, 20)
-                autoTable(doc, {
-                    startY: currentY,
-                    head: [['Source', 'Medium', 'Sessions', 'Users']],
-                    body: sources.map((s: any) => [s.source, s.medium, (s.sessions || 0).toLocaleString(), (s.users || 0).toLocaleString()]),
-                    ...tableStyles,
-                    columnStyles: { 2: { halign: 'right' }, 3: { halign: 'right' } },
-                })
-                currentY = (doc as any).lastAutoTable.finalY + 15
+                autoTable(doc, { startY: cy, head: [["Source","Medium","Sessions","Users"]], body: (data.sources||[]).slice(0,20).map((s:any)=>[s.source,s.medium,(s.sessions||0).toLocaleString(),(s.users||0).toLocaleString()]), ...ts, columnStyles: { 2:{halign:"right"},3:{halign:"right"} } })
+                cy = (doc as any).lastAutoTable.finalY + 15
             }
-
             if (scope === "devices") {
-                autoTable(doc, {
-                    startY: currentY,
-                    head: [['Device Category', 'Sessions', 'Users']],
-                    body: (data.devices || []).map((d: any) => [d.name, (d.sessions || 0).toLocaleString(), (d.users || 0).toLocaleString()]),
-                    ...tableStyles,
-                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } },
-                })
-                currentY = (doc as any).lastAutoTable.finalY + 15
+                autoTable(doc, { startY: cy, head: [["Device","Sessions","Users"]], body: (data.devices||[]).map((d:any)=>[d.name,(d.sessions||0).toLocaleString(),(d.users||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
+                cy = (doc as any).lastAutoTable.finalY + 15
             }
-
             if (scope === "audience") {
-                autoTable(doc, {
-                    startY: currentY,
-                    head: [['Country', 'Sessions', 'Users']],
-                    body: (data.countries || []).slice(0, 20).map((c: any) => [c.country, (c.sessions || 0).toLocaleString(), (c.users || 0).toLocaleString()]),
-                    ...tableStyles,
-                    columnStyles: { 1: { halign: 'right' }, 2: { halign: 'right' } },
-                })
-                currentY = (doc as any).lastAutoTable.finalY + 15
+                autoTable(doc, { startY: cy, head: [["Country","Sessions","Users"]], body: (data.countries||[]).slice(0,20).map((c:any)=>[c.country,(c.sessions||0).toLocaleString(),(c.users||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
+                cy = (doc as any).lastAutoTable.finalY + 15
             }
         })
-
         return doc
     }
 
     const handleExport = async () => {
         if (!selectedProperty) return toast.error("No property selected")
-
-        setLoading(true)
-        setLoadingStep("Fetching data...")
+        setLoading(true); setDone([])
+        const ts = format(new Date(), "yyyy-MM-dd")
+        const base = `Analytics_Report_${ts}`
         try {
-            const timestamp = format(new Date(), "yyyy-MM-dd")
-            const baseFilename = `Analytics_Report_${timestamp}`
-
             const results = await Promise.all(
-                selectedScopes.map(async (scope) => {
-                    setLoadingStep(`Analyzing ${scope}...`)
-                    const data = await fetchReportData(scope)
-                    const insights = await fetchAIInsights(scope)
+                selected.map(async scope => {
+                    setStep(scope)
+                    const data     = await fetchScope(scope)
+                    const insights = await fetchInsights(scope)
+                    setDone(d => [...d, scope])
                     return { scope, data, insights }
                 })
             )
-
-            if (exportFormat === "csv") {
+            if (fmt === "csv") {
                 const { flattenAnalyticsData } = await import("@/lib/export-utils")
-
-                let combinedData: any[] = []
-                results.forEach(({ scope, data }) => {
-                    const flatData = flattenAnalyticsData(data)
-                    if (Array.isArray(flatData)) {
-                        combinedData = [...combinedData, ...flatData]
-                    }
-                })
-
-                const csvContent = convertToCSV(combinedData, {
-                    filename: baseFilename,
-                    download: !sendToEmail
-                })
-
-                if (sendToEmail) {
-                    setLoadingStep("Sending email...")
-                    const blob = new Blob([csvContent], { type: 'text/csv' })
-                    const formData = new FormData()
-                    formData.append('file', blob, `${baseFilename}.csv`)
-
-                    const emailRes = await fetch("/api/email/send-report", {
-                        method: "POST",
-                        body: formData
-                    })
-
-                    if (!emailRes.ok) {
-                        const errBody = await emailRes.json().catch(() => ({}))
-                        throw new Error(errBody.error || "Failed to send email")
-                    }
-                    toast.success("CSV Report sent to your email")
-                } else {
-                    toast.success("CSV exported successfully")
-                }
+                let combined: any[] = []
+                results.forEach(({ data }) => { const flat = flattenAnalyticsData(data); if (Array.isArray(flat)) combined = [...combined, ...flat] })
+                const csv = convertToCSV(combined, { filename: base, download: !email })
+                if (email) {
+                    setStep("email")
+                    const blob = new Blob([csv], { type: "text/csv" })
+                    const fd = new FormData(); fd.append("file", blob, `${base}.csv`)
+                    const r = await fetch("/api/email/send-report", { method: "POST", body: fd })
+                    if (!r.ok) throw new Error((await r.json().catch(()=>({}))).error || "Email failed")
+                    toast.success("CSV sent to your email")
+                } else { toast.success("CSV exported") }
             } else {
-                const doc = generateDetailedPDF(results)
-
-                if (sendToEmail) {
-                    setLoadingStep("Sending PDF report via email...")
-                    const pdfBlob = doc.output("blob")
-                    const formData = new FormData()
-                    formData.append("file", pdfBlob, `${baseFilename}.pdf`)
-
-                    const emailRes = await fetch("/api/email/send-report", {
-                        method: "POST",
-                        body: formData,
-                    })
-
-                    if (!emailRes.ok) {
-                        const errBody = await emailRes.json().catch(() => ({}))
-                        throw new Error(errBody.error || "Failed to send email")
-                    }
-                    toast.success("PDF Report sent to your email")
-                } else {
-                    doc.save(`${baseFilename}.pdf`)
-                    toast.success("Report downloaded")
-                }
+                const doc = buildPDF(results)
+                if (email) {
+                    setStep("email")
+                    const blob = doc.output("blob"); const fd = new FormData(); fd.append("file", blob, `${base}.pdf`)
+                    const r = await fetch("/api/email/send-report", { method: "POST", body: fd })
+                    if (!r.ok) throw new Error((await r.json().catch(()=>({}))).error || "Email failed")
+                    toast.success("PDF sent to your email")
+                } else { doc.save(`${base}.pdf`); toast.success("Report downloaded") }
             }
-
             setOpen(false)
-        } catch (error: any) {
-            console.error(error)
-            toast.error(error?.message || "Something went wrong. Please try again.")
-        } finally {
-            setLoading(false)
-            setLoadingStep("")
-        }
+        } catch (err: any) {
+            toast.error(err?.message || "Something went wrong")
+        } finally { setLoading(false); setStep(""); setDone([]) }
     }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {children || (
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 gap-2 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-900 shadow-sm transition-colors text-[11px] font-medium"
-                    >
+                    <Button variant="outline" size="sm" className="h-8 gap-2 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-900 shadow-sm transition-colors duration-150 text-[11px] font-medium">
                         <Download className="h-3.5 w-3.5" />
                         <span className="hidden sm:inline">Export</span>
                     </Button>
                 )}
             </DialogTrigger>
-            <DialogContent
-                className="sm:max-w-[460px] bg-white text-zinc-900 border-zinc-100 shadow-2xl p-0 gap-0 overflow-hidden"
-                aria-describedby={undefined}
-            >
-                <DialogHeader className="p-6 pb-2">
-                    <DialogTitle className="text-lg font-bold text-zinc-900 flex items-center gap-2 mb-1">
-                        <Sparkles className="h-4 w-4 text-amber-500" />
-                        Export Report
-                    </DialogTitle>
-                    <DialogDescription className="text-zinc-500 text-xs">
-                        Generate a report with AI-powered insights for the selected date range.
-                    </DialogDescription>
-                </DialogHeader>
 
-                <div className="p-0">
-                    <div className="p-6 pt-4 min-h-[220px]">
-                        {loading ? (
-                            <div className="flex flex-col items-center justify-center h-full py-8 space-y-4">
-                                <Loader2 className="h-10 w-10 text-amber-500 animate-spin" />
-                                <div className="text-center space-y-1">
-                                    <p className="text-sm font-semibold text-zinc-900">Generating report...</p>
-                                    <p className="text-xs text-zinc-500 italic">{loadingStep || "Preparing..."}</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="space-y-4">
-                                <div className="space-y-3">
-                                    <Label className="text-xs text-zinc-500 uppercase tracking-wider font-bold">Sections</Label>
-                                    <div className="grid grid-cols-1 gap-2">
-                                        {scopes.map((scope) => (
-                                            <div key={scope.id} className="flex items-start space-x-3 p-2.5 rounded-xl border border-transparent hover:border-amber-100 hover:bg-amber-50/30 transition-all group">
-                                                <Checkbox
-                                                    id={scope.id}
-                                                    checked={selectedScopes.includes(scope.id)}
-                                                    onCheckedChange={() => handleScopeToggle(scope.id)}
-                                                    className="mt-0.5 border-zinc-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
-                                                />
-                                                <div className="grid gap-0.5 leading-none">
-                                                    <Label
-                                                        htmlFor={scope.id}
-                                                        className="text-sm font-semibold leading-none cursor-pointer text-zinc-700 group-hover:text-amber-700 transition-colors"
-                                                    >
-                                                        {scope.label}
-                                                    </Label>
-                                                    <p className="text-[10px] text-zinc-400 group-hover:text-zinc-500">
-                                                        {scope.description}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+            <DialogContent className="p-0 gap-0 sm:max-w-[420px] bg-white border-zinc-200/80 shadow-xl shadow-zinc-900/8 rounded-2xl overflow-hidden" aria-describedby={undefined}>
 
-                                <div className="pt-2">
-                                    <div className="flex items-center space-x-2 p-2 rounded-lg border border-zinc-100 bg-zinc-50/50 w-fit">
-                                        <Checkbox
-                                            id="email"
-                                            checked={sendToEmail}
-                                            onCheckedChange={(checked) => setSendToEmail(checked === true)}
-                                            className="border-zinc-300 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500"
-                                        />
-                                        <Label htmlFor="email" className="text-xs font-medium text-zinc-600 cursor-pointer flex items-center gap-1">
-                                            <Mail className="h-3 w-3" />
-                                            Send via Email
-                                        </Label>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="bg-zinc-50 p-4 border-t border-zinc-100 flex items-center justify-between">
-                        <div className="flex items-center gap-2 p-1 bg-zinc-200/50 rounded-lg">
-                            <button
-                                onClick={() => setExportFormat("pdf")}
-                                className={cn(
-                                    "px-4 py-1.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1.5",
-                                    exportFormat === "pdf"
-                                        ? "bg-white text-zinc-900 shadow-sm"
-                                        : "text-zinc-500 hover:text-zinc-700"
-                                )}
-                            >
-                                <FileText className="h-3 w-3" />
-                                PDF
-                            </button>
-                            <button
-                                onClick={() => setExportFormat("csv")}
-                                className={cn(
-                                    "px-4 py-1.5 rounded-md text-[10px] font-bold transition-all flex items-center gap-1.5",
-                                    exportFormat === "csv"
-                                        ? "bg-white text-zinc-900 shadow-sm"
-                                        : "text-zinc-500 hover:text-zinc-700"
-                                )}
-                            >
-                                <FileSpreadsheet className="h-3 w-3" />
-                                CSV
-                            </button>
+                {/* Header */}
+                <div className="px-5 pt-5 pb-4 border-b border-zinc-100">
+                    <div className="flex items-center gap-2.5 mb-1">
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10">
+                            <BarChart2 className="h-3.5 w-3.5 text-amber-600" strokeWidth={2} />
                         </div>
-
-                        <Button
-                            onClick={handleExport}
-                            disabled={loading || selectedScopes.length === 0}
-                            className="bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 text-xs px-8 h-9 font-bold rounded-lg transition-transform active:scale-95"
-                        >
-                            {loading ? <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" /> : <Download className="mr-2 h-3.5 w-3.5" />}
-                            Generate
-                        </Button>
+                        <h2 className="text-[15px] font-semibold text-zinc-900 tracking-tight">Export report</h2>
                     </div>
+                    <p className="text-[12px] text-zinc-400 pl-[calc(1.75rem+10px)]">
+                        AI-powered insights included for your date range.
+                    </p>
+                </div>
+
+                {/* Body */}
+                <div className="px-4 py-4 min-h-[240px]">
+                    <AnimatePresence mode="wait">
+                        {loading ? (
+                            <motion.div
+                                key="loading"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.18 }}
+                                className="flex flex-col gap-2 py-2"
+                            >
+                                <p className="text-[11px] font-medium text-zinc-500 mb-1">
+                                    {step === "email" ? "Sending…" : "Fetching data"}
+                                </p>
+                                {selected.map(id => {
+                                    const s = SCOPES.find(x => x.id === id)!
+                                    const isDone = done.includes(id)
+                                    const isActive = step === id
+                                    return (
+                                        <div key={id} className={cn("flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors duration-200", isDone ? "bg-zinc-50" : isActive ? "bg-amber-50/60" : "opacity-40")}>
+                                            <div className={cn("flex h-4 w-4 items-center justify-center rounded-full border transition-colors duration-200", isDone ? "border-zinc-300 bg-zinc-100" : isActive ? "border-amber-400 bg-amber-50" : "border-zinc-200")}>
+                                                {isDone
+                                                    ? <Check className="h-2.5 w-2.5 text-zinc-500" />
+                                                    : isActive
+                                                    ? <motion.div className="h-2 w-2 rounded-full bg-amber-400" animate={{ scale: [1, 1.3, 1] }} transition={{ duration: 0.8, repeat: Infinity }} />
+                                                    : null
+                                                }
+                                            </div>
+                                            <span className={cn("text-[12px] font-medium", isDone ? "text-zinc-500 line-through decoration-zinc-300" : isActive ? "text-amber-700" : "text-zinc-400")}>
+                                                {s.label}
+                                            </span>
+                                        </div>
+                                    )
+                                })}
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="form"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.18 }}
+                                className="space-y-1"
+                            >
+                                <p className="text-[11px] text-zinc-400 mb-2.5">Sections to include</p>
+                                {SCOPES.map(scope => (
+                                    <button
+                                        key={scope.id}
+                                        onClick={() => toggle(scope.id)}
+                                        className={cn(
+                                            "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left",
+                                            "transition-colors duration-150 group",
+                                            selected.includes(scope.id)
+                                                ? "bg-zinc-50"
+                                                : "hover:bg-zinc-50/60"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "h-4 w-4 shrink-0 rounded-[4px] border flex items-center justify-center transition-colors duration-150",
+                                            selected.includes(scope.id)
+                                                ? "bg-amber-500 border-amber-500"
+                                                : "border-zinc-300 group-hover:border-zinc-400"
+                                        )}>
+                                            {selected.includes(scope.id) && (
+                                                <Check className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />
+                                            )}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <p className={cn("text-[13px] font-medium leading-none", selected.includes(scope.id) ? "text-zinc-900" : "text-zinc-600")}>
+                                                {scope.label}
+                                            </p>
+                                            <p className="text-[11px] text-zinc-400 mt-0.5">{scope.detail}</p>
+                                        </div>
+                                    </button>
+                                ))}
+
+                                {/* Email toggle */}
+                                <button
+                                    onClick={() => setEmail(v => !v)}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors duration-150 hover:bg-zinc-50/60 mt-1 border-t border-zinc-100 pt-3"
+                                >
+                                    <div className={cn("h-4 w-4 shrink-0 rounded-[4px] border flex items-center justify-center transition-colors duration-150", email ? "bg-amber-500 border-amber-500" : "border-zinc-300")}>
+                                        {email && <Check className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />}
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        <Mail className="h-3.5 w-3.5 text-zinc-400" />
+                                        <span className="text-[12px] font-medium text-zinc-600">Send to my email</span>
+                                    </div>
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-zinc-100 bg-zinc-50/50">
+                    {/* Format toggle */}
+                    <div className="flex items-center gap-0.5 p-0.5 bg-zinc-100 rounded-lg">
+                        {(["pdf", "csv"] as const).map(f => (
+                            <button
+                                key={f}
+                                onClick={() => setFmt(f)}
+                                className={cn(
+                                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all duration-150",
+                                    fmt === f ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-500 hover:text-zinc-700"
+                                )}
+                            >
+                                {f === "pdf" ? <FileText className="h-3 w-3" /> : <FileSpreadsheet className="h-3 w-3" />}
+                                {f.toUpperCase()}
+                            </button>
+                        ))}
+                    </div>
+
+                    <motion.button
+                        onClick={handleExport}
+                        disabled={loading || selected.length === 0}
+                        className="flex items-center gap-2 px-5 py-2 rounded-xl text-[12px] font-semibold bg-amber-500 hover:bg-amber-400 text-white shadow-sm shadow-amber-500/20 disabled:opacity-50 transition-colors duration-150"
+                        whileTap={reduced ? {} : { scale: 0.97 }}
+                    >
+                        {loading
+                            ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            : <Download className="h-3.5 w-3.5" />
+                        }
+                        {loading ? "Working…" : "Generate"}
+                    </motion.button>
                 </div>
             </DialogContent>
         </Dialog>
