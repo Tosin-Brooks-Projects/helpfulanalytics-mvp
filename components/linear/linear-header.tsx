@@ -12,6 +12,7 @@ import { SyncButton } from "./sync-button"
 import { ExportDialog } from "@/components/dashboard/export-dialog"
 import { pricingData } from "@/config/subscriptions"
 import { AddPropertyModal } from "@/components/dashboard/add-property-modal"
+import { EmptyPropertyCTA } from "@/components/dashboard/empty-property-cta"
 import { CommandPalette } from "./command-palette"
 import { cn } from "@/lib/utils"
 import {
@@ -105,12 +106,7 @@ export function LinearHeader() {
                                 {propertySelector}
                             </div>
                         ) : !loading ? (
-                            <AddPropertyModal>
-                                <div className="flex items-center gap-1.5 cursor-pointer rounded-md px-2.5 py-1.5 text-[11px] font-medium text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 transition-colors">
-                                    <Plus className="h-3.5 w-3.5" />
-                                    <span>Add Property</span>
-                                </div>
-                            </AddPropertyModal>
+                            <EmptyPropertyCTA />
                         ) : (
                             <span className="text-sm font-semibold text-zinc-900 truncate">Analytics</span>
                         )}
@@ -229,12 +225,9 @@ export function LinearHeader() {
                         </Tooltip>
 
                         {!loading && properties.length === 0 && (
-                            <AddPropertyModal>
-                                <div className="flex items-center gap-1.5 cursor-pointer rounded-md px-2.5 py-1.5 text-[11px] font-medium text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 transition-colors" id="header-property-selector">
-                                    <Plus className="h-3.5 w-3.5" />
-                                    <span>Add Property</span>
-                                </div>
-                            </AddPropertyModal>
+                            <div id="header-property-selector">
+                                <EmptyPropertyCTA />
+                            </div>
                         )}
                         {!loading && properties.length > 0 && (
                             <Tooltip>
