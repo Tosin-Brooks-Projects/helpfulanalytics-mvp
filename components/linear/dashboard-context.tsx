@@ -44,6 +44,7 @@ interface DashboardContextType {
     sidebarCollapsed: boolean
     setSidebarCollapsed: (collapsed: boolean) => void
     deletionUsage: { count: number, resetAt: number } | null
+    propertyLimit: number | null
 }
 
 const LinearDashboardContext = createContext<DashboardContextType | undefined>(undefined)
@@ -85,6 +86,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
 
     const properties = useMemo(() => savedData?.properties || [], [savedData])
     const deletionUsage = useMemo(() => savedData?.deletionUsage || null, [savedData])
+    const propertyLimit = useMemo(() => savedData?.propertyLimit ?? null, [savedData])
     const subscription = useMemo(() => userData?.subscription || null, [userData])
     const features = useMemo(
         () => (userData?.features ? { advancedReports: !!userData.features.advancedReports } : null),
@@ -97,10 +99,18 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
         return allProps.filter((p: any) => !savedIds.has(p.id))
     }, [allData, properties])
 
-    // Initial Selection Logic - only run once when properties load and we don't have a selection
+    // Keep selection aligned with the saved property list. This also clears stale
+    // localStorage after a property is removed.
     useEffect(() => {
         if (!isClient) return
-        if (!selectedProperty && properties.length > 0) {
+        if (properties.length === 0) {
+            if (selectedProperty) setSelectedProperty("")
+            localStorage.removeItem("linear_selected_property")
+            return
+        }
+
+        const selectedStillExists = properties.some((p: Property) => p.id === selectedProperty)
+        if (!selectedProperty || !selectedStillExists) {
             const saved = localStorage.getItem("linear_selected_property")
             if (saved && properties.find((p: Property) => p.id === saved)) {
                 setSelectedProperty(saved)
@@ -108,7 +118,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
                 setSelectedProperty(properties[0].id)
             }
         }
-    }, [properties, selectedProperty])
+    }, [isClient, properties, selectedProperty])
 
     // Persist selection
     useEffect(() => {
@@ -187,6 +197,7 @@ export function LinearDashboardProvider({ children }: { children: ReactNode }) {
             sidebarCollapsed,
             setSidebarCollapsed,
             deletionUsage,
+            propertyLimit,
             features,
         }}>
             {children}

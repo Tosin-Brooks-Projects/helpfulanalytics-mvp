@@ -24,7 +24,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export function LinearHeader() {
     const { data: session } = useSession()
-    const { properties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription, compareDateRange, setCompareDateRange } = useDashboard()
+    const { properties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription, compareDateRange, setCompareDateRange, propertyLimit } = useDashboard()
     const pathname = usePathname()
 
     const reportChips = [
@@ -61,7 +61,7 @@ export function LinearHeader() {
                     {(() => {
                         const currentTier = subscription?.tier || "Starter"
                         const tierConfig = pricingData.find(t => t.title.toLowerCase() === currentTier.toLowerCase())
-                        const maxProps = tierConfig?.maxProperties || 1
+                        const maxProps = propertyLimit ?? tierConfig?.maxProperties ?? 1
                         const usage = properties.length
                         const freeSlots = Math.max(0, maxProps - usage)
 

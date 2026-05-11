@@ -7,6 +7,7 @@ import { Loader2, ChevronRight, Plus } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
 import { useDashboard } from "@/components/linear/dashboard-context"
+import { mutate } from "swr"
 
 export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
     const [open, setOpen] = useState(false)
@@ -39,7 +40,10 @@ export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
                 description: `${property.name} has been added to your dashboard.`,
             })
             setOpen(false)
-            // Trigger a reload to refresh context data
+            await Promise.all([
+                mutate("/api/user/properties"),
+                mutate("/api/analytics/properties"),
+            ])
             router.refresh()
 
         } catch (error: any) {

@@ -7,6 +7,19 @@ import { getSubscriptionStatus } from "@/lib/subscription"
 
 export const dynamic = "force-dynamic"
 
+const TESTING_PROPERTY_LIMITS: Record<string, number> = {
+    "support@konetiq.com": 3,
+}
+
+function normalizePropertyId(propertyId: string) {
+    return propertyId.replace(/^properties\//, "")
+}
+
+function getEffectivePropertyLimit(session: any, userData: any, tierLimit: number) {
+    const email = String(session?.user?.email || userData?.email || "").toLowerCase().trim()
+    return Math.max(tierLimit, TESTING_PROPERTY_LIMITS[email] || 0)
+}
+
 export async function GET() {
     const session = await getServerSession(authOptions)
 
@@ -27,8 +40,11 @@ export async function GET() {
         const properties = propertiesSnap.docs.map(doc => doc.data())
         const userData = userDoc.data()
         const deletionUsage = userData?.deletionRateLimit || { count: 0, resetAt: Date.now() + 30 * 24 * 60 * 60 * 1000 }
+        const subInfo = getSubscriptionStatus(userData)
+        const tierConfig = pricingData.find(t => t.title.toLowerCase() === subInfo.tier?.toLowerCase())
+        const propertyLimit = getEffectivePropertyLimit(session, userData, tierConfig?.maxProperties ?? 1)
 
-        return NextResponse.json({ properties, deletionUsage })
+        return NextResponse.json({ properties, deletionUsage, propertyLimit })
     } catch (error) {
         console.error("Error fetching user properties:", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
@@ -65,10 +81,11 @@ export async function POST(request: Request) {
             : 'starter'
 
         const tierConfig = pricingData.find(t => t.title.toLowerCase() === tierName?.toLowerCase())
-        const maxProperties = tierConfig?.maxProperties ?? 1
+        const maxProperties = getEffectivePropertyLimit(session, userData, tierConfig?.maxProperties ?? 1)
 
         // Check if the property already exists (re-selecting vs adding new)
-        const propertyRef = db.collection("users").doc(userId).collection("properties").doc(propertyId.replace("properties/", ""))
+        const normalizedPropertyId = normalizePropertyId(propertyId)
+        const propertyRef = db.collection("users").doc(userId).collection("properties").doc(normalizedPropertyId)
         const propertyDoc = await propertyRef.get()
 
         // Only enforce limit when adding a NEW property
@@ -83,13 +100,15 @@ export async function POST(request: Request) {
             }
         }
 
+        const activeProperty = {
+            id: propertyId,
+            name: propertyName,
+            accountId: accountId,
+            updatedAt: new Date()
+        }
+
         await db.collection("users").doc(userId).set({
-            activeProperty: {
-                id: propertyId,
-                name: propertyName,
-                accountId: accountId,
-                updatedAt: new Date()
-            },
+            activeProperty,
             isOnboarded: true, // Mark as onboarded after saving first property
             // Initialize basic subscription if not present (only if it's completely missing)
             ...(!userData?.subscription ? {
@@ -108,10 +127,66 @@ export async function POST(request: Request) {
             addedAt: new Date()
         })
 
-        return NextResponse.json({ success: true })
+        return NextResponse.json({ success: true, activeProperty })
 
     } catch (error) {
         console.error("Error saving property:", error)
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    }
+}
+
+export async function PUT(request: Request) {
+    const session = await getServerSession(authOptions)
+
+    // @ts-ignore
+    if (!session?.userId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    try {
+        const body = await request.json()
+        const { propertyId, name, timezone } = body
+
+        if (!propertyId) {
+            return NextResponse.json({ error: "Property ID required" }, { status: 400 })
+        }
+
+        // @ts-ignore
+        const userId = session.userId
+        const normalizedPropertyId = normalizePropertyId(propertyId)
+        const userRef = db.collection("users").doc(userId)
+        const propertyRef = userRef.collection("properties").doc(normalizedPropertyId)
+        const propertyDoc = await propertyRef.get()
+
+        if (!propertyDoc.exists) {
+            return NextResponse.json({ error: "Property not found" }, { status: 404 })
+        }
+
+        const updates = {
+            ...(name !== undefined ? { name } : {}),
+            ...(timezone !== undefined ? { timezone } : {}),
+            updatedAt: new Date(),
+        }
+
+        await propertyRef.set(updates, { merge: true })
+
+        const userDoc = await userRef.get()
+        const userData = userDoc.data()
+        let activeProperty = userData?.activeProperty ?? null
+        if (normalizePropertyId(userData?.activeProperty?.id || "") === normalizedPropertyId) {
+            activeProperty = {
+                ...(userData?.activeProperty || {}),
+                id: propertyId,
+                ...(name !== undefined ? { name } : {}),
+                ...(timezone !== undefined ? { timezone } : {}),
+                updatedAt: new Date(),
+            }
+            await userRef.set({ activeProperty }, { merge: true })
+        }
+
+        return NextResponse.json({ success: true, activeProperty })
+    } catch (error) {
+        console.error("Error updating property:", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }
@@ -134,13 +209,22 @@ export async function DELETE(request: Request) {
     const userId = session.userId
 
     try {
-        const propertyRef = db.collection("users").doc(userId).collection("properties").doc(propertyId)
+        const normalizedPropertyId = normalizePropertyId(propertyId)
         const userRef = db.collection("users").doc(userId)
+        const propertiesRef = userRef.collection("properties")
+        const propertyRef = propertiesRef.doc(normalizedPropertyId)
 
         // Rate Limit Check for Deletion
         // Run transaction or just optimistic check (doc read -> write)
         const userDoc = await userRef.get()
         const userData = userDoc.data()
+
+        const propertyDoc = await propertyRef.get()
+        const activePropertyId = normalizePropertyId(userData?.activeProperty?.id || "")
+
+        if (!propertyDoc.exists && activePropertyId !== normalizedPropertyId) {
+            return NextResponse.json({ error: "Property not found" }, { status: 404 })
+        }
 
         const now = Date.now()
         const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000
@@ -155,7 +239,9 @@ export async function DELETE(request: Request) {
         }
 
         // 1. Delete property
-        await propertyRef.delete()
+        if (propertyDoc.exists) {
+            await propertyRef.delete()
+        }
 
         // 2. Update Limit & Active Check
         const updates: any = {
@@ -165,13 +251,23 @@ export async function DELETE(request: Request) {
             }
         }
 
-        if (userData?.activeProperty?.id === propertyId) {
-            updates.activeProperty = null
+        if (activePropertyId === normalizedPropertyId) {
+            const remainingPropertiesSnap = await propertiesRef.get()
+            const nextProperty = remainingPropertiesSnap.docs
+                .filter(doc => doc.id !== normalizedPropertyId)
+                .map(doc => doc.data())[0]
+
+            updates.activeProperty = nextProperty ? {
+                id: nextProperty.id,
+                name: nextProperty.name,
+                accountId: nextProperty.accountId || null,
+                updatedAt: new Date(),
+            } : null
         }
 
         await userRef.update(updates)
 
-        return NextResponse.json({ success: true })
+        return NextResponse.json({ success: true, activeProperty: updates.activeProperty ?? userData?.activeProperty ?? null })
     } catch (error) {
         console.error("Error deleting property:", error)
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })

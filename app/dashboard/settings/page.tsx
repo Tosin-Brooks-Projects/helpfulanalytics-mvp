@@ -9,10 +9,13 @@ import { Label } from "@/components/ui/label"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { mutate } from "swr"
 
 export default function SettingsPage() {
-    const { properties, selectedProperty, loading: initialLoading, deletionUsage } = useDashboard()
+    const { properties, selectedProperty, setSelectedProperty, loading: initialLoading, deletionUsage } = useDashboard()
     const { toast } = useToast()
+    const router = useRouter()
 
     // Find absolute active property object (safe if properties update)
     const activeProp = properties.find(p => p.id === selectedProperty)
@@ -50,9 +53,8 @@ export default function SettingsPage() {
                 title: "Settings saved",
                 description: "Your property settings have been updated.",
             })
-            // Ideally trigger a context refresh here, simpler is to reload or let SWR handle it if we used it.
-            // For now, simple alert.
-            window.location.reload() // Quick refresh to update context
+            await mutate("/api/user/properties")
+            router.refresh()
         } catch (error) {
             toast({
                 title: "Error",
@@ -69,21 +71,32 @@ export default function SettingsPage() {
 
         setDeleting(true)
         try {
-            const res = await fetch(`/api/user/properties?propertyId=${selectedProperty}`, {
+            const res = await fetch(`/api/user/properties?propertyId=${encodeURIComponent(selectedProperty)}`, {
                 method: "DELETE",
             })
+            const data = await res.json()
 
-            if (!res.ok) throw new Error("Failed to delete property")
+            if (!res.ok) throw new Error(data.error || "Failed to delete property")
 
             toast({
                 title: "Property deleted",
                 description: "The property has been removed from your dashboard.",
             })
-            window.location.href = "/dashboard"
+            await mutate("/api/user/properties")
+            await mutate("/api/analytics/properties")
+            if (data.activeProperty?.id) {
+                setSelectedProperty(data.activeProperty.id)
+                localStorage.setItem("linear_selected_property", data.activeProperty.id)
+            } else {
+                setSelectedProperty("")
+                localStorage.removeItem("linear_selected_property")
+            }
+            router.push("/dashboard")
+            router.refresh()
         } catch (error) {
             toast({
                 title: "Error",
-                description: "Could not delete property.",
+                description: error instanceof Error ? error.message : "Could not delete property.",
                 variant: "destructive"
             })
         } finally {

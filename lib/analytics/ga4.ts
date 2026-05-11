@@ -113,109 +113,110 @@ export async function getMockOverviewComparisonData() {
 // ─── Overview Data ──────────────────────────────────────────────
 
 export async function getOverviewData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 10) {
-    const propertyStr = propertyId.startsWith("properties/") ? propertyId : `properties/${propertyId}`
+    const [
+        totalsResponse,
+        dailyResponse,
+        sourcesResponse,
+        devicesResponse,
+        countriesResponse,
+        pagesResponse,
+    ] = await Promise.all([
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            metrics: [
+                { name: "sessions" },
+                { name: "activeUsers" },
+                { name: "screenPageViews" },
+                { name: "bounceRate" },
+                { name: "averageSessionDuration" },
+                { name: "engagementRate" },
+            ],
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "date" }],
+            metrics: [{ name: "sessions" }, { name: "screenPageViews" }],
+            orderBys: [{ dimension: { dimensionName: "date" } }],
+            limit: 10000,
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "sessionDefaultChannelGroup" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit,
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "deviceCategory" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit: 10,
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "country" }],
+            metrics: [{ name: "sessions" }],
+            orderBys: [{ metric: { metricName: "sessions" }, desc: true }],
+            limit,
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
+            metrics: [{ name: "screenPageViews" }, { name: "activeUsers" }],
+            orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+            limit,
+        }),
+    ])
 
-    const fetchRes = await fetch(
-        `https://analyticsdata.googleapis.com/v1beta/${propertyStr}:runReport`,
-        {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                dateRanges: [{ startDate, endDate }],
-                dimensions: [
-                    { name: "date" },
-                    { name: "sessionDefaultChannelGroup" },
-                    { name: "deviceCategory" },
-                ],
-                metrics: [
-                    { name: "sessions" },
-                    { name: "activeUsers" },
-                    { name: "screenPageViews" },
-                    { name: "bounceRate" },
-                    { name: "averageSessionDuration" },
-                ],
-                limit: 10000,
-            }),
-        }
-    )
+    const totals = totalsResponse.rows?.[0]?.metricValues || []
+    const totalSessions = Number.parseInt(totals[0]?.value || "0", 10)
+    const totalActiveUsers = Number.parseInt(totals[1]?.value || "0", 10)
+    const totalPageViews = Number.parseInt(totals[2]?.value || "0", 10)
+    const avgBounceRate = Number.parseFloat(totals[3]?.value || "0")
+    const avgDuration = Number.parseFloat(totals[4]?.value || "0")
+    const engagementRate = Number.parseFloat(totals[5]?.value || `${1 - avgBounceRate}`)
 
-    if (!fetchRes.ok) {
-        const errorText = await fetchRes.text()
-        throw new Error(`GA4 REST API Error (${fetchRes.status}): ${errorText}`)
-    }
-
-    const response = await fetchRes.json()
-
-    let totalSessions = 0
-    let totalActiveUsers = 0
-    let totalPageViews = 0
-    let totalBounceRate = 0
-    let totalDuration = 0
-
-    const sourcesMap = new Map<string, number>()
-    const devicesMap = new Map<string, number>()
-    const dailySessionsMap = new Map<string, number>()
-    const dailyPageViewsMap = new Map<string, number>()
-
-    const rows = response.rows || []
-
-    for (const row of rows) {
-        const dateStr = row.dimensionValues?.[0]?.value || ""
-        const source = row.dimensionValues?.[1]?.value || "Unknown"
-        const device = row.dimensionValues?.[2]?.value || "Unknown"
-
-        const sessions = Number.parseInt(row.metricValues?.[0]?.value || "0", 10)
-        const activeUsers = Number.parseInt(row.metricValues?.[1]?.value || "0", 10)
-        const pageViews = Number.parseInt(row.metricValues?.[2]?.value || "0", 10)
-        const bounceRate = Number.parseFloat(row.metricValues?.[3]?.value || "0")
-        const duration = Number.parseFloat(row.metricValues?.[4]?.value || "0")
-
-        totalSessions += sessions
-        totalActiveUsers += activeUsers
-        totalPageViews += pageViews
-        if (sessions > 0) {
-            totalBounceRate += bounceRate * sessions
-            totalDuration += duration * sessions
-        }
-
-        // Keep trafficSources in sessions (to match charts + common GA reporting)
-        sourcesMap.set(source, (sourcesMap.get(source) || 0) + sessions)
-        devicesMap.set(device, (devicesMap.get(device) || 0) + sessions)
-        // Use raw GA4 "date" dimension (YYYYMMDD) as key to preserve chronology
-        if (dateStr) {
-            dailySessionsMap.set(dateStr, (dailySessionsMap.get(dateStr) || 0) + sessions)
-            dailyPageViewsMap.set(dateStr, (dailyPageViewsMap.get(dateStr) || 0) + pageViews)
-        }
-    }
-
-    // GA4 bounceRate metric is a ratio (0-1). Keep it as a ratio here.
-    const avgBounceRate = totalSessions > 0 ? (totalBounceRate / totalSessions) : 0
-    const avgDuration = totalSessions > 0 ? (totalDuration / totalSessions) : 0
-
-    const trafficSources = Array.from(sourcesMap.entries())
-        .map(([source, sessions]) => ({ source, sessions }))
-        .sort((a, b) => b.sessions - a.sessions)
-        .slice(0, limit)
-
-    const devices = Array.from(devicesMap.entries())
-        .map(([name, users]) => ({ name, users }))
-        .sort((a, b) => b.users - a.users)
-
-    const sortedDateStrs = Array.from(dailySessionsMap.keys()).sort()
+    const dailyRows = dailyResponse.rows || []
+    const sortedDateStrs = dailyRows.map((row: any) => row.dimensionValues?.[0]?.value || "").filter(Boolean)
     const formatDate = (yyyymmdd: string) =>
         new Date(`${yyyymmdd.substring(0, 4)}-${yyyymmdd.substring(4, 6)}-${yyyymmdd.substring(6, 8)}`).toLocaleDateString(
             "en-US",
             { month: "short", day: "numeric" },
         )
     const dates = sortedDateStrs.map(formatDate)
-    const pageViewsData = sortedDateStrs.map((d) => dailyPageViewsMap.get(d) || 0)
-    const sessionsOverTime = sortedDateStrs.map((d) => ({
-        date: d, // YYYYMMDD
-        sessions: dailySessionsMap.get(d) || 0,
+    const pageViewsData = dailyRows.map((row: any) => Number.parseInt(row.metricValues?.[1]?.value || "0", 10))
+    const sessionsOverTime = dailyRows.map((row: any) => ({
+        date: row.dimensionValues?.[0]?.value || "",
+        sessions: Number.parseInt(row.metricValues?.[0]?.value || "0", 10),
     }))
+
+    const trafficSources = (sourcesResponse.rows || []).map((row: any) => ({
+        source: row.dimensionValues?.[0]?.value || "Unknown",
+        sessions: Number.parseInt(row.metricValues?.[0]?.value || "0", 10),
+    }))
+
+    const topCountries = (countriesResponse.rows || []).map((row: any) => ({
+        country: row.dimensionValues?.[0]?.value || "Unknown",
+        sessions: Number.parseInt(row.metricValues?.[0]?.value || "0", 10),
+    }))
+
+    const deviceBreakdown = (devicesResponse.rows || []).map((row: any, index: number) => ({
+        device: row.dimensionValues?.[0]?.value || "Unknown",
+        sessions: Number.parseInt(row.metricValues?.[0]?.value || "0", 10),
+        fill: `hsl(var(--chart-${(index % 5) + 1}))`,
+    }))
+
+    const topPages = (pagesResponse.rows || []).map((row: any) => {
+        const views = Number.parseInt(row.metricValues?.[0]?.value || "0", 10)
+        return {
+            path: row.dimensionValues?.[0]?.value || "/",
+            title: row.dimensionValues?.[1]?.value || "Untitled",
+            views,
+            users: Number.parseInt(row.metricValues?.[1]?.value || "0", 10),
+            percentage: totalPageViews > 0 ? (views / totalPageViews) * 100 : 0,
+        }
+    })
 
         return {
             metrics: {
@@ -229,27 +230,12 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
                 bounceRateDelta: 0,
                 averageSessionDuration: avgDuration,
                 averageSessionDurationDelta: 0,
-                // Engagement rate is also a ratio (0-1)
-                engagementRate: 1 - avgBounceRate,
+                engagementRate,
             },
             trafficSources,
-            topCountries: [
-                { country: "United States", sessions: Math.floor(totalSessions * 0.4) },
-                { country: "United Kingdom", sessions: Math.floor(totalSessions * 0.2) },
-                { country: "Canada", sessions: Math.floor(totalSessions * 0.15) },
-                { country: "Germany", sessions: Math.floor(totalSessions * 0.1) },
-                { country: "France", sessions: Math.floor(totalSessions * 0.05) },
-            ],
-            deviceBreakdown: [
-                { device: "Mobile", sessions: Math.floor(totalSessions * 0.6), fill: "hsl(var(--chart-1))" },
-                { device: "Desktop", sessions: Math.floor(totalSessions * 0.3), fill: "hsl(var(--chart-2))" },
-                { device: "Tablet", sessions: Math.floor(totalSessions * 0.1), fill: "hsl(var(--chart-3))" },
-            ],
-            topPages: [
-                { title: "Home", path: "/", views: Math.floor(totalPageViews * 0.5), users: Math.floor(totalActiveUsers * 0.5), percentage: 50 },
-                { title: "Pricing", path: "/pricing", views: Math.floor(totalPageViews * 0.3), users: Math.floor(totalActiveUsers * 0.3), percentage: 30 },
-                { title: "Terms", path: "/terms", views: Math.floor(totalPageViews * 0.2), users: Math.floor(totalActiveUsers * 0.2), percentage: 20 },
-            ],
+            topCountries,
+            deviceBreakdown,
+            topPages,
             dates,
             sessionsOverTime,
             pageViewsData,
