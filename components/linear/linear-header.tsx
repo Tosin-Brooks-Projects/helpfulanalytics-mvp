@@ -1,18 +1,17 @@
 "use client"
 
-import { Lock, Plus, Zap, Users, Globe, BarChart3 } from "lucide-react"
+import { Zap, Users, Globe } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { useDashboard } from "@/components/linear/dashboard-context"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePickerWithRange } from "./date-range-picker"
 import { VersusDatePicker } from "./versus-date-picker"
 import { SyncButton } from "./sync-button"
 import { ExportDialog } from "@/components/dashboard/export-dialog"
 import { pricingData } from "@/config/subscriptions"
-import { AddPropertyModal } from "@/components/dashboard/add-property-modal"
 import { EmptyPropertyCTA } from "@/components/dashboard/empty-property-cta"
+import { PropertySwitcher } from "@/components/dashboard/property-switcher"
 import { CommandPalette } from "./command-palette"
 import { cn } from "@/lib/utils"
 import {
@@ -34,64 +33,20 @@ export function LinearHeader() {
         { title: "Sources", href: "/dashboard/sources", icon: Globe },
     ]
 
-    const propertySelector = !loading && properties.length > 0 && (
-        <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-            <SelectTrigger className="h-8 border-white/20 bg-white/50 hover:bg-white/80 text-[11px] font-medium text-zinc-900 focus:ring-0 rounded-md shadow-sm transition-all px-2.5 backdrop-blur-sm">
-                <SelectValue placeholder="Select Property" className="truncate" />
-            </SelectTrigger>
-            <SelectContent className="border-zinc-200 bg-white text-zinc-700 shadow-2xl rounded-lg min-w-[220px]">
-                <div className="p-1">
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-2 py-1.5 block">Properties</span>
-                    {properties.map((prop) => (
-                        <SelectItem
-                            key={prop.id}
-                            value={prop.id}
-                            className="text-[11px] font-medium focus:bg-amber-500/10 focus:text-amber-600 cursor-pointer rounded-md py-1.5 transition-colors"
-                        >
-                            <div className="flex items-center gap-2">
-                                <div className="flex h-4 w-4 items-center justify-center rounded-sm bg-zinc-100 text-[9px] font-bold text-zinc-500">
-                                    {prop.name.charAt(0)}
-                                </div>
-                                {prop.name}
-                            </div>
-                        </SelectItem>
-                    ))}
-                </div>
+    const currentTier = subscription?.tier || "Starter"
+    const tierConfig = pricingData.find(t => t.title.toLowerCase() === currentTier.toLowerCase())
+    const maxProps = propertyLimit ?? tierConfig?.maxProperties ?? 1
+    const freeSlots = Math.max(0, maxProps - properties.length)
+    const showUpgrade = maxProps < 30
 
-                <div className="mt-1 border-t border-zinc-100 p-1 bg-zinc-50/50">
-                    {(() => {
-                        const currentTier = subscription?.tier || "Starter"
-                        const tierConfig = pricingData.find(t => t.title.toLowerCase() === currentTier.toLowerCase())
-                        const maxProps = propertyLimit ?? tierConfig?.maxProperties ?? 1
-                        const usage = properties.length
-                        const freeSlots = Math.max(0, maxProps - usage)
-
-                        const slots = []
-                        if (freeSlots > 0) {
-                            slots.push(
-                                <AddPropertyModal key="add-new">
-                                    <div className="flex w-full cursor-pointer select-none items-center rounded-md py-1.5 px-2 text-[11px] font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors">
-                                        <Plus className="mr-2 h-3.5 w-3.5 text-zinc-400" />
-                                        <span>Add Property</span>
-                                        <span className="ml-auto text-[10px] text-zinc-400 bg-white border border-zinc-200 px-1 rounded">{freeSlots} left</span>
-                                    </div>
-                                </AddPropertyModal>
-                            )
-                        }
-
-                        if (maxProps < 30) {
-                            slots.push(
-                                <Link key="upgrade" href="/dashboard/settings" className="flex w-full cursor-pointer select-none items-center rounded-md py-1.5 px-2 text-[11px] font-medium text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-colors mt-0.5">
-                                    <Lock className="mr-2 h-3.5 w-3.5 text-zinc-400" />
-                                    <span>Upgrade Plan</span>
-                                </Link>
-                            )
-                        }
-                        return slots
-                    })()}
-                </div>
-            </SelectContent>
-        </Select>
+    const propertySwitcher = !loading && properties.length > 0 && (
+        <PropertySwitcher
+            properties={properties}
+            selectedProperty={selectedProperty}
+            setSelectedProperty={setSelectedProperty}
+            freeSlots={freeSlots}
+            showUpgrade={showUpgrade}
+        />
     )
 
     return (
@@ -101,9 +56,9 @@ export function LinearHeader() {
                 <div className="flex h-12 items-center justify-between px-4">
                     {/* Left: Property selector */}
                     <div className="flex-1 min-w-0 mr-3">
-                        {propertySelector ? (
+                        {propertySwitcher ? (
                             <div id="header-property-selector">
-                                {propertySelector}
+                                {propertySwitcher}
                             </div>
                         ) : !loading ? (
                             <EmptyPropertyCTA />
@@ -233,7 +188,7 @@ export function LinearHeader() {
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <div className="relative" id="header-property-selector">
-                                        {propertySelector}
+                                        {propertySwitcher}
                                     </div>
                                 </TooltipTrigger>
                                 <TooltipContent side="bottom" className="text-xs">
