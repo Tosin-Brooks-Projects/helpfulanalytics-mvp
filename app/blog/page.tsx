@@ -3,15 +3,20 @@ import { getAllPosts } from "@/lib/blog"
 import { BlogList } from "@/components/marketing/blog-list"
 import { Navbar } from "@/components/marketing/navbar"
 import { Footer } from "@/components/marketing/footer"
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld"
 
 export const metadata: Metadata = {
-  title: "Analytics Blog for Marketing Agencies | Helpful Analytics",
+  title: "GA4 & Agency Analytics Blog — Helpful Analytics",
   description:
     "GA4 tips, agency reporting guides, and analytics strategies to help marketing agencies save time and deliver better results for clients.",
   openGraph: {
-    title: "Analytics Blog for Marketing Agencies | Helpful Analytics",
+    title: "GA4 & Agency Analytics Blog — Helpful Analytics",
     description:
       "GA4 tips, agency reporting guides, and analytics strategies to help marketing agencies save time and deliver better results for clients.",
+    url: "https://helpfulanalytics.com/blog",
+  },
+  alternates: {
+    canonical: "https://helpfulanalytics.com/blog",
   },
 }
 
@@ -20,6 +25,10 @@ export default function BlogPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
+      <BreadcrumbJsonLd items={[
+        { name: "Home", href: "/" },
+        { name: "Blog", href: "/blog" },
+      ]} />
       <Navbar />
       <main className="flex-1 pt-32 pb-24">
         <div className="mx-auto max-w-6xl px-6 lg:px-8">

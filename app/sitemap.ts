@@ -2,42 +2,55 @@ import { MetadataRoute } from 'next'
 import fs from 'fs'
 import path from 'path'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://helpfulanalytics.com'
+const BASE = 'https://helpfulanalytics.com'
 
+export default function sitemap(): MetadataRoute.Sitemap {
     const staticRoutes: MetadataRoute.Sitemap = [
         {
-            url: baseUrl,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 1,
+            url: BASE,
+            lastModified: new Date('2025-05-01'),
+            changeFrequency: 'weekly',
+            priority: 1.0,
         },
         {
-            url: `${baseUrl}/pricing`,
-            lastModified: new Date(),
+            url: `${BASE}/pricing`,
+            lastModified: new Date('2025-05-01'),
             changeFrequency: 'monthly',
-            priority: 0.8,
+            priority: 0.9,
         },
         {
-            url: `${baseUrl}/about`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.8,
+            url: `${BASE}/blog`,
+            lastModified: new Date('2025-05-01'),
+            changeFrequency: 'weekly',
+            priority: 0.9,
         },
         {
-            url: `${baseUrl}/login`,
-            lastModified: new Date(),
+            url: `${BASE}/about`,
+            lastModified: new Date('2025-04-01'),
+            changeFrequency: 'monthly',
+            priority: 0.7,
+        },
+        {
+            url: `${BASE}/login`,
+            lastModified: new Date('2025-01-01'),
             changeFrequency: 'yearly',
-            priority: 0.5,
+            priority: 0.6,
         },
         {
-            url: `${baseUrl}/blog`,
-            lastModified: new Date(),
-            changeFrequency: 'monthly',
-            priority: 0.8,
+            url: `${BASE}/privacy`,
+            lastModified: new Date('2025-01-01'),
+            changeFrequency: 'yearly',
+            priority: 0.3,
+        },
+        {
+            url: `${BASE}/terms`,
+            lastModified: new Date('2025-01-01'),
+            changeFrequency: 'yearly',
+            priority: 0.3,
         },
     ]
 
+    // Blog posts from seo-docs directory
     const seoDocsDir = path.join(process.cwd(), 'seo-docs')
     let blogRoutes: MetadataRoute.Sitemap = []
 
@@ -46,11 +59,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
         blogRoutes = files
             .filter((file) => file.endsWith('.md'))
             .map((file) => {
-                // Strip leading number prefix (e.g. "01-") and ".md" extension
                 const slug = file.replace(/^\d+-/, '').replace(/\.md$/, '')
+                // Use file mtime for accurate lastModified
+                const stat = fs.statSync(path.join(seoDocsDir, file))
                 return {
-                    url: `${baseUrl}/blog/${slug}`,
-                    lastModified: new Date(),
+                    url: `${BASE}/blog/${slug}`,
+                    lastModified: stat.mtime,
                     changeFrequency: 'monthly' as const,
                     priority: 0.7,
                 }

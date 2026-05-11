@@ -4,6 +4,7 @@ import { getAllPosts, getPostBySlug } from "@/lib/blog"
 import { BlogPostContent } from "@/components/marketing/blog-post"
 import { Navbar } from "@/components/marketing/navbar"
 import { Footer } from "@/components/marketing/footer"
+import { BreadcrumbJsonLd } from "@/components/seo/json-ld"
 
 interface Props {
   params: { slug: string }
@@ -19,14 +20,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {}
 
   return {
-    title: post.title,
+    title: `${post.title} — Helpful Analytics`,
     description: post.description,
+    alternates: {
+      canonical: `https://helpfulanalytics.com/blog/${post.slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.description,
       type: "article",
       publishedTime: post.date,
       url: `https://helpfulanalytics.com/blog/${post.slug}`,
+      siteName: "Helpful Analytics",
     },
     twitter: {
       card: "summary_large_image",
@@ -78,6 +83,11 @@ export default function BlogPostPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <BreadcrumbJsonLd items={[
+        { name: "Home", href: "/" },
+        { name: "Blog", href: "/blog" },
+        { name: post.title, href: `/blog/${post.slug}` },
+      ]} />
       <Navbar />
       <BlogPostContent post={post} relatedPosts={related} />
       <Footer />
