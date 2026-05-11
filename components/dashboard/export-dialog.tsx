@@ -207,10 +207,20 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {children || (
-                    <Button variant="outline" size="sm" className="h-8 gap-2 bg-white border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-900 shadow-sm transition-colors duration-150 text-[11px] font-medium">
-                        <Download className="h-3.5 w-3.5" />
+                    <motion.div
+                        whileHover={{ scale: 1.03 }}
+                        whileTap={{ scale: 0.94 }}
+                        transition={{ duration: 0.14, ease: [0.23, 1, 0.32, 1] }}
+                        className="relative inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-zinc-200 bg-white text-zinc-500 hover:text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50/80 shadow-sm transition-colors duration-150 text-[11px] font-medium cursor-pointer overflow-hidden"
+                    >
+                        <motion.span
+                            whileHover={{ rotate: -12, y: -1 }}
+                            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+                        >
+                            <Download className="h-3.5 w-3.5" />
+                        </motion.span>
                         <span className="hidden sm:inline">Export</span>
-                    </Button>
+                    </motion.div>
                 )}
             </DialogTrigger>
 

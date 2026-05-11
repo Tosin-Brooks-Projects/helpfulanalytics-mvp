@@ -14,6 +14,7 @@ import { EmptyPropertyCTA } from "@/components/dashboard/empty-property-cta"
 import { PropertySwitcher } from "@/components/dashboard/property-switcher"
 import { CommandPalette } from "./command-palette"
 import { cn } from "@/lib/utils"
+import { motion, useReducedMotion } from "framer-motion"
 import {
     Tooltip,
     TooltipContent,
@@ -22,10 +23,13 @@ import {
 } from "@/components/ui/tooltip"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
+const E = [0.23, 1, 0.32, 1] as const
+
 export function LinearHeader() {
     const { data: session } = useSession()
     const { properties, selectedProperty, setSelectedProperty, loading, dateRange, setDateRange, subscription, compareDateRange, setCompareDateRange, propertyLimit } = useDashboard()
     const pathname = usePathname()
+    const reduced = useReducedMotion()
 
     const reportChips = [
         { title: "Devices", href: "/dashboard/devices", icon: Zap },
@@ -71,12 +75,17 @@ export function LinearHeader() {
                     <div className="flex items-center gap-1.5 shrink-0">
                         <div id="header-sync"><SyncButton /></div>
                         <Link href="/dashboard/profile">
-                            <Avatar className="h-7 w-7 border border-zinc-200">
-                                <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} className="object-cover" />
-                                <AvatarFallback className="bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-medium text-[10px]">
-                                    {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
-                                </AvatarFallback>
-                            </Avatar>
+                            <motion.div
+                                whileTap={reduced ? undefined : { scale: 0.92 }}
+                                transition={{ duration: 0.12, ease: E }}
+                            >
+                                <Avatar className="h-7 w-7 border border-zinc-200">
+                                    <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} className="object-cover" />
+                                    <AvatarFallback className="bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-medium text-[10px]">
+                                        {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
+                                    </AvatarFallback>
+                                </Avatar>
+                            </motion.div>
                         </Link>
                     </div>
                 </div>
@@ -104,18 +113,24 @@ export function LinearHeader() {
                                 return (
                                     <Tooltip key={chip.href}>
                                         <TooltipTrigger asChild>
-                                            <Link
-                                                href={chip.href}
-                                                className={cn(
-                                                    "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-medium transition-all duration-200 border border-transparent",
-                                                    active
-                                                        ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
-                                                        : "text-zinc-500 hover:bg-zinc-100/80 hover:text-zinc-900"
-                                                )}
+                                            <motion.div
+                                                whileHover={reduced || active ? undefined : { scale: 1.04, y: -0.5 }}
+                                                whileTap={reduced ? undefined : { scale: 0.95 }}
+                                                transition={{ duration: 0.14, ease: E }}
                                             >
-                                                <chip.icon className={cn("h-3 w-3", active ? "text-amber-500" : "text-zinc-400")} />
-                                                {chip.title}
-                                            </Link>
+                                                <Link
+                                                    href={chip.href}
+                                                    className={cn(
+                                                        "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11px] font-medium transition-colors duration-150 border",
+                                                        active
+                                                            ? "bg-amber-500/10 text-amber-600 border-amber-500/20"
+                                                            : "text-zinc-500 border-transparent hover:bg-zinc-100 hover:text-zinc-900 hover:border-zinc-200"
+                                                    )}
+                                                >
+                                                    <chip.icon className={cn("h-3 w-3 transition-colors duration-150", active ? "text-amber-500" : "text-zinc-400")} />
+                                                    {chip.title}
+                                                </Link>
+                                            </motion.div>
                                         </TooltipTrigger>
                                         <TooltipContent side="bottom" className="text-xs">
                                             View {chip.title} Report
@@ -198,12 +213,18 @@ export function LinearHeader() {
                         )}
 
                         <Link href="/dashboard/profile">
-                            <Avatar className="h-8 w-8 border border-zinc-200 shadow-sm cursor-pointer hover:ring-2 hover:ring-amber-500/20 transition-all">
-                                <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} className="object-cover" />
-                                <AvatarFallback className="bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-medium text-xs">
-                                    {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
-                                </AvatarFallback>
-                            </Avatar>
+                            <motion.div
+                                whileHover={reduced ? undefined : { scale: 1.08 }}
+                                whileTap={reduced ? undefined : { scale: 0.94 }}
+                                transition={{ duration: 0.14, ease: E }}
+                            >
+                                <Avatar className="h-8 w-8 border border-zinc-200 shadow-sm cursor-pointer transition-shadow duration-150 hover:shadow-amber-200/60 hover:border-amber-300/60">
+                                    <AvatarImage src={session?.user?.image || ""} alt={session?.user?.name || "User"} className="object-cover" />
+                                    <AvatarFallback className="bg-gradient-to-tr from-amber-500 to-orange-500 text-white font-medium text-xs">
+                                        {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : "U"}
+                                    </AvatarFallback>
+                                </Avatar>
+                            </motion.div>
                         </Link>
                     </div>
                 </div>
