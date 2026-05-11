@@ -104,6 +104,13 @@ export function LinearHeader() {
                             <div id="header-property-selector">
                                 {propertySelector}
                             </div>
+                        ) : !loading ? (
+                            <AddPropertyModal>
+                                <div className="flex items-center gap-1.5 cursor-pointer rounded-md px-2.5 py-1.5 text-[11px] font-medium text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 transition-colors">
+                                    <Plus className="h-3.5 w-3.5" />
+                                    <span>Add Property</span>
+                                </div>
+                            </AddPropertyModal>
                         ) : (
                             <span className="text-sm font-semibold text-zinc-900 truncate">Analytics</span>
                         )}
@@ -221,6 +228,14 @@ export function LinearHeader() {
                             </TooltipContent>
                         </Tooltip>
 
+                        {!loading && properties.length === 0 && (
+                            <AddPropertyModal>
+                                <div className="flex items-center gap-1.5 cursor-pointer rounded-md px-2.5 py-1.5 text-[11px] font-medium text-amber-600 bg-amber-500/10 hover:bg-amber-500/20 transition-colors" id="header-property-selector">
+                                    <Plus className="h-3.5 w-3.5" />
+                                    <span>Add Property</span>
+                                </div>
+                            </AddPropertyModal>
+                        )}
                         {!loading && properties.length > 0 && (
                             <Tooltip>
                                 <TooltipTrigger asChild>
