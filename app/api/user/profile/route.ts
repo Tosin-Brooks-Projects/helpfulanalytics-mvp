@@ -33,3 +33,48 @@ export async function GET() {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }
+export async function PUT(request: Request) {
+    try {
+        const session = await getServerSession(authOptions)
+        // @ts-ignore
+        const userId = session?.userId
+
+        if (!userId) {
+            return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
+        }
+
+        let body;
+        try {
+            body = await request.json()
+        } catch {
+            return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 })
+        }
+
+        const allowedUpdates = [
+            "emailFrequency",
+            "emailPreferredHour",
+            "emailTimezone",
+            "name"
+        ]
+
+        const updates: Record<string, any> = {}
+        for (const key of allowedUpdates) {
+            if (body[key] !== undefined) {
+                updates[key] = body[key]
+            }
+        }
+
+        if (Object.keys(updates).length === 0) {
+            return NextResponse.json({ error: "No valid update fields provided" }, { status: 400 })
+        }
+
+        updates.updatedAt = new Date()
+
+        await db.collection("users").doc(userId).set(updates, { merge: true })
+
+        return NextResponse.json({ success: true, updates })
+    } catch (error) {
+        console.error("Error updating user profile:", error)
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    }
+}

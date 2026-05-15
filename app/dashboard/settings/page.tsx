@@ -7,9 +7,16 @@ import { LinearGraphCard } from "@/components/linear/linear-graph-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { useToast } from "@/components/ui/use-toast"
-import { Loader2, Plus, Check, Trash2, BarChart2 } from "lucide-react"
+import { Loader2, Plus, Check, Trash2, BarChart2, Mail, Clock, Globe } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { mutate } from "swr"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
@@ -214,6 +221,54 @@ export default function SettingsPage() {
     const [confirmDelete, setConfirmDelete] = useState(false)
     const detailRef = useRef<HTMLDivElement>(null)
 
+    // Email & Preference States
+    const [emailFrequency, setEmailFrequency] = useState<string>("daily")
+    const [preferredHour, setPreferredHour] = useState<string>("18")
+    const [emailTimezone, setEmailTimezone] = useState<string>("America/New_York")
+    const [prefSaving, setPrefSaving] = useState(false)
+    const [prefSuccess, setPrefSuccess] = useState(false)
+
+    // Load user profile preferences on mount
+    useEffect(() => {
+        async function loadPrefs() {
+            try {
+                const res = await fetch("/api/user/profile")
+                if (res.ok) {
+                    const data = await res.json()
+                    setEmailFrequency(data.emailFrequency || "daily")
+                    setPreferredHour(String(data.emailPreferredHour !== undefined ? data.emailPreferredHour : "18"))
+                    setEmailTimezone(data.emailTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York")
+                }
+            } catch (e) {
+                console.error("Failed to load profile prefs", e)
+            }
+        }
+        loadPrefs()
+    }, [])
+
+    const handleSavePrefs = async () => {
+        setPrefSaving(true)
+        try {
+            const res = await fetch("/api/user/profile", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    emailFrequency,
+                    emailPreferredHour: parseInt(preferredHour, 10),
+                    emailTimezone
+                })
+            })
+            if (!res.ok) throw new Error()
+            setPrefSuccess(true)
+            setTimeout(() => setPrefSuccess(false), 2000)
+            toast({ title: "Preferences updated", description: "Your automated summary options have been saved." })
+        } catch {
+            toast({ title: "Error", description: "Failed to save preferences.", variant: "destructive" })
+        } finally {
+            setPrefSaving(false)
+        }
+    }
+
     const managedProp = properties.find((p: any) => p.id === managedId)
 
     // Initialise to currently selected property
@@ -306,6 +361,149 @@ export default function SettingsPage() {
                 <LinearGraphCard title="Billing & Subscription">
                     <BillingSettings />
                 </LinearGraphCard>
+
+                {/* Email Notifications & AI Preferences */}
+                <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">
+                    <div className="px-5 py-4 border-b border-zinc-100 flex justify-between items-center">
+                        <div>
+                            <h3 className="text-sm font-semibold text-zinc-900">Email & AI Summaries</h3>
+                            <p className="text-[11px] text-zinc-400 mt-0.5">Control how often Kea emails you dynamic performance summaries.</p>
+                        </div>
+                        <Mail className="h-4 w-4 text-zinc-400" />
+                    </div>
+
+                    <div className="p-5 space-y-6">
+                        {/* Frequency selection */}
+                        <div className="space-y-2">
+                            <Label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                                <Mail className="h-3 w-3 text-amber-500" /> Reporting Frequency
+                            </Label>
+                            <div className="flex flex-wrap gap-2">
+                                {[
+                                    { value: "daily", label: "Daily Snapshot" },
+                                    { value: "weekly", label: "Weekly Wrap-up" },
+                                    { value: "never", label: "Paused / Off" }
+                                ].map((opt) => {
+                                    const isActive = emailFrequency === opt.value
+                                    return (
+                                        <motion.button
+                                            key={opt.value}
+                                            onClick={() => setEmailFrequency(opt.value)}
+                                            type="button"
+                                            className={cn(
+                                                "px-3.5 py-2 rounded-lg border text-[12px] font-medium transition-all cursor-pointer flex-1 sm:flex-none text-center min-w-[120px]",
+                                                isActive 
+                                                    ? "bg-amber-50 border-amber-300 text-amber-700 shadow-sm" 
+                                                    : "bg-zinc-50/50 border-zinc-200 text-zinc-600 hover:bg-zinc-100/50"
+                                            )}
+                                            whileTap={{ scale: 0.97 }}
+                                        >
+                                            {opt.label}
+                                        </motion.button>
+                                    )
+                                })}
+                            </div>
+                            <p className="text-[11px] text-zinc-400 leading-relaxed">
+                                Summarizes yesterday's statistics across all your connected GA4 properties in Kea's witty personality.
+                            </p>
+                        </div>
+
+                        {/* Time configurations */}
+                        <div className="grid sm:grid-cols-2 gap-5 pt-2">
+                            {/* Preferred delivery window */}
+                            <div className="space-y-2">
+                                <Label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                                    <Clock className="h-3 w-3" /> Delivery Window
+                                </Label>
+                                <Select 
+                                    disabled={emailFrequency === "never"}
+                                    value={preferredHour} 
+                                    onValueChange={setPreferredHour}
+                                >
+                                    <SelectTrigger className="h-9 text-[13px] bg-zinc-50 border-zinc-200 text-zinc-900 focus:border-amber-400 focus:ring-amber-400 rounded-lg">
+                                        <SelectValue placeholder="Select time..." />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white border border-zinc-200 shadow-lg rounded-xl">
+                                        {[
+                                            { h: "6", l: "6:00 AM (Morning Start)" },
+                                            { h: "8", l: "8:00 AM" },
+                                            { h: "12", l: "12:00 PM (Midday)" },
+                                            { h: "17", l: "5:00 PM" },
+                                            { h: "18", l: "6:00 PM (Evening Summary)" },
+                                            { h: "19", l: "7:00 PM" },
+                                            { h: "20", l: "8:00 PM" },
+                                            { h: "21", l: "9:00 PM" },
+                                            { h: "22", l: "10:00 PM" }
+                                        ].map((time) => (
+                                            <SelectItem 
+                                                key={time.h} 
+                                                value={time.h}
+                                                className="text-[13px] text-zinc-700 focus:bg-zinc-50 focus:text-amber-700 cursor-pointer hover:bg-zinc-50"
+                                            >
+                                                {time.l}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/* Timezone */}
+                            <div className="space-y-2">
+                                <Label className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider flex items-center gap-1.5">
+                                    <Globe className="h-3 w-3" /> Target Timezone
+                                </Label>
+                                <div className="relative flex items-center">
+                                    <Input
+                                        disabled={emailFrequency === "never"}
+                                        value={emailTimezone}
+                                        onChange={(e) => setEmailTimezone(e.target.value)}
+                                        className="h-9 text-[13px] bg-zinc-50 border-zinc-200 text-zinc-900 focus:border-amber-400 focus:ring-amber-400 rounded-lg pr-16"
+                                        placeholder="e.g., Europe/London"
+                                    />
+                                    <button 
+                                        type="button"
+                                        onClick={() => setEmailTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone || "America/New_York")}
+                                        className="absolute right-2 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-400 hover:text-amber-600 border border-zinc-200 rounded transition-colors bg-white shadow-xs cursor-pointer"
+                                    >
+                                        Auto
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Action Footer */}
+                        <div className="pt-2 border-t border-zinc-50 flex items-center justify-between">
+                            <p className="text-[10px] text-zinc-400 font-mono tracking-tight">
+                                {emailFrequency === 'never' 
+                                    ? "Reporting is fully disabled." 
+                                    : `Dispatched at local hour ${preferredHour}:00 (${emailTimezone})`
+                                }
+                            </p>
+
+                            <motion.button
+                                onClick={handleSavePrefs}
+                                disabled={prefSaving}
+                                className="flex items-center gap-2 rounded-lg px-4 py-2 text-[12px] font-medium bg-zinc-900 hover:bg-zinc-800 text-white shadow-sm transition-colors disabled:opacity-60 cursor-pointer"
+                                whileTap={{ scale: 0.97 }}
+                            >
+                                <AnimatePresence mode="wait">
+                                    {prefSaving ? (
+                                        <motion.span key="spin" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        </motion.span>
+                                    ) : prefSuccess ? (
+                                        <motion.span key="check" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                            <SaveCheckmark />
+                                        </motion.span>
+                                    ) : null}
+                                </AnimatePresence>
+                                {prefSuccess ? "Preferences Saved" : "Update Preferences"}
+                            </motion.button>
+                        </div>
+
+                    </div>
+                </div>
+
 
                 {/* Properties section */}
                 <div className="rounded-xl border border-zinc-200 bg-white shadow-sm overflow-hidden">

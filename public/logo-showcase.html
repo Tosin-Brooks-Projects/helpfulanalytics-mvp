@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Logo Animation Showcase</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0f;font-family:system-ui,sans-serif;color:#fff;min-height:100vh;overflow-x:hidden}
+
+.tabs{display:flex;gap:8px;padding:24px 16px;justify-content:center;flex-wrap:wrap}
+.tab{padding:10px 18px;border:1px solid rgba(255,255,255,0.15);border-radius:100px;
+  background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;font-size:13px;
+  transition:all .25s;white-space:nowrap}
+.tab.active,.tab:hover{border-color:#FF7917;color:#FF7917}
+
+.scene{display:none;width:100%;height:calc(100vh - 110px);
+  align-items:center;justify-content:center;flex-direction:column;gap:0}
+.scene.active{display:flex}
+
+.caption{margin-top:32px;font-size:12px;letter-spacing:.18em;
+  text-transform:uppercase;color:rgba(255,255,255,0.35);opacity:0}
+.replay-btn{margin-top:24px;padding:10px 28px;border:1px solid rgba(255,255,255,0.2);
+  border-radius:100px;background:transparent;color:rgba(255,255,255,0.5);
+  cursor:pointer;font-size:13px;transition:all .2s}
+.replay-btn:hover{border-color:#FF7917;color:#FF7917}
+
+/* ─── SVG base ─── */
+svg{overflow:visible}
+
+
+/* ══ 1. FORGE ══════════════════════════════════════════ */
+#forge{background:#060610}
+#forge .logo{width:200px;height:200px}
+/* Stroke draw animation via dasharray — no plugin needed */
+#forge svg path{
+  fill:transparent;
+  stroke-width:1.5;
+  stroke-dasharray:300;
+  stroke-dashoffset:300;
+  transition:none;
+}
+#forge svg path.drawn{
+  animation:draw-path .55s cubic-bezier(.4,0,.2,1) forwards;
+}
+#forge svg path.filled{
+  fill:var(--fill);stroke:none;
+  animation:none;stroke-dashoffset:0;
+}
+@keyframes draw-path{
+  to{stroke-dashoffset:0}
+}
+
+
+/* ══ 2. GLASS ══════════════════════════════════════════ */
+#glass{background:linear-gradient(135deg,#1a0533,#0d1f3c 50%,#0a1a12)}
+.grain-bg{position:absolute;inset:0;opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px;pointer-events:none}
+.glass-card{
+  background:rgba(255,255,255,0.07);backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.18);border-radius:28px;padding:48px;
+  box-shadow:0 8px 80px rgba(169,146,219,.15),inset 0 1px 0 rgba(255,255,255,.2);
+  position:relative;z-index:1;
+}
+#glass .logo{width:160px;height:160px}
+#glass svg path{opacity:0;transform-box:fill-box;transform-origin:center}
+
+
+/* ══ 3. SEARCHLIGHT ════════════════════════════════════ */
+#search{background:#000}
+#search .logo{width:190px;height:190px;position:relative;z-index:2}
+#search svg path{fill:#fff;opacity:.07}
+.sweep-wrap{position:relative;width:420px;height:320px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center}
+.sweep{position:absolute;top:0;left:-50%;width:50%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);
+  pointer-events:none;z-index:3}
+.vol{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:320px;height:320px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.07) 0%,transparent 65%);
+  opacity:0;pointer-events:none;z-index:1}
+
+
+/* ══ 4. LIQUID ═════════════════════════════════════════ */
+#liquid{background:radial-gradient(ellipse at 50% 60%,#0d1520,#040609)}
+#liquid .logo{width:190px;height:190px;position:relative;z-index:2;filter:url(#goo)}
+#liquid svg path{opacity:0;transform-box:fill-box;transform-origin:center;transform:scale(0)}
+.drop-wrap{position:absolute;width:0;height:0;top:50%;left:50%}
+.drop{position:absolute;width:18px;height:18px;border-radius:50%;opacity:0;
+  transform:translate(-50%,-50%)}
+
+@media(prefers-reduced-motion:reduce){
+  #forge svg path{stroke-dashoffset:0!important;fill:var(--fill)!important;stroke:none!important}
+  #glass svg path,#liquid svg path{opacity:1!important;transform:none!important}
+  #search svg path{opacity:.9!important}
+}
+</style>
+</head>
+<body>
+
+<!-- Goo filter for liquid -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <filter id="goo" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix"
+        values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo"/>
+      <feComposite in="SourceGraphic" in2="goo" operator="atop"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="tabs">
+  <button class="tab active" id="tab-forge" onclick="switchTab('forge')">⚡ Digital Forge</button>
+  <button class="tab" id="tab-glass" onclick="switchTab('glass')">🪟 Glassmorphic</button>
+  <button class="tab" id="tab-search" onclick="switchTab('search')">🔦 Searchlight</button>
+  <button class="tab" id="tab-liquid" onclick="switchTab('liquid')">💧 Liquid Flow</button>
+</div>
+
+
+<!-- ══ 1. FORGE ══ -->
+<div class="scene active" id="forge">
+  <div class="logo">
+    <svg viewBox="0 0 49 48" fill="none">
+      <path id="fp1" style="--fill:#442781;stroke:#8866ff"
+        d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z"/>
+      <path id="fp2" style="--fill:#61459C;stroke:#9977ee"
+        d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z"/>
+      <path id="fp3" style="--fill:#A992DB;stroke:#ccaaff"
+        d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z"/>
+      <path id="fp4" style="--fill:#FF7917;stroke:#ffaa55"
+        d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z"/>
+    </svg>
+  </div>
+  <p class="caption" id="forge-cap">Digital Forge — Laser Print</p>
+  <button class="replay-btn" onclick="runForge()">↺ Replay</button>
+</div>
+
+
+<!-- ══ 2. GLASS ══ -->
+<div class="scene" id="glass">
+  <div class="grain-bg"></div>
+  <div class="glass-card" id="glassCard">
+    <div class="logo">
+      <svg viewBox="0 0 49 48" fill="none">
+        <path class="gp" fill="#442781" d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z"/>
+        <path class="gp" fill="#61459C" d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z"/>
+        <path class="gp" fill="#A992DB" d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z"/>
+        <path class="gp" fill="#FF7917" d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z"/>
+      </svg>
+    </div>
+  </div>
+  <p class="caption" id="glass-cap">Glassmorphic — Spring Physics</p>
+  <button class="replay-btn" onclick="runGlass()">↺ Replay</button>
+</div>
+
+
+<!-- ══ 3. SEARCHLIGHT ══ -->
+<div class="scene" id="search">
+  <div class="sweep-wrap">
+    <div class="sweep" id="sweep"></div>
+    <div class="vol" id="vol"></div>
+    <div class="logo">
+      <svg viewBox="0 0 49 48" fill="none">
+        <path class="sp" d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z"/>
+        <path class="sp" d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z"/>
+        <path class="sp" d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z"/>
+        <path class="sp" d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z"/>
+      </svg>
+    </div>
+  </div>
+  <p class="caption" id="search-cap">Searchlight — Volumetric Sweep</p>
+  <button class="replay-btn" onclick="runSearch()">↺ Replay</button>
+</div>
+
+
+<!-- ══ 4. LIQUID ══ -->
+<div class="scene" id="liquid">
+  <div style="position:relative;width:280px;height:280px;display:flex;align-items:center;justify-content:center">
+    <div class="drop-wrap" id="drops">
+      <div class="drop" id="d1" style="background:radial-gradient(circle,#ff9944,#FF7917)"></div>
+      <div class="drop" id="d2" style="background:radial-gradient(circle,#ccaaff,#A992DB)"></div>
+      <div class="drop" id="d3" style="background:radial-gradient(circle,#9977cc,#61459C)"></div>
+      <div class="drop" id="d4" style="background:radial-gradient(circle,#6644aa,#442781)"></div>
+    </div>
+    <div class="logo" id="liqLogo">
+      <svg viewBox="0 0 49 48" fill="none">
+        <path class="lp" fill="#442781" d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z"/>
+        <path class="lp" fill="#61459C" d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z"/>
+        <path class="lp" fill="#A992DB" d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z"/>
+        <path class="lp" fill="#FF7917" d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z"/>
+      </svg>
+    </div>
+  </div>
+  <p class="caption" id="liquid-cap">Liquid Mercury — Organic Flow</p>
+  <button class="replay-btn" onclick="runLiquid()">↺ Replay</button>
+</div>
+
+
+<script>
+/* ── Tab switcher ───────────────────────────────────── */
+const runners = {forge:runForge,glass:runGlass,search:runSearch,liquid:runLiquid};
+function switchTab(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.getElementById(id).classList.add('active');
+  runners[id]();
+}
+
+
+/* ══ 1. DIGITAL FORGE ═══════════════════════════════════
+   Uses CSS stroke-dashoffset animation — no paid plugin
+══════════════════════════════════════════════════════════ */
+function runForge(){
+  const paths = ['#fp1','#fp2','#fp3','#fp4'];
+  const cap = document.getElementById('forge-cap');
+
+  // Reset
+  paths.forEach(sel=>{
+    const el = document.querySelector(sel);
+    el.classList.remove('drawn','filled');
+    el.style.strokeDashoffset = '300';
+    el.style.fill = 'transparent';
+  });
+  gsap.set(cap,{opacity:0,y:8});
+
+  const tl = gsap.timeline();
+
+  // Stagger draw each path via GSAP + CSS keyframe trigger
+  paths.forEach((sel,i)=>{
+    tl.call(()=>{
+      const el = document.querySelector(sel);
+      el.style.animation = `draw-path .55s cubic-bezier(.4,0,.2,1) ${i*0.18}s forwards`;
+      el.classList.add('drawn');
+    }, null, i * 0.18);
+  });
+
+  // After draw — glitch flash then solidify
+  tl.call(()=>{
+    const logo = document.querySelector('#forge .logo');
+    gsap.to(logo,{filter:'drop-shadow(0 0 12px #00bfff) drop-shadow(0 0 3px #fff)',
+      duration:.08,yoyo:true,repeat:5,ease:'none',onComplete:()=>{
+        // Solidify
+        paths.forEach((sel,i)=>{
+          setTimeout(()=>{
+            const el = document.querySelector(sel);
+            el.style.animation = 'none';
+            el.style.fill = getComputedStyle(el).getPropertyValue('--fill').trim();
+            el.style.stroke = 'none';
+            el.style.strokeDashoffset = '0';
+          }, i * 60);
+        });
+        // Final glow
+        setTimeout(()=>{
+          gsap.to(logo,{filter:'drop-shadow(0 0 24px #44278166)',duration:.6,ease:'power2.out'});
+          gsap.to(cap,{opacity:1,y:0,duration:.4,ease:'power2.out'});
+        }, 350);
+      }
+    });
+  }, null, '+=1.0');
+}
+
+
+/* ══ 2. GLASSMORPHIC ════════════════════════════════════ */
+function runGlass(){
+  const card = document.getElementById('glassCard');
+  const parts = document.querySelectorAll('#glass .gp');
+  const cap = document.getElementById('glass-cap');
+
+  gsap.set(card,{opacity:0,y:56,rotateX:14,scale:.88,transformPerspective:900});
+  gsap.set(parts,{opacity:0,y:18,scale:.82,transformBox:'fill-box',transformOrigin:'center'});
+  gsap.set(cap,{opacity:0,y:10});
+
+  gsap.timeline()
+    .to(card,{opacity:1,y:0,rotateX:0,scale:1,duration:.75,ease:'back.out(1.6)'})
+    .to(parts,{opacity:1,y:0,scale:1,duration:.55,stagger:.09,ease:'back.out(2.2)'},'-=0.35')
+    .to(cap,{opacity:1,y:0,duration:.4,ease:'power2.out'},'-=0.1')
+    .to(card,{
+      boxShadow:'0 8px 80px rgba(169,146,219,.35),inset 0 1px 0 rgba(255,255,255,.3)',
+      duration:.9,yoyo:true,repeat:1,ease:'sine.inOut'
+    });
+}
+
+
+/* ══ 3. SEARCHLIGHT ════════════════════════════════════ */
+function runSearch(){
+  const sweep = document.getElementById('sweep');
+  const vol   = document.getElementById('vol');
+  const paths = document.querySelectorAll('#search .sp');
+  const cap   = document.getElementById('search-cap');
+
+  gsap.set(sweep,{x:'-50%'});
+  gsap.set(vol,{opacity:0,scale:.85});
+  gsap.set(paths,{opacity:.07,fill:'#fff'});
+  gsap.set(cap,{opacity:0});
+
+  gsap.timeline()
+    .to(sweep,{x:'150%',duration:1.5,ease:'power1.inOut'})
+    .to(paths,{opacity:.9,filter:'drop-shadow(0 0 2px #fff)',duration:.35,stagger:.06,ease:'power2.out'},0.45)
+    .to(vol,{opacity:1,scale:1.1,duration:.3,ease:'power2.out'},0.75)
+    .to(vol,{opacity:0,scale:1.4,duration:.55,ease:'power2.in'},1.0)
+    .to(paths,{opacity:.78,filter:'none',duration:.5,ease:'power2.inOut'},1.2)
+    .to(cap,{opacity:1,duration:.4,ease:'power2.out'},1.5)
+    .to(paths,{opacity:1,duration:.15,yoyo:true,repeat:1,ease:'sine.inOut'},1.7);
+}
+
+
+/* ══ 4. LIQUID FLOW ════════════════════════════════════ */
+function runLiquid(){
+  const logo  = document.getElementById('liqLogo');
+  const parts = document.querySelectorAll('#liquid .lp');
+  const cap   = document.getElementById('liquid-cap');
+  const dropEls = ['#d1','#d2','#d3','#d4'].map(s=>document.querySelector(s));
+
+  const startPos = [{x:-90,y:-85},{x:85,y:-70},{x:-75,y:80},{x:88,y:78}];
+
+  gsap.set(logo,{opacity:1});
+  gsap.set(parts,{opacity:0,scale:0,transformBox:'fill-box',transformOrigin:'center'});
+  gsap.set(cap,{opacity:0,y:8});
+  dropEls.forEach((d,i)=>{
+    gsap.set(d,{x:startPos[i].x,y:startPos[i].y,opacity:0,scale:1,
+      width:20,height:20,borderRadius:'50%',
+      position:'absolute',top:0,left:0,marginTop:-10,marginLeft:-10});
+  });
+
+  const tl = gsap.timeline();
+  tl.to(dropEls,{opacity:.9,duration:.25,stagger:.08,ease:'power2.out'});
+  dropEls.forEach((d,i)=>{
+    tl.to(d,{x:0,y:0,duration:.85,ease:'elastic.out(1,.65)'},0.25+i*0.06);
+  });
+  tl.to(dropEls,{scale:7,opacity:0,duration:.45,stagger:.03,ease:'power3.in'},1.05);
+  tl.to(parts,{opacity:1,scale:1,duration:.6,stagger:.07,ease:'elastic.out(1.3,.55)'},1.25);
+  tl.to(parts,{scale:1.05,duration:.14,yoyo:true,repeat:1,stagger:.04,ease:'sine.inOut'},2.0);
+  tl.to(cap,{opacity:1,y:0,duration:.4},2.2);
+}
+
+
+/* Auto-play on load */
+window.addEventListener('load', ()=> runForge());
+</script>
+</body>
+</html>

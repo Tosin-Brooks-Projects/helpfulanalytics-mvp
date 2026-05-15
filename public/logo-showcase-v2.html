@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Logo animations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+:root{
+  --orange:#FF7917;--purple-dark:#442781;--purple-mid:#61459C;--purple-light:#A992DB;
+  --bg:#08080f;--surface:rgba(255,255,255,0.04);--border:rgba(255,255,255,0.08);
+  --text-primary:rgba(255,255,255,0.92);--text-secondary:rgba(255,255,255,0.38);
+  --radius-sm:6px;--radius-md:12px;--radius-lg:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);font-family:'Inter',system-ui,sans-serif;color:var(--text-primary);overflow:hidden}
+
+/* dot-grid signature detail */
+body::before{content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,0.06) 1px,transparent 1px);
+  background-size:28px 28px;pointer-events:none;z-index:0}
+
+/* ── Nav ── */
+nav{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo svg{width:20px;height:20px}
+.nav-title{font-size:13px;font-weight:500;color:var(--text-secondary);letter-spacing:.01em}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:3px}
+.tab{padding:7px 16px;border:none;background:none;color:var(--text-secondary);
+  font-family:inherit;font-size:13px;font-weight:450;border-radius:7px;cursor:pointer;
+  transition:color .15s,background .15s;white-space:nowrap}
+.tab.active{background:rgba(255,255,255,0.07);color:var(--text-primary)}
+.tab:hover:not(.active){color:rgba(255,255,255,.65)}
+
+/* replay */
+.replay{background:none;border:1px solid var(--border);border-radius:100px;
+  padding:8px 22px;font-family:inherit;font-size:12px;font-weight:500;
+  color:var(--text-secondary);cursor:pointer;letter-spacing:.03em;
+  transition:border-color .2s,color .2s}
+.replay:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ── Scenes ── */
+main{position:relative;z-index:1;height:calc(100vh - 61px);display:grid;place-items:center}
+.scene{display:none;flex-direction:column;align-items:center;gap:0}
+.scene.active{display:flex}
+
+.scene-label{margin-top:40px;text-align:center}
+.scene-label h2{font-size:15px;font-weight:500;letter-spacing:-.01em;color:var(--text-primary);
+  opacity:0;transform:translateY(6px)}
+.scene-label p{font-size:12px;font-weight:400;color:var(--text-secondary);
+  margin-top:4px;letter-spacing:.01em;opacity:0;transform:translateY(4px)}
+.scene-actions{margin-top:24px;opacity:0}
+
+svg{overflow:visible}
+
+/* ══ 1 FORGE ══ */
+#forge{background:transparent}
+#forge .logo{width:180px;height:180px;display:block}
+#forge svg{width:100%;height:100%;display:block}
+#forge svg path{
+  fill:none;
+  stroke-width:1.4;
+  stroke-dasharray:300;
+  stroke-dashoffset:300;
+  transition:fill .3s ease;
+}
+#forge svg path.draw{
+  animation:fgDraw .6s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes fgDraw{from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
+
+/* ══ 2 GLASS ══ */
+#glass-card{
+  background:rgba(255,255,255,0.055);backdrop-filter:blur(28px) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.12);border-radius:var(--radius-lg);
+  padding:52px;position:relative;overflow:hidden;
+  box-shadow:0 2px 0 0 rgba(255,255,255,0.06) inset,0 24px 80px rgba(68,39,129,.12)}
+#glass-card::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 60%);
+  pointer-events:none;border-radius:inherit}
+#glass .logo{width:160px;height:160px}
+#glass svg path{opacity:0;transform-box:fill-box;transform-origin:center}
+
+/* ══ 3 SEARCH ══ */
+#search-wrap{position:relative;width:360px;height:260px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;border-radius:var(--radius-md);
+  background:rgba(0,0,0,.6)}
+#search .logo{width:170px;height:170px;position:relative;z-index:2}
+#search svg path{fill:#fff;opacity:.07}
+#sweep{position:absolute;top:0;left:-55%;width:55%;height:100%;z-index:3;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.82),rgba(255,255,255,.95),rgba(255,255,255,.82),transparent)}
+#vol{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:280px;height:280px;border-radius:50%;opacity:0;z-index:1;pointer-events:none;
+  background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 65%)}
+
+/* ══ 4 LIQUID ══ */
+#liquid-wrap{position:relative;width:260px;height:260px;display:flex;align-items:center;justify-content:center}
+.drop-layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;filter:url(#goo);z-index:1;pointer-events:none}
+#liquid .logo{width:180px;height:180px;position:relative;z-index:2;overflow:visible}
+#liquid svg{overflow:visible}
+#liquid svg path{opacity:0;transform-box:fill-box;transform-origin:center}
+.drop{position:absolute;width:16px;height:16px;border-radius:50%;opacity:0}
+
+@media(prefers-reduced-motion:reduce){
+  .scene-label h2,.scene-label p,.scene-actions{opacity:1!important;transform:none!important}
+  #forge svg path,#glass svg path,#liquid svg path{opacity:1!important;transform:none!important;
+    fill:var(--f)!important;stroke:none!important;stroke-dashoffset:0!important}
+  #search svg path{opacity:.85!important}
+}
+</style>
+</head>
+<body>
+<!-- goo filter -->
+<svg width="0" height="0" style="position:absolute">
+<defs><filter id="goo" x="-40%" y="-40%" width="180%" height="180%">
+  <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/>
+  <feColorMatrix in="b" mode="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 19 -8" result="g"/>
+  <feComposite in="SourceGraphic" in2="g" operator="atop"/>
+</filter></defs></svg>
+
+<nav>
+  <div class="nav-logo">
+    <svg viewBox="0 0 49 48" fill="none"><path d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z" fill="#442781"/><path d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z" fill="#61459C"/><path d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z" fill="#A992DB"/><path d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z" fill="#FF7917"/></svg>
+    <span class="nav-title">Animation showcase</span>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="go('forge',this)">Digital forge</button>
+    <button class="tab" onclick="go('glass',this)">Glassmorphic</button>
+    <button class="tab" onclick="go('search',this)">Searchlight</button>
+    <button class="tab" onclick="go('liquid',this)">Liquid flow</button>
+  </div>
+</nav>
+
+<main>
+<!-- 1 FORGE -->
+<div class="scene active" id="forge">
+  <div class="logo"><svg viewBox="0 0 49 48" fill="none">
+    <path id="fp1" style="--f:#442781" stroke="#9966ff" d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z"/>
+    <path id="fp2" style="--f:#61459C" stroke="#8855ee" d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z"/>
+    <path id="fp3" style="--f:#A992DB" stroke="#ccaaff" d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z"/>
+    <path id="fp4" style="--f:#FF7917" stroke="#FF7917" d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z"/>
+  </svg></div>
+  <div class="scene-label">
+    <h2>Digital forge</h2>
+    <p>Laser-traced paths — glitch — solidify</p>
+  </div>
+  <div class="scene-actions"><button class="replay" onclick="runForge()">Replay</button></div>
+</div>
+
+<!-- 2 GLASS -->
+<div class="scene" id="glass">
+  <div id="glass-card">
+    <div class="logo"><svg viewBox="0 0 49 48" fill="none">
+      <path class="gp" fill="#442781" d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z"/>
+      <path class="gp" fill="#61459C" d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z"/>
+      <path class="gp" fill="#A992DB" d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z"/>
+      <path class="gp" fill="#FF7917" d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z"/>
+    </svg></div>
+  </div>
+  <div class="scene-label">
+    <h2>Glassmorphic reveal</h2>
+    <p>Spring physics — layered depth — refraction shimmer</p>
+  </div>
+  <div class="scene-actions"><button class="replay" onclick="runGlass()">Replay</button></div>
+</div>
+
+<!-- 3 SEARCH -->
+<div class="scene" id="search">
+  <div id="search-wrap">
+    <div id="sweep"></div>
+    <div id="vol"></div>
+    <div class="logo"><svg viewBox="0 0 49 48" fill="none">
+      <path class="sp" d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z"/>
+      <path class="sp" d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z"/>
+      <path class="sp" d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z"/>
+      <path class="sp" d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z"/>
+    </svg></div>
+  </div>
+  <div class="scene-label">
+    <h2>Searchlight</h2>
+    <p>Volumetric sweep — metallic reveal — single pulse</p>
+  </div>
+  <div class="scene-actions"><button class="replay" onclick="runSearch()">Replay</button></div>
+</div>
+
+<!-- 4 LIQUID -->
+<div class="scene" id="liquid">
+  <div id="liquid-wrap">
+    <div class="drop-layer">
+      <div class="drop" id="d1" style="background:radial-gradient(circle,#ff9944,#FF7917)"></div>
+      <div class="drop" id="d2" style="background:radial-gradient(circle,#ccaaff,#A992DB)"></div>
+      <div class="drop" id="d3" style="background:radial-gradient(circle,#9977cc,#61459C)"></div>
+      <div class="drop" id="d4" style="background:radial-gradient(circle,#6644aa,#442781)"></div>
+    </div>
+    <div class="logo"><svg viewBox="0 0 49 48" fill="none">
+      <path class="lp" fill="#442781" d="M2.98 29.29C2.98 27.03 3.43 24.79 4.29 22.7C5.16 20.62 6.43 18.72 8.03 17.12C9.62 15.52 11.52 14.26 13.61 13.39C15.7 12.53 17.93 12.08 20.19 12.08V29.29H2.98Z"/>
+      <path class="lp" fill="#61459C" d="M2.98 29.29C2.98 31.55 3.43 33.79 4.29 35.88C5.16 37.96 6.43 39.86 8.03 41.46C9.62 43.06 11.52 44.33 13.61 45.19C15.7 46.06 17.93 46.5 20.19 46.5V29.29H2.98Z"/>
+      <path class="lp" fill="#A992DB" d="M37.41 29.29C37.41 31.55 36.96 33.79 36.1 35.88C35.23 37.96 33.96 39.86 32.36 41.46C30.77 43.06 28.87 44.33 26.78 45.19C24.69 46.06 22.46 46.5 20.2 46.5V29.29H37.41Z"/>
+      <path class="lp" fill="#FF7917" d="M48.02 14.42C48.02 21.56 42.23 27.34 35.09 27.34H22.17V14.42C22.17 7.29 27.96 1.5 35.09 1.5C42.23 1.5 48.02 7.29 48.02 14.42Z"/>
+    </svg></div>
+  </div>
+  <div class="scene-label">
+    <h2>Liquid flow</h2>
+    <p>Droplets converge — goo merge — organic solidify</p>
+  </div>
+  <div class="scene-actions"><button class="replay" onclick="runLiquid()">Replay</button></div>
+</div>
+</main>
+
+<script>
+const E=id=>document.getElementById(id);
+const Q=(s,c=document)=>c.querySelector(s);
+const QA=(s,c=document)=>[...c.querySelectorAll(s)];
+
+function showLabel(scene){
+  const h=Q('.scene-label h2',scene),p=Q('.scene-label p',scene),a=Q('.scene-actions',scene);
+  gsap.to([h,p],{opacity:1,y:0,duration:.4,stagger:.07,ease:'power2.out',delay:.05});
+  gsap.to(a,{opacity:1,duration:.3,delay:.35});
+}
+function resetLabel(scene){
+  const h=Q('.scene-label h2',scene),p=Q('.scene-label p',scene),a=Q('.scene-actions',scene);
+  gsap.set([h,p],{opacity:0,y:6});gsap.set(a,{opacity:0});
+}
+
+function go(id,btn){
+  QA('.tab').forEach(t=>t.classList.remove('active'));
+  QA('.scene').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  const scene=E(id); scene.classList.add('active');
+  ({forge:runForge,glass:runGlass,search:runSearch,liquid:runLiquid})[id]();
+}
+
+/* ── 1 FORGE ── */
+const FORGE_DATA=[
+  {id:'fp1',fill:'#442781',stroke:'#9966ff'},
+  {id:'fp2',fill:'#61459C',stroke:'#8855ee'},
+  {id:'fp3',fill:'#A992DB',stroke:'#ccaaff'},
+  {id:'fp4',fill:'#FF7917',stroke:'#FF7917'},
+];
+function runForge(){
+  const scene=E('forge');
+  const logo=Q('#forge .logo');
+  resetLabel(scene);
+  logo.style.filter='';
+  logo.style.transform='';
+
+  // Reset all paths
+  FORGE_DATA.forEach(d=>{
+    const el=E(d.id);
+    el.classList.remove('draw');
+    el.style.fill='none';
+    el.style.stroke=d.stroke;
+    el.style.strokeWidth='1.4';
+    el.style.strokeDasharray='300';
+    el.style.strokeDashoffset='300';
+    el.style.filter='';
+    void el.getBoundingClientRect(); // force reflow
+  });
+
+  let drawn=0;
+  FORGE_DATA.forEach((d,i)=>{
+    const el=E(d.id);
+    setTimeout(()=>{
+      el.style.filter=`drop-shadow(0 0 5px ${d.stroke})`;
+      el.style.animationDelay='0ms';
+      el.classList.add('draw');
+      // after animation done
+      setTimeout(()=>{ if(++drawn===FORGE_DATA.length) startGlitch(); },620);
+    },i*220);
+  });
+
+  function startGlitch(){
+    let g=0;
+    const id=setInterval(()=>{
+      logo.style.transform=`translate(${(Math.random()-.5)*7}px,${(Math.random()-.5)*2}px)`;
+      logo.style.filter='drop-shadow(0 0 12px #00cfff99) hue-rotate(45deg)';
+      if(++g>7){
+        clearInterval(id);
+        logo.style.transform='';
+        logo.style.filter='';
+        FORGE_DATA.forEach((d,i)=>setTimeout(()=>{
+          const el=E(d.id);
+          el.classList.remove('draw');
+          el.style.fill=d.fill;
+          el.style.stroke='none';
+          el.style.strokeDasharray='none';
+          el.style.strokeDashoffset='0';
+          el.style.filter=`drop-shadow(0 0 10px ${d.fill}cc)`;
+          setTimeout(()=>{ el.style.filter=''; },700);
+        },i*65));
+        setTimeout(()=>{
+          gsap.to(logo,{filter:'drop-shadow(0 0 24px rgba(68,39,129,0.3))',duration:.8,ease:'power2.out'});
+          showLabel(scene);
+        },450);
+      }
+    },50);
+  }
+}
+
+/* ── 2 GLASS ── */
+function runGlass(){
+  const scene=E('glass');
+  const card=E('glass-card');
+  const ps=QA('#glass .gp');
+  resetLabel(scene);
+  gsap.set(card,{opacity:0,y:44,rotateX:12,scale:.9,transformPerspective:1000});
+  gsap.set(ps,{opacity:0,y:14,scale:.84,transformBox:'fill-box',transformOrigin:'center'});
+  gsap.timeline()
+    .to(card,{opacity:1,y:0,rotateX:0,scale:1,duration:.7,ease:'back.out(1.7)'})
+    .to(ps,{opacity:1,y:0,scale:1,duration:.5,stagger:.08,ease:'back.out(2.2)'},'-=.3')
+    .call(()=>showLabel(scene))
+    .to(card,{boxShadow:'0 2px 0 0 rgba(255,255,255,0.09) inset,0 32px 100px rgba(68,39,129,.22)',duration:.8,yoyo:true,repeat:1,ease:'sine.inOut'});
+}
+
+/* ── 3 SEARCH ── */
+function runSearch(){
+  const scene=E('search');
+  const ps=QA('#search .sp');
+  resetLabel(scene);
+  gsap.set('#sweep',{x:'-55%'});
+  gsap.set('#vol',{opacity:0,scale:.8});
+  gsap.set(ps,{opacity:.07,fill:'#fff',filter:'none'});
+  gsap.timeline()
+    .to('#sweep',{x:'155%',duration:1.3,ease:'power1.inOut'})
+    .to(ps,{opacity:.92,filter:'drop-shadow(0 0 1.5px #fff)',duration:.3,stagger:.05,ease:'power2.out'},.4)
+    .to('#vol',{opacity:1,scale:1.05,duration:.25,ease:'power2.out'},.7)
+    .to('#vol',{opacity:0,scale:1.4,duration:.45,ease:'power2.in'},1.0)
+    .to(ps,{opacity:.8,filter:'none',duration:.4,ease:'power2.inOut'},1.2)
+    .call(()=>showLabel(scene))
+    .to(ps,{opacity:1,duration:.18,yoyo:true,repeat:1,ease:'sine.inOut'},1.5);
+}
+
+/* ── 4 LIQUID ── */
+function runLiquid(){
+  const scene=E('liquid');
+  const ps=QA('#liquid .lp');
+  const drops=[E('d1'),E('d2'),E('d3'),E('d4')];
+  const pos=[{x:-70,y:-70},{x:70,y:-55},{x:-60,y:65},{x:72,y:65}];
+  resetLabel(scene);
+  // reset paths — opacity only, no scale (avoids SVG clip)
+  gsap.set(ps,{opacity:0,y:12});
+  drops.forEach((d,i)=>gsap.set(d,{x:pos[i].x,y:pos[i].y,opacity:0,scale:1,
+    position:'absolute',width:16,height:16,borderRadius:'50%'}));
+
+  gsap.timeline()
+    .to(drops,{opacity:.95,duration:.22,stagger:.08,ease:'power2.out'})
+    .to(drops,{x:0,y:0,duration:.85,stagger:.05,ease:'elastic.out(1,.6)'},.22)
+    .to(drops,{scale:8,opacity:0,duration:.42,stagger:.04,ease:'power3.in'},1.05)
+    .to(ps,{opacity:1,y:0,duration:.55,stagger:.08,ease:'back.out(2)'},1.25)
+    .to(ps,{y:-4,duration:.12,yoyo:true,repeat:1,stagger:.05,ease:'sine.inOut'},2.0)
+    .call(()=>showLabel(scene));
+}
+
+window.addEventListener('load',()=>runForge());
+</script>
+</body>
+</html>
