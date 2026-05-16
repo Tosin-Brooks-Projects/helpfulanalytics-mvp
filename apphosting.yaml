@@ -18,6 +18,8 @@ secrets:
     secret: STRIPE_WEBHOOK_SECRET
   - variable: RESEND_API_KEY
     secret: RESEND_API_KEY
+  - variable: CRON_SECRET
+    secret: CRON_SECRET
 
 environmentVariables:
   - variable: FIREBASE_PROJECT_ID

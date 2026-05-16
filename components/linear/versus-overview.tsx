@@ -235,7 +235,7 @@ export function VersusOverview() {
                                         icon={<Users className="h-4 w-4" />}
                                     />
                                     <MetricBattleRow
-                                        title="Total Users"
+                                        title="Active Users"
                                         metric={data.metrics.users}
                                         icon={<Globe className="h-4 w-4" />}
                                     />

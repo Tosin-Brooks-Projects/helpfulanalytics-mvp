@@ -16,11 +16,14 @@ import { toast } from "sonner"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 
 const SCOPES = [
-    { id: "overview",  label: "Overview",        detail: "Sessions, users, bounce rate" },
-    { id: "devices",   label: "Devices",          detail: "OS, browser, screen breakdown" },
-    { id: "pages",     label: "Top pages",        detail: "Most visited paths" },
-    { id: "audience",  label: "Audience",         detail: "Countries and cities" },
-    { id: "sources",   label: "Traffic sources",  detail: "Source / medium acquisition" },
+    { id: "overview",    label: "Overview",        detail: "Sessions, users, bounce rate" },
+    { id: "devices",     label: "Devices",          detail: "OS, browser, screen breakdown" },
+    { id: "pages",       label: "Top pages",        detail: "Most visited paths" },
+    { id: "audience",    label: "Audience",         detail: "Countries and cities" },
+    { id: "sources",     label: "Traffic sources",  detail: "Source / medium acquisition" },
+    { id: "events",      label: "Events",           detail: "Actions and interactions" },
+    { id: "conversions", label: "Conversions",      detail: "Key events and goals" },
+    { id: "landing",     label: "Landing pages",    detail: "First entry paths" },
 ]
 
 export function ExportDialog({ children }: { children?: React.ReactNode } = {}) {
@@ -148,11 +151,23 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                 cy = (doc as any).lastAutoTable.finalY + 15
             }
             if (scope === "devices") {
-                autoTable(doc, { startY: cy, head: [["Device","Sessions","Users"]], body: (data.devices||[]).map((d:any)=>[d.name,(d.sessions||0).toLocaleString(),(d.users||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
+                autoTable(doc, { startY: cy, head: [["Device","Sessions","Users"]], body: (data.devices||[]).map((d:any)=>[d.deviceCategory,(d.sessions||0).toLocaleString(),(d.users||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
                 cy = (doc as any).lastAutoTable.finalY + 15
             }
             if (scope === "audience") {
                 autoTable(doc, { startY: cy, head: [["Country","Sessions","Users"]], body: (data.countries||[]).slice(0,20).map((c:any)=>[c.country,(c.sessions||0).toLocaleString(),(c.users||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
+                cy = (doc as any).lastAutoTable.finalY + 15
+            }
+            if (scope === "events") {
+                autoTable(doc, { startY: cy, head: [["Event Name","Event Count","Users"]], body: (data.events||[]).slice(0,25).map((e:any)=>[e.eventName||"unknown",(e.eventCount||0).toLocaleString(),(e.users||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
+                cy = (doc as any).lastAutoTable.finalY + 15
+            }
+            if (scope === "conversions") {
+                autoTable(doc, { startY: cy, head: [["Event Name","Key Events","Total Count"]], body: (data.conversions||[]).slice(0,25).map((c:any)=>[c.eventName||"unknown",(c.keyEvents||0).toLocaleString(),(c.eventCount||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
+                cy = (doc as any).lastAutoTable.finalY + 15
+            }
+            if (scope === "landing") {
+                autoTable(doc, { startY: cy, head: [["Landing Path","Sessions","Bounce Rate"]], body: (data.landingPages||[]).slice(0,25).map((l:any)=>[l.path||"/",(l.sessions||0).toLocaleString(),((l.bounceRate||0)*100).toFixed(1)+"%"]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
                 cy = (doc as any).lastAutoTable.finalY + 15
             }
         })

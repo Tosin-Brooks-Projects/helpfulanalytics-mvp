@@ -21,7 +21,7 @@ interface SourceData {
 }
 
 export default function SourcesPage() {
-    const { selectedProperty } = useDashboard()
+    const { selectedProperty, dateRange } = useDashboard()
     const [data, setData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
@@ -30,7 +30,15 @@ export default function SourcesPage() {
             if (!selectedProperty) return
             setLoading(true)
             try {
-                const res = await fetch(`/api/analytics?propertyId=${selectedProperty}&reportType=acquisition`)
+                const start = dateRange?.from ? dateRange.from.toISOString().split('T')[0] : "30daysAgo"
+                const end = dateRange?.to ? dateRange.to.toISOString().split('T')[0] : "today"
+                const params = new URLSearchParams({
+                    propertyId: selectedProperty,
+                    reportType: "acquisition",
+                    startDate: start,
+                    endDate: end
+                })
+                const res = await fetch(`/api/analytics?${params.toString()}`)
                 const json = await res.json()
                 setData(json)
             } catch (error) {
@@ -41,7 +49,7 @@ export default function SourcesPage() {
         }
 
         fetchData()
-    }, [selectedProperty])
+    }, [selectedProperty, dateRange])
 
     const acquisitionData: SourceData[] = data?.sources || []
     const topSource = acquisitionData.length > 0 ? acquisitionData[0] : null

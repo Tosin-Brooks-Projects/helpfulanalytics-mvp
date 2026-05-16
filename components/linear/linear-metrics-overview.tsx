@@ -36,7 +36,7 @@ export function LinearMetricsOverview({ propertyId }: LinearMetricsOverviewProps
         <div className="space-y-6">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                 <LinearStatCard
-                    title="Total Users"
+                    title="Active Users"
                     value={(metrics.users || metrics.activeUsers || 0).toLocaleString()}
                     icon={Users}
                     variant="indigo"

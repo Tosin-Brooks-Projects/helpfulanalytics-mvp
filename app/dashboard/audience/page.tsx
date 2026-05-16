@@ -310,7 +310,7 @@ export default function AudiencePage() {
                     </Card>
                     <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-zinc-600">Total Users</CardTitle>
+                            <CardTitle className="text-sm font-medium text-zinc-600">Active Users</CardTitle>
                             <Users className="h-4 w-4 text-zinc-400" />
                         </CardHeader>
                         <CardContent>

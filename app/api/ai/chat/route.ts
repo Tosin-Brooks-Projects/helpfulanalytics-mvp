@@ -132,8 +132,25 @@ function convertToModelMessages(uiMessages: any[]): Array<{ role: string; conten
 
 // ─── System Prompt ──────────────────────────────────────────────
 
-function buildSystemPrompt(): string {
+function buildSystemPrompt(startDate?: string, endDate?: string, compareStartDate?: string, compareEndDate?: string): string {
+    const todayStr = new Date().toISOString().split('T')[0]
+    const dateContext = `
+## Active Time Context
+- Today's current date is: **${todayStr}**.
+- The user is currently viewing their dashboard with a primary date range of: **${startDate || "30daysAgo"} to ${endDate || "today"}**.
+${compareStartDate && compareEndDate ? `- The comparison date range selected is: **${compareStartDate} to ${compareEndDate}**.` : ""}
+
+### How to perform date comparisons:
+If the user asks to compare performance based on their current dashboard selection, you should execute your analytical tools **TWICE**:
+1. Once for the primary range (**${startDate || "30daysAgo"}** to **${endDate || "today"}**)
+2. A second time for the comparison range (**${compareStartDate || "N/A"}** to **${compareEndDate || "N/A"}**)
+
+### Custom Timeframes & Historical Data:
+If the user asks for a specific or custom timeframe (e.g., "3 years ago", "last year", "in 2021"), do NOT use the dashboard ranges. Instead, dynamically calculate the correct \`startDate\` and \`endDate\` in \`YYYY-MM-DD\` format based on today's date. You can compare data across any timeline as long as you supply the correct date strings to your tools.`
+
     return `You are Kea — a warm, sharp, and deeply human marketing analyst built into the Helpful Analytics dashboard.
+
+${dateContext}
 
 ## Who you are
 
@@ -185,62 +202,87 @@ You have tools connected to the user's live GA4 property. You MUST call your too
 function buildSchemaOnlyTools() {
     return {
         getMetricsOverview: (tool as any)({
-            description: "Fetch high-level GA4 metrics: total sessions, active users, pageviews, bounce rate, and average session duration.",
-            parameters: z.object({ startDate: z.string(), endDate: z.string() }),
+            description: "Fetch high-level GA4 metrics: total sessions, active users, pageviews, bounce rate, and average session duration. You can fetch data for ANY historical timeframe by passing the correct YYYY-MM-DD dates.",
+            parameters: z.object({ startDate: z.string().describe("Start date, e.g., '2023-01-01' or '30daysAgo'"), endDate: z.string().describe("End date, e.g., '2023-12-31' or 'today'") }),
         }),
         getTrafficSources: (tool as any)({
-            description: "Fetch top traffic sources with sessions, users, bounce rates.",
-            parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
+            description: "Fetch top traffic sources with sessions, users, bounce rates. Supports any historical date range.",
+            parameters: z.object({ startDate: z.string().describe("Start date in YYYY-MM-DD format"), endDate: z.string().describe("End date in YYYY-MM-DD format"), limit: z.number().optional() }),
         }),
         getTopPages: (tool as any)({
-            description: "Fetch most visited pages with pageviews, bounce rate, avg time.",
-            parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
+            description: "Fetch most visited pages with pageviews, bounce rate, avg time. Supports any historical date range.",
+            parameters: z.object({ startDate: z.string().describe("Start date in YYYY-MM-DD format"), endDate: z.string().describe("End date in YYYY-MM-DD format"), limit: z.number().optional() }),
         }),
         getDeviceBreakdown: (tool as any)({
-            description: "Fetch device category breakdown (mobile/desktop/tablet), browsers.",
-            parameters: z.object({ startDate: z.string(), endDate: z.string() }),
+            description: "Fetch device category breakdown (mobile/desktop/tablet), browsers. Supports any historical date range.",
+            parameters: z.object({ startDate: z.string().describe("Start date in YYYY-MM-DD format"), endDate: z.string().describe("End date in YYYY-MM-DD format") }),
         }),
         getLocationData: (tool as any)({
-            description: "Fetch geographic distribution of users by country.",
-            parameters: z.object({ startDate: z.string(), endDate: z.string(), limit: z.number().optional() }),
+            description: "Fetch geographic distribution of users by country. Supports any historical date range.",
+            parameters: z.object({ startDate: z.string().describe("Start date in YYYY-MM-DD format"), endDate: z.string().describe("End date in YYYY-MM-DD format"), limit: z.number().optional() }),
         }),
         getRealtimeSnapshot: (tool as any)({
             description: "Fetch real-time active users and pages they are viewing.",
             parameters: z.object({}),
         }),
         getTrafficByState: (tool as any)({
-            description: "Fetch state/region level traffic within a country.",
-            parameters: z.object({ startDate: z.string(), endDate: z.string(), country: z.string().optional(), limit: z.number().optional() }),
+            description: "Fetch state/region level traffic within a country. Supports any historical date range.",
+            parameters: z.object({ startDate: z.string().describe("Start date in YYYY-MM-DD format"), endDate: z.string().describe("End date in YYYY-MM-DD format"), country: z.string().optional(), limit: z.number().optional() }),
         }),
         getTrafficByCity: (tool as any)({
-            description: "Fetch city-level traffic within a country.",
-            parameters: z.object({ startDate: z.string(), endDate: z.string(), country: z.string().optional(), limit: z.number().optional() }),
+            description: "Fetch city-level traffic within a country. Supports any historical date range.",
+            parameters: z.object({ startDate: z.string().describe("Start date in YYYY-MM-DD format"), endDate: z.string().describe("End date in YYYY-MM-DD format"), country: z.string().optional(), limit: z.number().optional() }),
         }),
     }
 }
 
 // ─── Tool Executors (actual data fetching functions) ─────────────
 
+function getJitterMultiplier(startDate?: string): number {
+    if (!startDate) return 1
+    let hash = 0
+    for (let i = 0; i < startDate.length; i++) hash += startDate.charCodeAt(i)
+    // Map hash to a multiplier between 0.75 and 1.25
+    return 0.75 + ((hash % 50) / 100)
+}
+
+function applyJitter(obj: any, multiplier: number): any {
+    if (multiplier === 1) return obj
+    if (typeof obj === 'number') {
+        if (Number.isInteger(obj)) return Math.floor(obj * multiplier)
+        return Number((obj * multiplier).toFixed(1))
+    }
+    if (Array.isArray(obj)) return obj.map(item => applyJitter(item, multiplier))
+    if (typeof obj === 'object' && obj !== null) {
+        const newObj: any = {}
+        for (const [k, v] of Object.entries(obj)) {
+            newObj[k] = applyJitter(v, multiplier)
+        }
+        return newObj
+    }
+    return obj
+}
+
 function buildToolExecutors(isDemo: boolean, accessToken: string, propertyId: string): Record<string, (args: any) => Promise<any>> {
     return {
         getMetricsOverview: async (args: any) => {
-            if (isDemo) return DEMO_OVERVIEW
+            if (isDemo) return applyJitter(DEMO_OVERVIEW, getJitterMultiplier(args.startDate))
             return getOverviewData(accessToken, propertyId, args.startDate, args.endDate)
         },
         getTrafficSources: async (args: any) => {
-            if (isDemo) return DEMO_SOURCES
+            if (isDemo) return applyJitter(DEMO_SOURCES, getJitterMultiplier(args.startDate))
             return getAcquisitionData(accessToken, propertyId, args.startDate, args.endDate, args.limit ?? 10)
         },
         getTopPages: async (args: any) => {
-            if (isDemo) return DEMO_PAGES
+            if (isDemo) return applyJitter(DEMO_PAGES, getJitterMultiplier(args.startDate))
             return getTopPagesData(accessToken, propertyId, args.startDate, args.endDate, args.limit ?? 10)
         },
         getDeviceBreakdown: async (args: any) => {
-            if (isDemo) return DEMO_DEVICES
+            if (isDemo) return applyJitter(DEMO_DEVICES, getJitterMultiplier(args.startDate))
             return getDevicesData(accessToken, propertyId, args.startDate, args.endDate)
         },
         getLocationData: async (args: any) => {
-            if (isDemo) return DEMO_LOCATIONS
+            if (isDemo) return applyJitter(DEMO_LOCATIONS, getJitterMultiplier(args.startDate))
             return getLocationsData(accessToken, propertyId, args.startDate, args.endDate, args.limit ?? 10)
         },
         getRealtimeSnapshot: async () => {
@@ -264,11 +306,11 @@ export async function POST(request: Request) {
     const session = await getServerSession(authOptions)
     if (!session) return new Response("Unauthorized", { status: 401 })
 
-    let body: { propertyId: string; startDate: string; endDate: string; messages: any[] }
+    let body: { propertyId: string; startDate: string; endDate: string; compareStartDate?: string; compareEndDate?: string; messages: any[] }
     try { body = await request.json() }
     catch { return new Response("Invalid JSON body", { status: 400 }) }
 
-    const { messages, propertyId } = body
+    const { messages, propertyId, startDate, endDate, compareStartDate, compareEndDate } = body
     if (!messages || messages.length === 0) return new Response("No messages provided", { status: 400 })
 
     const accessToken = (session as { accessToken?: string }).accessToken
@@ -277,7 +319,7 @@ export async function POST(request: Request) {
     const isDemo = isDemoProperty(propertyId)
     const modelMessages = convertToModelMessages(messages)
     const model = google("gemini-2.5-flash")
-    const system = buildSystemPrompt()
+    const system = buildSystemPrompt(startDate, endDate, compareStartDate, compareEndDate)
 
     console.log("[Kea] Property:", propertyId, "| isDemo:", isDemo, "| msgs:", modelMessages.length)
 

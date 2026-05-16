@@ -58,7 +58,7 @@ function getFirstUserMessage(messages: any[]): string | undefined {
 }
 
 export function KeaChatProvider({ children }: { children: ReactNode }) {
-    const { selectedProperty, dateRange } = useDashboard()
+    const { selectedProperty, dateRange, compareDateRange } = useDashboard()
     const [isClient, setIsClient] = useState(false)
     const [input, setInput] = useState("")
     const hasMounted = useRef(false)
@@ -70,6 +70,8 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
 
     const startDate = isClient && dateRange?.from ? dateRange.from.toISOString().split("T")[0] : "30daysAgo"
     const endDate = isClient && dateRange?.to ? dateRange.to.toISOString().split("T")[0] : "today"
+    const compareStartDate = isClient && compareDateRange?.from ? compareDateRange.from.toISOString().split("T")[0] : undefined
+    const compareEndDate = isClient && compareDateRange?.to ? compareDateRange.to.toISOString().split("T")[0] : undefined
 
     // Load saved sessions from localStorage (with version check)
     const loadSavedSessions = useCallback((): ChatSession[] => {
@@ -101,6 +103,8 @@ export function KeaChatProvider({ children }: { children: ReactNode }) {
                 propertyId: selectedProperty || "demo-property",
                 startDate,
                 endDate,
+                compareStartDate,
+                compareEndDate,
             },
         }),
         onError: (err) => {

@@ -12,7 +12,15 @@ export function convertToCSV(data: any[], options: CSVOptions = { download: true
     if (!data || !data.length) return ""
 
     const { filename = "export", metadata, download = true } = options
-    const headers = Object.keys(data[0])
+    
+    // Dynamically harvest all unique headers present in any of the objects to prevent column loss
+    const headersSet = new Set<string>()
+    data.forEach(row => {
+        if (row && typeof row === 'object') {
+            Object.keys(row).forEach(key => headersSet.add(key))
+        }
+    })
+    const headers = Array.from(headersSet)
 
     let csvRows: string[] = []
 
@@ -71,81 +79,186 @@ export function downloadJSON(data: any, filename: string) {
 }
 
 export function flattenAnalyticsData(data: any) {
-    // Helper to flatten complex analytics objects for CSV export
-    // This is a basic implementation - can be expanded based on specific report structures
     if (!data) return []
 
-    // Example: Flatten 'devices' array if it exists
-    if (Array.isArray(data.devices)) {
-        return data.devices.map((d: any) => ({
-            category: 'Devices',
-            type: d.deviceCategory,
-            sessions: d.sessions,
-            users: d.users,
-            bounceRate: d.bounceRate,
-            percentage: d.percentage
-        }))
+    const flatData: any[] = []
+
+    // 1. Base Metrics KPIs
+    if (data.metrics && typeof data.metrics === 'object' && !Array.isArray(data.metrics)) {
+        const m = data.metrics
+        flatData.push({
+            Category: 'Overview',
+            Metric: 'Sessions',
+            Value: m.sessions ?? 0
+        })
+        flatData.push({
+            Category: 'Overview',
+            Metric: 'Active Users',
+            Value: m.activeUsers ?? 0
+        })
+        flatData.push({
+            Category: 'Overview',
+            Metric: 'Screen Page Views',
+            Value: m.screenPageViews ?? m.pageViews ?? 0
+        })
+        flatData.push({
+            Category: 'Overview',
+            Metric: 'Bounce Rate',
+            Value: `${((m.bounceRate ?? 0) * 100).toFixed(1)}%`
+        })
+        flatData.push({
+            Category: 'Overview',
+            Metric: 'Engagement Rate',
+            Value: `${((m.engagementRate ?? (1 - (m.bounceRate ?? 0))) * 100).toFixed(1)}%`
+        })
+        flatData.push({
+            Category: 'Overview',
+            Metric: 'Avg Session Duration',
+            Value: `${Math.round(m.averageSessionDuration ?? m.avgSessionDuration ?? 0)}s`
+        })
     }
 
-    // Example: Flatten 'topPages' array
-    if (Array.isArray(data.topPages)) {
-        return data.topPages.map((p: any) => ({
-            category: 'Top Pages',
-            path: p.pagePath,
-            views: p.screenPageViews,
-            activeUsers: p.activeUsers
-        }))
+    // 2. Pages
+    const pages = data.pages || data.topPages
+    if (Array.isArray(pages)) {
+        pages.forEach((p: any) => {
+            flatData.push({
+                Category: 'Pages',
+                Path: p.pagePath || p.path || '/',
+                Title: p.pageTitle || p.title || 'Untitled',
+                Views: p.pageViews || p.views || 0,
+                Unique: p.uniquePageViews || p.users || 0,
+                BounceRate: p.bounceRate !== undefined ? `${(p.bounceRate * 100).toFixed(1)}%` : undefined,
+                Percentage: p.percentage !== undefined ? `${p.percentage.toFixed(1)}%` : undefined
+            })
+        })
     }
 
-    // Flatten 'os' array
-    if (Array.isArray(data.os)) {
-        return data.os.map((o: any) => ({
-            category: 'Operating System',
-            name: o.name,
-            sessions: o.sessions,
-            percentage: o.percentage
-        }))
+    // 3. Traffic Sources
+    const sources = data.sources || data.trafficSources
+    if (Array.isArray(sources)) {
+        sources.forEach((s: any) => {
+            flatData.push({
+                Category: 'Acquisition',
+                Source: s.source || s.name || 'unknown',
+                Medium: s.medium || 'unknown',
+                Sessions: s.sessions ?? 0,
+                Users: s.users ?? 0,
+                BounceRate: s.bounceRate !== undefined ? `${(s.bounceRate * 100).toFixed(1)}%` : undefined
+            })
+        })
     }
 
-    // Flatten 'browsers' array
+    // 4. Devices
+    const devices = data.devices || data.deviceBreakdown
+    if (Array.isArray(devices)) {
+        devices.forEach((d: any) => {
+            flatData.push({
+                Category: 'Devices',
+                Type: d.deviceCategory || d.device || d.name || 'Unknown',
+                Sessions: d.sessions ?? 0,
+                Users: d.users ?? 0,
+                Percentage: d.percentage !== undefined ? `${d.percentage.toFixed(1)}%` : undefined
+            })
+        })
+    }
+
+    // 5. Browsers
     if (Array.isArray(data.browsers)) {
-        return data.browsers.map((b: any) => ({
-            category: 'Browser',
-            name: b.browser,
-            sessions: b.sessions,
-            percentage: b.percentage
-        }))
+        data.browsers.forEach((b: any) => {
+            flatData.push({
+                Category: 'Browsers',
+                Type: b.browser || 'Unknown',
+                Sessions: b.sessions ?? 0,
+                Percentage: b.percentage !== undefined ? `${b.percentage.toFixed(1)}%` : undefined
+            })
+        })
     }
 
-    // Flatten 'screens' array
+    // 6. Operating Systems
+    if (Array.isArray(data.os)) {
+        data.os.forEach((o: any) => {
+            flatData.push({
+                Category: 'Operating Systems',
+                Type: o.name || 'Unknown',
+                Sessions: o.sessions ?? 0,
+                Percentage: o.percentage !== undefined ? `${o.percentage.toFixed(1)}%` : undefined
+            })
+        })
+    }
+
+    // 7. Screens
     if (Array.isArray(data.screens)) {
-        return data.screens.map((s: any) => ({
-            category: 'Screen Resolution',
-            resolution: s.resolution,
-            sessions: s.sessions,
-            percentage: s.percentage
-        }))
+        data.screens.forEach((s: any) => {
+            flatData.push({
+                Category: 'Screens',
+                Type: s.resolution || 'Unknown',
+                Sessions: s.sessions ?? 0,
+                Percentage: s.percentage !== undefined ? `${s.percentage.toFixed(1)}%` : undefined
+            })
+        })
     }
 
-    // Flatten 'sources' array (assuming structure from Sources page)
-    if (Array.isArray(data.sources)) {
-        return data.sources.map((s: any) => ({
-            category: 'Acquisition',
-            source: s.source,
-            sessions: s.sessions,
-            users: s.users
-        }))
+    // 8. Audience / Locations
+    const locations = data.countries || data.locations || data.topCountries
+    if (Array.isArray(locations)) {
+        locations.forEach((l: any) => {
+            flatData.push({
+                Category: 'Location',
+                Country: l.country || 'Unknown',
+                Sessions: l.sessions ?? 0,
+                Users: l.users ?? 0,
+                BounceRate: l.bounceRate !== undefined ? `${(l.bounceRate * 100).toFixed(1)}%` : undefined,
+                Percentage: l.percentage !== undefined ? `${l.percentage.toFixed(1)}%` : undefined
+            })
+        })
     }
 
-    // Flatten 'locations' array (assuming structure from Audience page)
-    if (Array.isArray(data.locations)) {
-        return data.locations.map((l: any) => ({
-            category: 'Location',
-            country: l.country,
-            activeUsers: l.activeUsers
-        }))
+    // 9. Events
+    if (Array.isArray(data.events)) {
+        data.events.forEach((e: any) => {
+            flatData.push({
+                Category: 'Events',
+                EventName: e.eventName || 'unknown',
+                Count: e.eventCount ?? 0,
+                Users: e.users ?? 0,
+                Percentage: e.percentage !== undefined ? `${e.percentage.toFixed(1)}%` : undefined
+            })
+        })
     }
 
-    // Default: return raw data wrapped in array if object, or as is if array
-    return Array.isArray(data) ? data : [data]
+    // 10. Conversions
+    if (Array.isArray(data.conversions)) {
+        data.conversions.forEach((c: any) => {
+            flatData.push({
+                Category: 'Conversions',
+                EventName: c.eventName || 'unknown',
+                KeyEvents: c.keyEvents ?? 0,
+                TotalCount: c.eventCount ?? 0,
+                Users: c.users ?? 0,
+                Percentage: c.percentage !== undefined ? `${c.percentage.toFixed(1)}%` : undefined
+            })
+        })
+    }
+
+    // 11. Landing Pages
+    if (Array.isArray(data.landingPages)) {
+        data.landingPages.forEach((lp: any) => {
+            flatData.push({
+                Category: 'Landing Pages',
+                Path: lp.path || lp.pagePath || '/',
+                Sessions: lp.sessions ?? 0,
+                Users: lp.users ?? 0,
+                BounceRate: lp.bounceRate !== undefined ? `${(lp.bounceRate * 100).toFixed(1)}%` : undefined,
+                Percentage: lp.percentage !== undefined ? `${lp.percentage.toFixed(1)}%` : undefined
+            })
+        })
+    }
+
+    // If flatData is still empty, fallback to array wrapping
+    if (flatData.length === 0) {
+        return Array.isArray(data) ? data : [data]
+    }
+
+    return flatData
 }

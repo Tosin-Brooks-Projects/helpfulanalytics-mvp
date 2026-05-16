@@ -13,7 +13,7 @@ import { Smartphone, Monitor, Tablet, Laptop, Chrome, Globe, Laptop2, MonitorSma
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
 
 export default function DevicesPage() {
-    const { selectedProperty } = useDashboard()
+    const { selectedProperty, dateRange } = useDashboard()
     // Explicitly fetching report type 'devices'
     const [reportData, setReportData] = useState<any>(null)
     const [reportLoading, setReportLoading] = useState(true)
@@ -23,7 +23,15 @@ export default function DevicesPage() {
             if (!selectedProperty) return
             setReportLoading(true)
             try {
-                const res = await fetch(`/api/analytics?propertyId=${selectedProperty}&reportType=devices`)
+                const start = dateRange?.from ? dateRange.from.toISOString().split('T')[0] : "30daysAgo"
+                const end = dateRange?.to ? dateRange.to.toISOString().split('T')[0] : "today"
+                const params = new URLSearchParams({
+                    propertyId: selectedProperty,
+                    reportType: "devices",
+                    startDate: start,
+                    endDate: end
+                })
+                const res = await fetch(`/api/analytics?${params.toString()}`)
                 const json = await res.json()
                 setReportData(json)
             } catch (error) {
@@ -33,7 +41,7 @@ export default function DevicesPage() {
             }
         }
         fetchDevices()
-    }, [selectedProperty])
+    }, [selectedProperty, dateRange])
 
     const COLORS = ["hsl(var(--chart-1))", "#6366f1", "#10b981", "#f43f5e"]
 

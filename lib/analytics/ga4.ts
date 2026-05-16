@@ -41,11 +41,14 @@ export async function getMockOverviewData() {
         
         dates.push(formattedDate);
         const sessions = Math.floor(Math.random() * 500) + 800;
+        const pageViews = Math.floor(sessions * 3.5);
         sessionsOverTime.push({
             date: dateStr,
-            sessions: sessions
+            sessions: sessions,
+            pageViews: pageViews,
+            users: Math.floor(sessions * 0.8)
         });
-        pageViewsData.push(Math.floor(sessions * 3.5));
+        pageViewsData.push(pageViews);
     }
 
     return {
@@ -135,7 +138,7 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
         runReport(accessToken, propertyId, {
             dateRanges: [{ startDate, endDate }],
             dimensions: [{ name: "date" }],
-            metrics: [{ name: "sessions" }, { name: "screenPageViews" }],
+            metrics: [{ name: "sessions" }, { name: "screenPageViews" }, { name: "activeUsers" }],
             orderBys: [{ dimension: { dimensionName: "date" } }],
             limit: 10000,
         }),
@@ -189,6 +192,8 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
     const sessionsOverTime = dailyRows.map((row: any) => ({
         date: row.dimensionValues?.[0]?.value || "",
         sessions: Number.parseInt(row.metricValues?.[0]?.value || "0", 10),
+        pageViews: Number.parseInt(row.metricValues?.[1]?.value || "0", 10),
+        users: Number.parseInt(row.metricValues?.[2]?.value || "0", 10),
     }))
 
     const trafficSources = (sourcesResponse.rows || []).map((row: any) => ({
@@ -245,24 +250,37 @@ export async function getOverviewData(accessToken: string, propertyId: string, s
 // ─── Top Pages ──────────────────────────────────────────────────
 
 export async function getTopPagesData(accessToken: string, propertyId: string, startDate: string, endDate: string, limit: number = 20) {
-    const response = await runReport(accessToken, propertyId, {
-        dateRanges: [{ startDate, endDate }],
-        dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
-        metrics: [
-            { name: "screenPageViews" },
-            { name: "sessions" },
-            { name: "averageSessionDuration" },
-            { name: "bounceRate" },
-        ],
-        orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
-        limit,
-    })
+    const [response, totalsResponse] = await Promise.all([
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            dimensions: [{ name: "pagePath" }, { name: "pageTitle" }],
+            metrics: [
+                { name: "screenPageViews" },
+                { name: "sessions" },
+                { name: "averageSessionDuration" },
+                { name: "bounceRate" },
+            ],
+            orderBys: [{ metric: { metricName: "screenPageViews" }, desc: true }],
+            limit,
+        }),
+        runReport(accessToken, propertyId, {
+            dateRanges: [{ startDate, endDate }],
+            metrics: [
+                { name: "averageSessionDuration" },
+                { name: "engagementRate" },
+            ]
+        })
+    ])
 
     const rows = response.rows || []
     const totalPageViews = rows.reduce(
         (sum: number, row: any) => sum + Number.parseInt(row.metricValues?.[0]?.value || "0"),
         0,
     )
+
+    const totals = totalsResponse.rows?.[0]?.metricValues || []
+    const avgSessionDuration = Number.parseFloat(totals[0]?.value || "0")
+    const engagementRate = Number.parseFloat(totals[1]?.value || "0")
 
     return {
         pages: rows.map((row: any) => {
@@ -278,6 +296,10 @@ export async function getTopPagesData(accessToken: string, propertyId: string, s
             }
         }),
         totalPageViews,
+        metrics: {
+            avgSessionDuration,
+            engagementRate,
+        }
     }
 }
 

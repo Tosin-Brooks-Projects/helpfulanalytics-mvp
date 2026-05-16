@@ -295,7 +295,11 @@ async function getMockTopPagesData() {
             bounceRate: Number((Math.random() * 0.4 + 0.3).toFixed(2)),
             percentage: (p.views / totalViews) * 100
         })),
-        totalPageViews: totalViews
+        totalPageViews: totalViews,
+        metrics: {
+            avgSessionDuration: 145,
+            engagementRate: 0.575
+        }
     }
 }
 
@@ -709,12 +713,12 @@ async function getTopPagesComparisonData(accessToken: string, propertyId: string
     const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
 
     const merged = currentData.pages.map((curr: any) => {
-        const prev = previousData.pages.find((p: any) => p.path === curr.path)
+        const prev = previousData.pages.find((p: any) => p.pagePath === curr.pagePath)
         return {
-            name: curr.path,
-            value: curr.views,
-            previous: prev?.views || 0,
-            delta: calculateDelta(curr.views, prev?.views || 0)
+            name: curr.pagePath,
+            value: curr.pageViews,
+            previous: prev?.pageViews || 0,
+            delta: calculateDelta(curr.pageViews, prev?.pageViews || 0)
         }
     })
 
