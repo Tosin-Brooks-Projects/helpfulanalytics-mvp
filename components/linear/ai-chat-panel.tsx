@@ -16,14 +16,14 @@ const SUGGESTED_PROMPTS = [
 ]
 
 const TOOL_LABELS: Record<string, { label: string; icon: string }> = {
-    getMetricsOverview: { label: "site metrics", icon: "📊" },
-    getTrafficSources: { label: "traffic sources", icon: "🔗" },
-    getTopPages: { label: "top pages", icon: "📄" },
-    getDeviceBreakdown: { label: "device data", icon: "📱" },
-    getLocationData: { label: "location data", icon: "🌍" },
-    getRealtimeSnapshot: { label: "live visitors", icon: "⚡" },
-    getTrafficByState: { label: "state data", icon: "📍" },
-    getTrafficByCity: { label: "city data", icon: "🏙️" },
+    getMetricsOverview: { label: "Site metrics", icon: "📊" },
+    getTrafficSources: { label: "Traffic sources", icon: "🔗" },
+    getTopPages: { label: "Top pages", icon: "📄" },
+    getDeviceBreakdown: { label: "Device data", icon: "📱" },
+    getLocationData: { label: "Location data", icon: "🌍" },
+    getRealtimeSnapshot: { label: "Live visitors", icon: "⚡" },
+    getTrafficByState: { label: "State data", icon: "📍" },
+    getTrafficByCity: { label: "City data", icon: "🏙️" },
 }
 
 const BIRD_MESSAGES = [
@@ -33,111 +33,10 @@ const BIRD_MESSAGES = [
     "Coo... Your retention is looking peaceful.",
     "Hoot! Wise move checkin' the top pages.",
     "Chirp! Mobile users are flocking in!",
-    "Caw caw! A spike! A spike in the woods!",
     "Peep! Look at those real-time visitors!",
-    "Tweet-tweet! You've got a nest full of users!",
     "Caw! Time to preen those landing pages!",
     "Squawk! Organic search is flying high!",
     "Chirp! Social traffic is migrating your way.",
-    "Hoot! I see a wise trend in your data.",
-    "Coo... Conversions are hatching nicely.",
-    "Peep! Little fledglings are clicking around!",
-    "Caw! Don't let your data fly south!",
-    "Tweet! Are we migrating to more desktop users?",
-    "Squawk! That referral source is a rare bird!",
-    "Chirp chirp! High engagement! Shake those feathers!",
-    "Hoot! Knowledge is a powerful wingspan.",
-    "Caw! Is your load time making users fly away?",
-    "Tweet! Let's build a stronger nest for your leads.",
-    "Squawk! Your SEO is reaching the canopy!",
-    "Chirp! I've spotted a worm in your funnel!",
-    "Coo... Soft landings on your homepage.",
-    "Peep! The audience is singing your praises.",
-    "Caw! Flock to the reports, quick!",
-    "Tweet! Your data is singing a beautiful song.",
-    "Squawk! Who's that colorful new referral?",
-    "Chirp! Twitter traffic is... well, tweeting!",
-    "Hoot! I've stayed up all night watching your stats.",
-    "Caw! Dive deep like a falcon into these numbers!",
-    "Tweet! Your reach is spreading its wings.",
-    "Squawk! Don't be a dodo, check the devices!",
-    "Chirp! Your site is buzzing like a hummingbird.",
-    "Coo... Peaceful growth, my friend.",
-    "Peep! Is that a new device category I see?",
-    "Caw! The wind is in your favor today.",
-    "Tweet! Let's peck at these location stats.",
-    "Squawk! Shiny new users! I want 'em!",
-    "Chirp! High bounce rate? Flap harder!",
-    "Hoot! I've got my eyes on your sessions.",
-    "Caw! You're the alpha of this analytics forest!",
-    "Tweet! Are we soaring or just gliding?",
-    "Squawk! I found a shiny bit of data for you!",
-    "Chirp! Your funnel is as clear as a blue sky.",
-    "Coo... Rest your wings and look at this.",
-    "Peep! Tiny clicks make big rivers.",
-    "Caw! I've circled the top pages twice now!",
-    "Tweet! Your audience is a diverse flock!",
-    "Squawk! Look! Shiny conversion points!",
-    "Chirp-a-dee! Happy users, happy tree!",
-    "Hoot! Whooo's visiting at this hour?",
-    "Caw! Ride the thermal of this traffic spike!",
-    "Tweet! Every user is a feather in your cap.",
-    "Squawk! Don't let the cat catch your leads!",
-    "Chirp! I'm preening your metrics right now.",
-    "Coo... Steady as a dove.",
-    "Peep! Are we growing? I think we're growing!",
-    "Caw! I can see your site from way up here!",
-    "Tweet! Let's migrate some more traffic!",
-    "Squawk! Shiny! Look at that screen time!",
-    "Chirp! Your bounce rate just took a dive!",
-    "Hoot! A parliament of users has arrived!",
-    "Caw! Sharp eyes on the goal!",
-    "Tweet! Flap those marketing wings!",
-    "Squawk! I'm hungry for more data!",
-    "Chirp chirp! The morning traffic is here!",
-    "Coo... Soft as a feather, your UI is.",
-    "Peep! Tiny users, huge potential!",
-    "Caw! I've scouted some new sources!",
-    "Tweet! Your brand is taking flight!",
-    "Squawk! Look out for that competitors' hawk!",
-    "Chirp! Is your cache as fresh as a spring breeze?",
-    "Coo... All quiet on the bounce front.",
-    "Peep! I'm chirping for more conversions!",
-    "Caw! I've got a bird's eye view of your sales!",
-    "Tweet! Let's sprinkle some seed on that ad!",
-    "Squawk! Look at the colors on that chart!",
-    "Chirp! High speed, low drag, let's fly!",
-    "Hoot! Wisdom is knowing your audience.",
-    "Caw! I'm nesting in your dashboard today.",
-    "Tweet! Your CTR is looking fly!",
-    "Squawk! Grab that lead! Grab it!",
-    "Chirp! I'm singing the song of GA4!",
-    "Coo... Relaxed users stay longer.",
-    "Peep! I've spotted a trend!",
-    "Caw! Thunder-traffic is rolling in!",
-    "Tweet! Scatter some content, watch 'em flock!",
-    "Squawk! Is that a goldfinch or a golden lead?",
-    "Chirp! Fluttering through the location data.",
-    "Hoot! Night owls are buying more!",
-    "Caw! My beak is ready for some insights!",
-    "Tweet! Your reach is mult-continental!",
-    "Squawk! Don't let your data get caged!",
-    "Chirp! Be bold like a blue jay!",
-    "Coo... Soft landings for every click.",
-    "Peep! Look at the little user-steps!",
-    "Caw! I've claimed this dashboard as my nest!",
-    "Tweet! Let's soar together!",
-    "Squawk! Peek-a-boo, I see a user!",
-    "Chirp! Bright feathers, bright data!",
-    "Hoot! Who's the master of analytics? You!",
-    "Caw! Spread your wings and analyze!",
-    "Tweet! Your site is the tallest tree!",
-    "Squawk! No crumbs left behind!",
-    "Chirp! Every click is a melody!",
-    "Peep! Hatching new ideas!",
-    "Caw! Soar high, little dashboard!",
-    "Tweet! Your metrics are top-tier!",
-    "Squawk! I'm the king of the canopy!"
 ]
 
 function getToolInfo(toolName: string) {
@@ -205,22 +104,16 @@ export function AIChatPanel() {
         }
 
         const cycleBubble = () => {
-            // Pick a random message
             const nextIndex = Math.floor(Math.random() * BIRD_MESSAGES.length)
             setBubbleIndex(nextIndex)
             setShowBubble(true)
-
-            // Hide after 5 seconds
             setTimeout(() => {
                 setShowBubble(false)
             }, 5000)
         }
 
-        // Run every 10 seconds (5s visible + 5s hidden)
-        const interval = setInterval(cycleBubble, 10000)
-
-        // Final check to run immediately if closed
-        const initialTimeout = setTimeout(cycleBubble, 3000)
+        const interval = setInterval(cycleBubble, 12000)
+        const initialTimeout = setTimeout(cycleBubble, 4000)
 
         return () => {
             clearInterval(interval)
@@ -264,21 +157,22 @@ export function AIChatPanel() {
         <>
             {/* ─── Floating Toggle & Bubble ─────────────────── */}
             <div className={cn(
-                "fixed right-4 z-50 flex flex-col items-end gap-3 transition-all duration-300",
+                "fixed right-4 z-50 flex flex-col items-end gap-4 transition-all duration-300",
                 "bottom-[4.5rem] lg:bottom-8 lg:right-8",
                 open && "opacity-0 pointer-events-none scale-75"
             )}>
                 <AnimatePresence>
                     {showBubble && !open && (
                         <motion.button
-                            initial={{ opacity: 0, y: 10, scale: 0.9, x: 20 }}
+                            initial={{ opacity: 0, y: 10, scale: 0.95, x: 10 }}
                             animate={{ opacity: 1, y: 0, scale: 1, x: 0 }}
                             exit={{ opacity: 0, y: 5, scale: 0.95, x: 10 }}
+                            transition={{ duration: 0.2, ease: "easeOut" }}
                             onClick={() => setOpen(true)}
-                            className="relative mb-1 max-w-[200px] rounded-2xl bg-white border border-amber-200 p-3 shadow-xl text-xs text-zinc-600 font-medium leading-relaxed group hover:border-amber-400 transition-colors cursor-pointer"
+                            className="relative mb-1 max-w-[220px] rounded-2xl bg-white/95 backdrop-blur-md border border-amber-200/60 p-3.5 shadow-xl shadow-amber-500/10 text-[13px] text-zinc-700 font-medium leading-relaxed group hover:border-amber-300 transition-all cursor-pointer"
                         >
-                            <div className="absolute bottom-[-6px] right-6 h-3 w-3 rotate-45 border-b border-r border-amber-200 bg-white group-hover:border-amber-400 transition-colors" />
-                            <Sparkles className="h-3 w-3 text-amber-500 mb-1 inline mr-1" />
+                            <div className="absolute bottom-[-6px] right-7 h-3 w-3 rotate-45 border-b border-r border-amber-200/60 bg-white group-hover:border-amber-300 transition-colors" />
+                            <Sparkles className="h-3.5 w-3.5 text-amber-500 mb-0.5 inline mr-1.5" />
                             {BIRD_MESSAGES[bubbleIndex]}
                         </motion.button>
                     )}
@@ -288,59 +182,58 @@ export function AIChatPanel() {
                     onClick={() => setOpen((v) => !v)}
                     aria-label="Open AI chat"
                     className={cn(
-                        "flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-transform",
-                        "bg-gradient-to-br from-amber-400 to-amber-500 text-white hover:from-amber-500 hover:to-amber-600 hover:scale-105"
+                        "flex h-14 w-14 items-center justify-center rounded-full shadow-2xl shadow-amber-500/30 transition-transform duration-300 hover:scale-105 active:scale-95 bg-white border border-zinc-200/50"
                     )}
                 >
-                    <img src="/kea.svg" alt="Kea" className="h-12 w-12 rounded-full" />
+                    <img src="/kea.svg" alt="Kea" className="h-14 w-14 rounded-full" />
                 </button>
             </div>
 
             {/* ─── Chat Panel ───────────────────────────────── */}
             <div
                 className={cn(
-                    "fixed right-4 z-50 flex flex-col overflow-hidden rounded-2xl border border-zinc-200/80 bg-white/95 backdrop-blur-xl shadow-2xl transition-all duration-300 ease-out",
+                    "fixed right-4 z-50 flex flex-col overflow-hidden rounded-[24px] border border-zinc-200/60 bg-white/85 backdrop-blur-2xl shadow-2xl shadow-zinc-900/10 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
                     "bottom-[4.5rem] lg:bottom-8 lg:right-8",
-                    "w-[calc(100vw-2rem)] max-w-sm sm:w-96",
+                    "w-[calc(100vw-2rem)] max-w-[380px]",
                     open
-                        ? "h-[540px] opacity-100 translate-y-0 scale-100"
+                        ? "h-[600px] max-h-[85vh] opacity-100 translate-y-0 scale-100"
                         : "h-0 opacity-0 translate-y-4 scale-95 pointer-events-none"
                 )}
             >
                 {/* ─── Header ───────────────────────────── */}
-                <div className="flex shrink-0 items-center justify-between border-b border-zinc-100 bg-gradient-to-r from-amber-50/80 to-white px-4 py-3">
-                    <div className="flex items-center gap-2.5">
+                <div className="flex shrink-0 items-center justify-between px-5 py-4 bg-white/50 border-b border-zinc-100/50">
+                    <div className="flex items-center gap-3">
                         <div className="relative">
-                            <img src="/kea.svg" alt="Kea" className="h-8 w-8 rounded-full shrink-0" />
-                            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
+                            <img src="/kea.svg" alt="Kea" className="h-9 w-9 rounded-full shrink-0 shadow-sm border border-zinc-100" />
+                            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-[2.5px] border-white bg-emerald-500" />
                         </div>
                         <div>
-                            <p className="text-sm font-semibold text-zinc-900 leading-tight">Kea</p>
-                            <p className="text-[10px] text-zinc-400 leading-tight">Your analytics assistant</p>
+                            <h2 className="text-[15px] font-semibold text-zinc-900 tracking-tight leading-none mb-0.5">Kea</h2>
+                            <p className="text-[11px] font-medium text-zinc-500 leading-none tracking-wide">Your analytics assistant</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-0.5">
+                    <div className="flex items-center gap-1">
                         <button
                             onClick={() => router.push("/dashboard/kea")}
                             aria-label="Expand to full page"
                             title="Open full page"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100/80 hover:text-zinc-700 transition-colors"
                         >
                             <Maximize2 className="h-3.5 w-3.5" />
                         </button>
                         <button
                             onClick={resetChat}
                             aria-label="Reset chat"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100/80 hover:text-zinc-700 transition-colors"
                         >
                             <RotateCcw className="h-3.5 w-3.5" />
                         </button>
                         <button
                             onClick={() => setOpen(false)}
                             aria-label="Close chat"
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 transition-colors"
+                            className="flex h-8 w-8 items-center justify-center rounded-full text-zinc-400 hover:bg-zinc-100/80 hover:text-zinc-700 transition-colors"
                         >
-                            <X className="h-3.5 w-3.5" />
+                            <X className="h-4 w-4" />
                         </button>
                     </div>
                 </div>
@@ -349,23 +242,23 @@ export function AIChatPanel() {
                 <div
                     ref={scrollContainerRef}
                     onScroll={handleScroll}
-                    className="relative flex-1 overflow-y-auto px-4 py-4 space-y-3"
+                    className="relative flex-1 overflow-y-auto px-5 py-5 space-y-4"
                 >
                     {messages.map((rawMsg, i) => {
                         const msg = rawMsg as any
                         return (
-                            <div key={msg.id || i} className="flex flex-col gap-1.5">
+                            <div key={msg.id || i} className="flex flex-col gap-2">
                                 {/* Message bubble */}
-                                <div className={cn("flex", msg.role === "user" ? "justify-end" : "justify-start")}>
+                                <div className={cn("flex items-end gap-2.5", msg.role === "user" ? "justify-end" : "justify-start")}>
                                     {msg.role === "assistant" && (
-                                        <img src="/kea.svg" alt="Kea" className="mr-2 mt-1 h-6 w-6 shrink-0 rounded-full" />
+                                        <img src="/kea.svg" alt="Kea" className="h-6 w-6 shrink-0 rounded-full shadow-sm border border-zinc-100" />
                                     )}
                                     <div
                                         className={cn(
-                                            "max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[13px] leading-relaxed",
+                                            "max-w-[82%] px-4 py-2.5 text-[13px] leading-relaxed transition-all",
                                             msg.role === "user"
-                                                ? "bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-tr-md shadow-sm"
-                                                : "bg-zinc-50 border border-zinc-100 text-zinc-800 rounded-tl-md"
+                                                ? "bg-gradient-to-br from-amber-500 to-amber-600 text-white shadow-md shadow-amber-500/15 rounded-[20px] rounded-br-[4px]"
+                                                : "bg-white border border-zinc-100 shadow-sm text-zinc-800 rounded-[20px] rounded-bl-[4px]"
                                         )}
                                     >
                                         <MessageContent msg={msg} />
@@ -380,17 +273,20 @@ export function AIChatPanel() {
                                     return (
                                         <div key={pi} className="flex justify-start pl-8">
                                             <div className={cn(
-                                                "flex items-center gap-2 rounded-xl px-3 py-1.5 text-[10px] font-medium transition-all",
+                                                "flex items-center gap-2.5 rounded-xl px-3.5 py-2 text-[11px] font-medium transition-all shadow-sm",
                                                 hasResult
-                                                    ? "bg-emerald-50 border border-emerald-100 text-emerald-700"
-                                                    : "bg-amber-50 border border-amber-100 text-amber-700"
+                                                    ? "bg-white border border-zinc-200 text-zinc-600"
+                                                    : "bg-amber-50/50 border border-amber-200 text-amber-700"
                                             )}>
-                                                <span className="text-sm">{toolInfo.icon}</span>
+                                                <span className="text-xs">{toolInfo.icon}</span>
                                                 {hasResult ? (
-                                                    <span>✓ Loaded {toolInfo.label}</span>
+                                                    <span className="tracking-tight">Loaded {toolInfo.label}</span>
                                                 ) : (
-                                                    <span className="flex items-center gap-1.5">
-                                                        <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                                    <span className="flex items-center gap-2 tracking-tight">
+                                                        <span className="relative flex h-1.5 w-1.5">
+                                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+                                                        </span>
                                                         Fetching {toolInfo.label}…
                                                     </span>
                                                 )}
@@ -404,28 +300,32 @@ export function AIChatPanel() {
 
                     {/* Suggested prompts (visible until user sends first message) */}
                     {!messages.some(m => m.role === "user") && (
-                        <div className="grid grid-cols-1 gap-1.5 pt-1">
-                            {SUGGESTED_PROMPTS.map((prompt) => (
-                                <button
+                        <div className="grid grid-cols-1 gap-2 pt-2">
+                            {SUGGESTED_PROMPTS.map((prompt, idx) => (
+                                <motion.button
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.05, duration: 0.3, ease: "easeOut" }}
                                     key={prompt}
                                     onClick={() => {
                                         sendMessage({ role: "user", content: prompt } as any)
                                         setInput("")
                                     }}
-                                    className="flex items-center gap-2 w-full rounded-xl border border-zinc-200/80 px-3 py-2.5 text-left text-xs text-zinc-600 hover:bg-amber-50/60 hover:border-amber-200 hover:text-amber-700 transition-all"
+                                    className="flex items-center gap-2.5 w-full rounded-[16px] border border-zinc-200 bg-white/50 px-4 py-3 text-left text-[13px] font-medium text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-300 hover:shadow-sm transition-all"
                                 >
-                                    <Sparkles className="h-3 w-3 text-amber-400 shrink-0" />
+                                    <Sparkles className="h-3.5 w-3.5 text-amber-400 shrink-0" />
                                     {prompt}
-                                </button>
+                                </motion.button>
                             ))}
                         </div>
                     )}
 
                     {/* Typing / status indicator */}
                     {statusLabel && (
-                        <div className="flex items-center gap-2 pl-8">
-                            <div className="flex items-center gap-2 rounded-xl bg-zinc-50 border border-zinc-100 px-3 py-1.5 text-[10px] text-zinc-500 font-medium">
-                                <span className="flex gap-0.5">
+                        <div className="flex items-end gap-2.5 pl-1">
+                            <img src="/kea.svg" alt="Kea" className="h-6 w-6 shrink-0 rounded-full shadow-sm border border-zinc-100 grayscale-[30%] opacity-70" />
+                            <div className="flex items-center gap-2.5 rounded-[16px] rounded-bl-[4px] bg-white border border-zinc-100 shadow-sm px-3.5 py-2.5 text-[11px] text-zinc-500 font-medium tracking-wide">
+                                <span className="flex gap-1">
                                     <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
                                     <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
                                     <span className="h-1 w-1 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
@@ -439,27 +339,32 @@ export function AIChatPanel() {
                 </div>
 
                 {/* ─── Scroll to bottom ─────────────────── */}
-                {showScrollBtn && (
-                    <button
-                        onClick={() => scrollToBottom()}
-                        className="absolute bottom-[72px] right-4 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white border border-zinc-200 shadow-sm text-zinc-500 hover:text-zinc-900 transition-colors"
-                    >
-                        <ChevronDown className="h-4 w-4" />
-                    </button>
-                )}
+                <AnimatePresence>
+                    {showScrollBtn && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            onClick={() => scrollToBottom()}
+                            className="absolute bottom-[88px] right-6 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white border border-zinc-200 shadow-md text-zinc-500 hover:text-zinc-900 transition-colors"
+                        >
+                            <ChevronDown className="h-4 w-4" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
 
                 {/* ─── Input ────────────────────────────── */}
-                <form onSubmit={onFormSubmit} className="shrink-0 border-t border-zinc-100 bg-white/80 backdrop-blur-sm px-3 py-3">
-                    <div className="flex items-end gap-2 rounded-xl border border-zinc-200 bg-zinc-50/80 px-3 py-2 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-100 transition-all">
+                <form onSubmit={onFormSubmit} className="shrink-0 bg-white/80 backdrop-blur-md px-4 py-4 pt-2">
+                    <div className="flex items-end gap-2.5 rounded-[20px] border border-zinc-200 bg-white px-3.5 py-2.5 shadow-sm focus-within:border-amber-400 focus-within:ring-[3px] focus-within:ring-amber-500/10 transition-all duration-200">
                         <textarea
                             ref={inputRef}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Ask about your analytics…"
+                            placeholder="Ask Kea about your traffic…"
                             rows={1}
                             disabled={isLoading}
-                            className="flex-1 resize-none bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 outline-none max-h-28 disabled:opacity-50"
+                            className="flex-1 resize-none bg-transparent text-[13px] tracking-tight text-zinc-900 placeholder:text-zinc-400 outline-none max-h-28 disabled:opacity-50 my-1 ml-1"
                             style={{ height: "auto", minHeight: "20px" }}
                             onInput={(e) => {
                                 const el = e.target as HTMLTextAreaElement
@@ -472,17 +377,19 @@ export function AIChatPanel() {
                             disabled={!input || input.trim() === "" || isLoading}
                             aria-label="Send message"
                             className={cn(
-                                "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all",
-                                "bg-gradient-to-br from-amber-500 to-amber-600 text-white hover:from-amber-600 hover:to-amber-700",
-                                "disabled:opacity-30 disabled:cursor-not-allowed disabled:from-zinc-400 disabled:to-zinc-400"
+                                "flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200",
+                                "bg-zinc-900 text-white hover:bg-zinc-800 hover:scale-105 active:scale-95 shadow-md",
+                                "disabled:opacity-100 disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-400 disabled:hover:scale-100 disabled:shadow-none"
                             )}
                         >
-                            <Send className="h-3.5 w-3.5" />
+                            <Send className="h-3.5 w-3.5 ml-0.5" />
                         </button>
                     </div>
-                    <p className="mt-1.5 text-center text-[10px] text-zinc-300">
-                        Press Enter to send · Shift+Enter for new line
-                    </p>
+                    <div className="mt-2.5 flex justify-center items-center gap-1.5 text-[10px] text-zinc-400 font-medium">
+                        <span>Press</span>
+                        <kbd className="px-1.5 py-0.5 bg-zinc-100 rounded text-zinc-500 border border-zinc-200/60 font-sans">Enter</kbd>
+                        <span>to send</span>
+                    </div>
                 </form>
             </div>
         </>
@@ -496,7 +403,7 @@ function MessageContent({ msg }: { msg: any }) {
 
     if (textParts.length > 0) {
         return (
-            <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline">
+            <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:font-semibold prose-strong:text-current prose-headings:text-current prose-a:text-inherit prose-a:underline hover:prose-a:opacity-80">
                 {textParts.map((part: any, i: number) => (
                     <ReactMarkdown key={i}>{part.text}</ReactMarkdown>
                 ))}
@@ -506,19 +413,9 @@ function MessageContent({ msg }: { msg: any }) {
 
     if (msg.content) {
         return (
-            <div className="prose prose-xs max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:text-zinc-900 prose-headings:text-zinc-900 prose-a:text-amber-600 prose-a:no-underline hover:prose-a:underline">
+            <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5 prose-strong:font-semibold prose-strong:text-current prose-headings:text-current prose-a:text-inherit prose-a:underline hover:prose-a:opacity-80">
                 <ReactMarkdown>{msg.content}</ReactMarkdown>
             </div>
-        )
-    }
-
-    if (msg.role === "assistant") {
-        return (
-            <span className="flex gap-1 py-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:0ms]" />
-                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:150ms]" />
-                <span className="h-1.5 w-1.5 rounded-full bg-zinc-400 animate-bounce [animation-delay:300ms]" />
-            </span>
         )
     }
 
