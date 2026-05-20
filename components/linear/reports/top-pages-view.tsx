@@ -64,8 +64,12 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
                         <Clock className="h-4 w-4 text-zinc-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-zinc-900">{Math.floor(data.metrics?.avgSessionDuration || 0)}s</div>
-                        <p className="text-xs text-zinc-500 mt-1">-2.1% from last month</p>
+                        <div className="text-2xl font-bold text-zinc-900">
+                            {(data.metrics?.avgSessionDuration ?? data.avgSessionDuration ?? 0) > 0
+                                ? `${Math.floor(data.metrics?.avgSessionDuration ?? data.avgSessionDuration ?? 0)}s`
+                                : "--"}
+                        </div>
+                        <p className="text-xs text-zinc-500 mt-1">Avg. session duration</p>
                     </CardContent>
                 </Card>
                 <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
@@ -74,8 +78,12 @@ export function TopPagesView({ propertyId }: { propertyId: string }) {
                         <MousePointerClick className="h-4 w-4 text-zinc-400" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-zinc-900">{((data.metrics?.engagementRate || 0) * 100).toFixed(1)}%</div>
-                        <p className="text-xs text-zinc-500 mt-1 text-emerald-600">+4.3% from last month</p>
+                        <div className="text-2xl font-bold text-zinc-900">
+                            {(data.metrics?.engagementRate ?? data.engagementRate ?? 0) > 0
+                                ? `${((data.metrics?.engagementRate ?? data.engagementRate ?? 0) * 100).toFixed(1)}%`
+                                : "--"}
+                        </div>
+                        <p className="text-xs text-zinc-500 mt-1">Engaged sessions ratio</p>
                     </CardContent>
                 </Card>
             </div>

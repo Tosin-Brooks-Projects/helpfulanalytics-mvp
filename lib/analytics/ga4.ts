@@ -99,17 +99,32 @@ export async function getMockOverviewData() {
 
 export async function getMockOverviewComparisonData() {
     const data = await getMockOverviewData();
+    const previousOverTime = data.sessionsOverTime.map((d: any) => ({
+        date: d.date,
+        sessions: Math.floor(d.sessions * 0.8),
+        pageViews: Math.floor(d.pageViews * 0.78),
+        users: Math.floor(d.users * 0.82),
+    }))
+
+    const calculateDelta = (c: number, p: number) => !p ? (c > 0 ? 100 : 0) : ((c - p) / p) * 100
+
     return {
-        ...data,
-        comparisonMetrics: {
-            sessions: 10000,
-            activeUsers: 7100,
-            screenPageViews: 34200,
-            bounceRate: 0.45,
-            averageSessionDuration: 128,
+        isVersus: true,
+        metrics: {
+            sessions: { value: 12543, previous: 10000, delta: calculateDelta(12543, 10000) },
+            users: { value: 8432, previous: 7100, delta: calculateDelta(8432, 7100) },
+            pageViews: { value: 45210, previous: 34200, delta: calculateDelta(45210, 34200) },
+            bounceRate: { value: 0.425, previous: 0.45, delta: 0.425 - 0.45 },
+            engagementRate: { value: 0.575, previous: 0.55, delta: 0.575 - 0.55 },
+            avgSessionDuration: { value: 145, previous: 128, delta: calculateDelta(145, 128) },
         },
-        // For comparison charts, we could generate more, but for now we'll match the structure
-        comparisonSessionsData: data.sessionsOverTime.map(d => Math.floor(d.sessions * 0.8)),
+        chartData: {
+            current: data.sessionsOverTime,
+            previous: previousOverTime,
+        },
+        trafficSources: [],
+        topPages: [],
+        deviceBreakdown: data.deviceBreakdown,
     }
 }
 

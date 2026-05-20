@@ -151,7 +151,7 @@ export function ExportDialog({ children }: { children?: React.ReactNode } = {}) 
                 cy = (doc as any).lastAutoTable.finalY + 15
             }
             if (scope === "devices") {
-                autoTable(doc, { startY: cy, head: [["Device","Sessions","Users"]], body: (data.devices||[]).map((d:any)=>[d.deviceCategory,(d.sessions||0).toLocaleString(),(d.users||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
+                autoTable(doc, { startY: cy, head: [["Device","Sessions","Users"]], body: (data.devices||[]).map((d:any)=>[(d.deviceCategory||d.device||d.name||'Unknown'),(d.sessions||0).toLocaleString(),(d.users||0).toLocaleString()]), ...ts, columnStyles: { 1:{halign:"right"},2:{halign:"right"} } })
                 cy = (doc as any).lastAutoTable.finalY + 15
             }
             if (scope === "audience") {

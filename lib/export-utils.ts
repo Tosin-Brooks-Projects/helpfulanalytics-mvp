@@ -83,39 +83,18 @@ export function flattenAnalyticsData(data: any) {
 
     const flatData: any[] = []
 
-    // 1. Base Metrics KPIs
+    // 1. Base Metrics KPIs — only include if the metrics object has core traffic fields
     if (data.metrics && typeof data.metrics === 'object' && !Array.isArray(data.metrics)) {
         const m = data.metrics
-        flatData.push({
-            Category: 'Overview',
-            Metric: 'Sessions',
-            Value: m.sessions ?? 0
-        })
-        flatData.push({
-            Category: 'Overview',
-            Metric: 'Active Users',
-            Value: m.activeUsers ?? 0
-        })
-        flatData.push({
-            Category: 'Overview',
-            Metric: 'Screen Page Views',
-            Value: m.screenPageViews ?? m.pageViews ?? 0
-        })
-        flatData.push({
-            Category: 'Overview',
-            Metric: 'Bounce Rate',
-            Value: `${((m.bounceRate ?? 0) * 100).toFixed(1)}%`
-        })
-        flatData.push({
-            Category: 'Overview',
-            Metric: 'Engagement Rate',
-            Value: `${((m.engagementRate ?? (1 - (m.bounceRate ?? 0))) * 100).toFixed(1)}%`
-        })
-        flatData.push({
-            Category: 'Overview',
-            Metric: 'Avg Session Duration',
-            Value: `${Math.round(m.averageSessionDuration ?? m.avgSessionDuration ?? 0)}s`
-        })
+        const hasCoreMetrics = m.sessions != null || m.activeUsers != null || m.screenPageViews != null
+        if (hasCoreMetrics) {
+            flatData.push({ Category: 'Overview', Metric: 'Sessions', Value: m.sessions ?? 0 })
+            flatData.push({ Category: 'Overview', Metric: 'Active Users', Value: m.activeUsers ?? 0 })
+            flatData.push({ Category: 'Overview', Metric: 'Screen Page Views', Value: m.screenPageViews ?? m.pageViews ?? 0 })
+            flatData.push({ Category: 'Overview', Metric: 'Bounce Rate', Value: `${((m.bounceRate ?? 0) * 100).toFixed(1)}%` })
+            flatData.push({ Category: 'Overview', Metric: 'Engagement Rate', Value: `${((m.engagementRate ?? (1 - (m.bounceRate ?? 0))) * 100).toFixed(1)}%` })
+            flatData.push({ Category: 'Overview', Metric: 'Avg Session Duration', Value: `${Math.round(m.averageSessionDuration ?? m.avgSessionDuration ?? 0)}s` })
+        }
     }
 
     // 2. Pages

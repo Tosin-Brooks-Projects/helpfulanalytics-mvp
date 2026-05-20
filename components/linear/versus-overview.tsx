@@ -286,27 +286,35 @@ export function VersusOverview() {
 
 function TabComparisonList({ reportType, dateRange, compareDateRange, propertyId }: { reportType: string, dateRange: DateRange | undefined, compareDateRange: DateRange | undefined, propertyId: string | null }) {
     const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
 
     useEffect(() => {
-        if (!propertyId || !dateRange?.from || !compareDateRange?.from) return
+        if (!propertyId || !dateRange?.from || !compareDateRange?.from) {
+            setLoading(false)
+            return
+        }
 
         async function fetchTab() {
             if (!propertyId) return
 
             setLoading(true)
-            const params = new URLSearchParams({
-                propertyId: propertyId,
-                reportType,
-                startDate: dateRange?.from?.toISOString().split('T')[0] || '',
-                endDate: (dateRange?.to || dateRange?.from)?.toISOString().split('T')[0] || '',
-                compareStartDate: compareDateRange?.from?.toISOString().split('T')[0] || '',
-                compareEndDate: (compareDateRange?.to || compareDateRange?.from)?.toISOString().split('T')[0] || ''
-            })
-            const res = await fetch(`/api/analytics?${params.toString()}`)
-            const json = await res.json()
-            setData(json)
-            setLoading(false)
+            try {
+                const params = new URLSearchParams({
+                    propertyId: propertyId,
+                    reportType,
+                    startDate: dateRange?.from?.toISOString().split('T')[0] || '',
+                    endDate: (dateRange?.to || dateRange?.from)?.toISOString().split('T')[0] || '',
+                    compareStartDate: compareDateRange?.from?.toISOString().split('T')[0] || '',
+                    compareEndDate: (compareDateRange?.to || compareDateRange?.from)?.toISOString().split('T')[0] || ''
+                })
+                const res = await fetch(`/api/analytics?${params.toString()}`)
+                const json = await res.json()
+                setData(json)
+            } catch (err) {
+                console.error(`Failed to fetch ${reportType} comparison`, err)
+            } finally {
+                setLoading(false)
+            }
         }
         fetchTab()
     }, [reportType, dateRange, compareDateRange, propertyId])
@@ -412,8 +420,8 @@ function mergeChartData(current: any[], previous: any[], metricKey: string) {
     for (let i = 0; i < len; i++) {
         result.push({
             day: `Day ${i + 1}`,
-            current: current?.[i]?.[metricKey] || null,
-            previous: previous?.[i]?.[metricKey] || null
+            current: current?.[i]?.[metricKey] ?? null,
+            previous: previous?.[i]?.[metricKey] ?? null
         })
     }
     return result
