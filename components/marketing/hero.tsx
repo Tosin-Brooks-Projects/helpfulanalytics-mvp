@@ -1,92 +1,112 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ShinyButton } from "@/components/ui/shiny-button";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { ArrowRight } from "lucide-react";
+
+const VIDEO_URL =
+    "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4";
 
 export function Hero() {
     const { data: session } = useSession();
 
     return (
-        <div className="relative isolate overflow-hidden">
-            <div className="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
-                <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8 text-center lg:text-left">
-                    <motion.h1
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.1 }}
-                        className="mt-24 sm:mt-32 lg:mt-16 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl leading-[1.1]"
+        <section className="relative min-h-dvh overflow-hidden flex flex-col">
+
+            {/* ── Video background ── */}
+            <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                aria-hidden="true"
+                className="absolute inset-0 w-full h-full object-cover z-0"
+            >
+                <source src={VIDEO_URL} type="video/mp4" />
+            </video>
+
+            {/* ── Scrim — just enough to read text ── */}
+            <div
+                className="absolute inset-0 z-[1]"
+                aria-hidden="true"
+                style={{
+                    background:
+                        "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.55) 100%)",
+                }}
+            />
+
+            {/* ── Content ── */}
+            <div className="relative z-10 flex flex-1 flex-col items-center justify-center text-center px-6 pt-28 pb-20 sm:pt-32 sm:pb-28">
+
+                {/* Overline badge */}
+                <div className="animate-fade-rise liquid-glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium text-white/80 mb-8">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" aria-hidden="true" />
+                    30-day free trial · no credit card required
+                </div>
+
+                {/* Headline */}
+                <h1
+                    className="animate-fade-rise-delay max-w-5xl font-normal text-white leading-[1.0] tracking-[-1.5px] text-5xl sm:text-6xl md:text-7xl lg:text-8xl"
+                    style={{ fontFamily: "var(--font-instrument), 'Georgia', serif" }}
+                >
+                    Stop wrestling with{" "}
+                    <em
+                        className="not-italic"
+                        style={{ color: "hsl(36 100% 70%)" }}
                     >
-                        Stop Wrestling With
-                        <br />
-                        <motion.span
-                            animate={{
-                                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                            }}
-                            transition={{
-                                duration: 5,
-                                repeat: Infinity,
-                                ease: "linear",
-                            }}
-                            className="bg-gradient-to-r from-primary via-[#FBBC05] to-primary bg-[length:200%_auto] bg-clip-text text-transparent inline-block pb-2"
-                        >
-                            Google Analytics
-                        </motion.span>
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.2 }}
-                        className="mt-8 text-lg leading-8 text-slate-600 max-w-xl mx-auto lg:mx-0"
-                    >
-                        Connect your Google Analytics in 60 seconds and get the clear dashboard you&apos;ve been wishing for. You&apos;re stuck with GA4. We get it. We don&apos;t replace it - we just make it actually useful.
-                    </motion.p>
-                    {!session && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5, delay: 0.3 }}
-                            className="mt-10 flex items-center justify-center lg:justify-start gap-x-6"
-                        >
-                            <Link href="/login">
-                                <ShinyButton className="h-12 px-8">Get Started</ShinyButton>
+                        Google Analytics.
+                    </em>
+                </h1>
+
+                {/* Subtext */}
+                <p className="animate-fade-rise-delay-2 mt-7 max-w-xl text-base sm:text-lg leading-relaxed text-white/60">
+                    Connect your GA4 in 60 seconds and get the clear dashboard you&apos;ve been
+                    wishing for. We don&apos;t replace it — we just make it actually useful.
+                </p>
+
+                {/* CTAs */}
+                {!session && (
+                    <div className="animate-fade-rise-delay-3 mt-10 flex flex-col items-center gap-4">
+                        <div className="flex flex-wrap items-center justify-center gap-4">
+                            <Link
+                                href="/login"
+                                className="group liquid-glass inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-semibold text-white transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                            >
+                                Start free trial
+                                <ArrowRight className="h-4 w-4 transition-transform duration-150 group-hover:translate-x-0.5" aria-hidden="true" />
                             </Link>
                             <Link
                                 href="/#features"
                                 onClick={(e) => {
                                     e.preventDefault();
-                                    const element = document.getElementById("features");
-                                    if (element) {
-                                        element.scrollIntoView({ behavior: "smooth" });
-                                    }
+                                    document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
                                 }}
-                                className="text-sm font-semibold leading-6 text-slate-900 hover:text-primary transition-colors"
+                                className="text-sm font-medium text-white/50 hover:text-white/80 transition-colors duration-150"
                             >
-                                Learn more <span aria-hidden="true">→</span>
+                                See how it works <span aria-hidden="true">→</span>
                             </Link>
-                        </motion.div>
-                    )}
-                </div>
-                <div className="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mt-0 lg:mr-0 lg:max-w-none lg:flex-none xl:ml-32">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none"
-                    >
-                        <div className="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 dark:bg-gray-100/10 dark:ring-gray-100/20 lg:-m-4 lg:rounded-2xl lg:p-4">
-                            <img
-                                src="/dashboard-preview.png"
-                                alt="App screenshot"
-                                width={2432}
-                                height={1442}
-                                className="w-[76rem] rounded-md shadow-2xl ring-1 ring-gray-900/10 dark:ring-gray-100/20"
-                            />
                         </div>
-                    </motion.div>
-                </div>
+
+                        {/* Trust line */}
+                        <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-xs text-white/35">
+                            <span>No credit card required</span>
+                            <span className="h-3 w-px bg-white/20" aria-hidden="true" />
+                            <span>30-day free trial</span>
+                            <span className="h-3 w-px bg-white/20" aria-hidden="true" />
+                            <span>Cancel anytime</span>
+                        </div>
+                    </div>
+                )}
             </div>
-        </div>
+
+            {/* ── Bottom fade into stats bar ── */}
+            <div
+                className="absolute bottom-0 inset-x-0 h-32 z-[2] pointer-events-none"
+                aria-hidden="true"
+                style={{
+                    background: "linear-gradient(to bottom, transparent, rgb(15 23 42))",
+                }}
+            />
+        </section>
     );
 }

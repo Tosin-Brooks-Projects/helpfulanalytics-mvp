@@ -157,7 +157,7 @@ export function Pricing() {
                                     onClick={() => handleSubscribe(priceId, tier.isCustom || false)}
                                     disabled={!!isLoading}
                                 >
-                                    {isLoading === priceId ? "Processing..." : tier.isCustom ? "Contact Sales" : "Subscribe"}
+                                    {isLoading === priceId ? "Processing..." : tier.isCustom ? "Contact Sales" : tier.title === "Starter" ? "Start Free Trial" : "Subscribe"}
                                 </ShinyButton>
                             </div>
                         )

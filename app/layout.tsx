@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter, Outfit, Cormorant_Garamond } from "next/font/google"
+import { Inter, Outfit, Cormorant_Garamond, Instrument_Serif } from "next/font/google"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { SessionProviderWrapper } from "@/components/SessionProviderWrapper"
 import { Toaster } from "@/components/ui/sonner"
@@ -12,6 +12,13 @@ const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-cormorant",
   weight: ["300", "400", "500", "600", "700"],
+  style: ["normal", "italic"],
+})
+
+const instrumentSerif = Instrument_Serif({
+  subsets: ["latin"],
+  variable: "--font-instrument",
+  weight: "400",
   style: ["normal", "italic"],
 })
 
@@ -85,7 +92,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${outfit.variable} ${cormorant.variable}`}>
+    <html lang="en" className={`${inter.variable} ${outfit.variable} ${cormorant.variable} ${instrumentSerif.variable}`}>
       <body className={inter.className}>
         <SessionProviderWrapper>
           <ErrorBoundary>{children}</ErrorBoundary>
