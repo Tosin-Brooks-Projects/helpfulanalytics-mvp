@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Check, ChevronRight, Loader2, ShieldCheck, BarChart2, ArrowRight, Zap } from "lucide-react"
 import { motion, AnimatePresence, useReducedMotion, useMotionValue, useTransform, animate } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { useSession } from "next-auth/react"
+import { signOut, useSession } from "next-auth/react"
 import { useToast } from "@/components/ui/use-toast"
 
 // ─── ease curve (Emil: strong ease-out) ──────────────────────────────────────
@@ -206,7 +206,13 @@ export function OnboardingWizard() {
 
     const fetchProperties = async () => {
         const res = await fetch("/api/analytics/properties")
-        if (!res.ok) throw new Error("Failed to fetch properties")
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            if (data.error === "ReauthRequired") {
+                throw Object.assign(new Error("ReauthRequired"), { reauth: true })
+            }
+            throw new Error(data.error || "Failed to fetch properties")
+        }
         const data = await res.json()
         setProperties(data.properties || [])
     }
@@ -216,8 +222,13 @@ export function OnboardingWizard() {
         try {
             await fetchProperties()
             setStep(2)
-        } catch {
-            toast({ title: "Couldn't connect", description: "Please try again.", variant: "destructive" })
+        } catch (e: any) {
+            if (e?.reauth) {
+                toast({ title: "Session expired", description: "Re-connecting your Google account…", variant: "destructive" })
+                await signOut({ callbackUrl: "/api/auth/signin" })
+                return
+            }
+            toast({ title: "Couldn't connect", description: e?.message || "Please try again.", variant: "destructive" })
         } finally { setLoading(false) }
     }
 

@@ -15,6 +15,11 @@ export async function GET() {
     const session = await getServerSession(authOptions)
 
     // @ts-ignore
+    if (session?.error === "RefreshAccessTokenError") {
+        return NextResponse.json({ error: "ReauthRequired" }, { status: 401 })
+    }
+
+    // @ts-ignore
     const accessToken = session?.accessToken
 
     if (!accessToken) {
