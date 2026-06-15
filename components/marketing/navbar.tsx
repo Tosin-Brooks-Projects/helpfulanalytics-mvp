@@ -56,7 +56,7 @@ export function Navbar() {
                 <div className={`flex h-14 w-full max-w-5xl items-center justify-between rounded-full px-4 sm:px-6 transition-all duration-300 ${
                     scrolled
                         ? "bg-white/90 backdrop-blur-xl border border-white/40 shadow-[0_4px_24px_0_rgba(0,0,0,0.06)]"
-                        : "liquid-glass"
+                        : "bg-black/40 backdrop-blur-xl border border-white/10"
                 }`}>
 
                     {/* Logo */}
