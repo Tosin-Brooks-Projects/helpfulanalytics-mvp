@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth-options"
 import { db } from "@/lib/firebase-admin"
 import { pricingData } from "@/config/subscriptions"
 import { getSubscriptionStatus } from "@/lib/subscription"
+import { logOnboardingEvent } from "@/lib/onboarding/log"
 
 export const dynamic = "force-dynamic"
 
@@ -56,19 +57,30 @@ export async function POST(request: Request) {
 
     // @ts-ignore
     if (!session?.userId) {
+        await logOnboardingEvent({
+            email: session?.user?.email, step: "save_property.unauthorized", status: "error",
+            message: "No userId on session",
+        })
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
+
+    // @ts-ignore
+    const userId = session.userId
+    const email = session?.user?.email
+
+    await logOnboardingEvent({ userId, email, step: "save_property.start", status: "info" })
 
     try {
         const body = await request.json()
         const { propertyId, propertyName, accountId } = body
 
         if (!propertyId) {
+            await logOnboardingEvent({
+                userId, email, step: "save_property.missing_property_id", status: "error",
+                message: "Property ID missing from request body",
+            })
             return NextResponse.json({ error: "Property ID required" }, { status: 400 })
         }
-
-        // @ts-ignore
-        const userId = session.userId
 
         // Fetch user data and existing properties
         const userDoc = await db.collection("users").doc(userId).get()
@@ -94,6 +106,11 @@ export async function POST(request: Request) {
             const currentCount = propertiesSnap.size
 
             if (currentCount >= maxProperties) {
+                await logOnboardingEvent({
+                    userId, email, step: "save_property.plan_limit_reached", status: "error",
+                    message: `Plan limit reached (${currentCount}/${maxProperties})`,
+                    meta: { tier: tierConfig?.title || "Starter", maxProperties, currentCount },
+                })
                 return NextResponse.json({
                     error: `Plan limit reached. You can only add ${maxProperties} properties on the ${tierConfig?.title || 'Starter'} plan.`
                 }, { status: 403 })
@@ -127,10 +144,19 @@ export async function POST(request: Request) {
             addedAt: new Date()
         })
 
+        await logOnboardingEvent({
+            userId, email, step: "save_property.success", status: "info",
+            meta: { propertyId, propertyName },
+        })
+
         return NextResponse.json({ success: true, activeProperty })
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error saving property:", error)
+        await logOnboardingEvent({
+            userId, email, step: "save_property.exception", status: "error",
+            message: error?.message || String(error),
+        })
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }

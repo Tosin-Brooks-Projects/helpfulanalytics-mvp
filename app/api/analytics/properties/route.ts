@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { BetaAnalyticsDataClient } from "@google-analytics/data"
+import { logOnboardingEvent } from "@/lib/onboarding/log"
 
 // Note: For properties lists, we strictly should use the Google Analytics Admin API.
 // However, @google-analytics/data is primarily for reports.
@@ -13,9 +14,18 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
     const session = await getServerSession(authOptions)
+    // @ts-ignore
+    const userId = session?.userId
+    const email = session?.user?.email
+
+    await logOnboardingEvent({ userId, email, step: "fetch_properties.start", status: "info" })
 
     // @ts-ignore
     if (session?.error === "RefreshAccessTokenError") {
+        await logOnboardingEvent({
+            userId, email, step: "fetch_properties.refresh_token_error", status: "error",
+            message: "Google access token refresh failed (likely missing refresh_token)",
+        })
         return NextResponse.json({ error: "ReauthRequired" }, { status: 401 })
     }
 
@@ -23,6 +33,10 @@ export async function GET() {
     const accessToken = session?.accessToken
 
     if (!accessToken) {
+        await logOnboardingEvent({
+            userId, email, step: "fetch_properties.no_access_token", status: "error",
+            message: "No access token on session",
+        })
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -36,6 +50,11 @@ export async function GET() {
 
         if (!response.ok) {
             const error = await response.json()
+            await logOnboardingEvent({
+                userId, email, step: "fetch_properties.admin_api_error", status: "error",
+                message: error.error?.message || "Failed to fetch properties",
+                meta: { status: response.status },
+            })
             return NextResponse.json({ error: error.error?.message || "Failed to fetch properties" }, { status: response.status })
         }
 
@@ -64,9 +83,17 @@ export async function GET() {
             accountId: "demo-account"
         })
 
+        await logOnboardingEvent({
+            userId, email, step: "fetch_properties.success", status: "info",
+            meta: { count: properties.length },
+        })
+
         return NextResponse.json({ properties })
-    } catch (error) {
-        console.error("Error fetching properties:", error)
+    } catch (error: any) {
+        await logOnboardingEvent({
+            userId, email, step: "fetch_properties.exception", status: "error",
+            message: error?.message || String(error),
+        })
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
     }
 }
