@@ -4,6 +4,7 @@ import { ShinyButton } from "@/components/ui/shiny-button";
 import { pricingData } from "@/config/subscriptions";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 
 
 export function Pricing() {
@@ -12,6 +13,7 @@ export function Pricing() {
     const [isAnnual, setIsAnnual] = useState(false)
     const searchParams = useSearchParams()
     const router = useRouter()
+    const posthog = usePostHog()
 
     const reason = searchParams?.get("reason")
 
@@ -43,6 +45,14 @@ export function Pricing() {
 
         try {
             setIsLoading(priceId)
+            const tier = pricingData.find(
+                (t) => t.priceIdMonthly === priceId || t.priceIdYearly === priceId
+            )
+            posthog?.capture("subscription_checkout_started", {
+                price_id: priceId,
+                tier: tier?.title,
+                billing_period: isAnnual ? "annual" : "monthly",
+            })
             const response = await fetch("/api/stripe/checkout", {
                 method: "POST",
                 headers: {
@@ -98,7 +108,11 @@ export function Pricing() {
                 <div className="mt-12 flex justify-center items-center gap-4">
                     <span className={`text-sm ${!isAnnual ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>Monthly</span>
                     <button
-                        onClick={() => setIsAnnual(!isAnnual)}
+                        onClick={() => {
+                            const next = !isAnnual
+                            setIsAnnual(next)
+                            posthog?.capture("pricing_billing_toggle_changed", { billing_period: next ? "annual" : "monthly" })
+                        }}
                         className="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none bg-zinc-200 dark:bg-zinc-800"
                         role="switch"
                         aria-checked={isAnnual}

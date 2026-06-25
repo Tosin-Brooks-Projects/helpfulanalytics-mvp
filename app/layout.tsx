@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { Inter, Outfit, Cormorant_Garamond, Instrument_Serif } from "next/font/google"
 import { ErrorBoundary } from "@/components/error-boundary"
 import { SessionProviderWrapper } from "@/components/SessionProviderWrapper"
+import { PostHogProvider } from "@/components/PostHogProvider"
 import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
@@ -95,8 +96,10 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${outfit.variable} ${cormorant.variable} ${instrumentSerif.variable}`}>
       <body className={inter.className}>
         <SessionProviderWrapper>
-          <ErrorBoundary>{children}</ErrorBoundary>
-          <Toaster />
+          <PostHogProvider>
+            <ErrorBoundary>{children}</ErrorBoundary>
+            <Toaster />
+          </PostHogProvider>
         </SessionProviderWrapper>
       </body>
     </html>

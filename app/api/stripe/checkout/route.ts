@@ -5,6 +5,7 @@ import { stripe } from "@/lib/stripe"
 import { pricingData } from "@/config/subscriptions"
 import { db } from "@/lib/firebase-admin"
 import { TRIAL_DAYS } from "@/lib/subscription"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 export async function POST(req: Request) {
     try {
@@ -87,6 +88,18 @@ export async function POST(req: Request) {
                 userId: userId,
             },
             subscription_data,
+        })
+
+        const posthog = getPostHogClient()
+        posthog.capture({
+            distinctId: userId,
+            event: "checkout_session_created",
+            properties: {
+                price_id: priceId,
+                tier: tier?.title,
+                trial_days: signupTrialRemainingDays > 0 ? signupTrialRemainingDays : 0,
+                has_existing_customer: Boolean(existingStripeCustomerId),
+            },
         })
 
         return NextResponse.json({ url: stripeSession.url })

@@ -4,6 +4,7 @@ import { stripe } from "@/lib/stripe"
 import Stripe from "stripe"
 import { db } from "@/lib/firebase-admin"
 import { pricingData } from "@/config/subscriptions"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 // This is required for raw body access in Next.js App Router for webhooks if we were using a different method, 
 // but simply reading text() is often enough if we don't have middleware interference.
@@ -52,6 +53,18 @@ export async function POST(req: Request) {
                     stripeCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
                 }
             }, { merge: true })
+
+            const posthog = getPostHogClient()
+            posthog.capture({
+                distinctId: userId,
+                event: "subscription_activated",
+                properties: {
+                    price_id: priceId,
+                    tier: tier?.title,
+                    stripe_subscription_id: subscription.id,
+                    status: subscription.status,
+                },
+            })
         }
     }
 
@@ -78,6 +91,16 @@ export async function POST(req: Request) {
                         stripeCurrentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
                     }
                 }, { merge: true })
+
+                const posthog = getPostHogClient()
+                posthog.capture({
+                    distinctId: doc.id,
+                    event: "invoice_payment_succeeded",
+                    properties: {
+                        stripe_subscription_id: subscription.id,
+                        status: subscription.status,
+                    },
+                })
             }
         }
     }
@@ -104,6 +127,18 @@ export async function POST(req: Request) {
                     stripeCurrentPeriodEnd: periodEnd
                 }
             }, { merge: true })
+
+            if (event.type === "customer.subscription.deleted") {
+                const posthog = getPostHogClient()
+                posthog.capture({
+                    distinctId: doc.id,
+                    event: "subscription_cancelled",
+                    properties: {
+                        stripe_subscription_id: subscription.id,
+                        status: subscription.status,
+                    },
+                })
+            }
         }
     }
 

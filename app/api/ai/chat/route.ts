@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 export const dynamic = "force-dynamic"
 import { generateText, tool, createUIMessageStream, createUIMessageStreamResponse } from "ai"
@@ -320,6 +321,20 @@ export async function POST(request: Request) {
     const modelMessages = convertToModelMessages(messages)
     const model = google("gemini-2.5-flash")
     const system = buildSystemPrompt(startDate, endDate, compareStartDate, compareEndDate)
+
+    const userId = (session as any).userId || (session as any).user?.id
+    if (userId) {
+        const posthog = getPostHogClient()
+        posthog.capture({
+            distinctId: userId,
+            event: "ai_chat_message_sent",
+            properties: {
+                property_id: propertyId,
+                is_demo: isDemo,
+                message_count: messages.length,
+            },
+        })
+    }
 
     console.log("[Kea] Property:", propertyId, "| isDemo:", isDemo, "| msgs:", modelMessages.length)
 

@@ -7,6 +7,7 @@ import { motion, AnimatePresence, useReducedMotion, useMotionValue, useTransform
 import { cn } from "@/lib/utils"
 import { signOut, useSession } from "next-auth/react"
 import { useToast } from "@/components/ui/use-toast"
+import { usePostHog } from "posthog-js/react"
 
 // ─── ease curve (Emil: strong ease-out) ──────────────────────────────────────
 const E = [0.23, 1, 0.32, 1] as const
@@ -203,6 +204,7 @@ export function OnboardingWizard() {
     const { toast } = useToast()
     const { update } = useSession()
     const reduced = useReducedMotion()
+    const posthog = usePostHog()
 
     const fetchProperties = async () => {
         const res = await fetch("/api/analytics/properties")
@@ -221,6 +223,7 @@ export function OnboardingWizard() {
         setLoading(true)
         try {
             await fetchProperties()
+            posthog?.capture("ga4_connected")
             setStep(2)
         } catch (e: any) {
             if (e?.reauth) {
@@ -242,6 +245,10 @@ export function OnboardingWizard() {
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || "Failed to save property")
+            posthog?.capture("property_selected", {
+                property_name: property.name,
+                property_id: property.id,
+            })
             setStep(3)
         } catch (e: any) {
             toast({ title: "Error", description: e.message || "Something went wrong.", variant: "destructive" })
@@ -250,6 +257,7 @@ export function OnboardingWizard() {
 
     const handleFinish = async () => {
         setLoading(true)
+        posthog?.capture("onboarding_completed")
         await update({ isOnboarded: true })
         router.push("/dashboard")
         router.refresh()
@@ -462,7 +470,7 @@ export function OnboardingWizard() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.3, duration: 0.3, ease: E }}
                                 >
-                                    You're all set
+                                    You&apos;re all set
                                 </motion.h2>
                                 <motion.p
                                     className="mt-2 text-[13px] text-zinc-500 text-center max-w-xs leading-relaxed px-6"

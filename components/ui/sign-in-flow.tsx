@@ -8,6 +8,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { signIn } from "next-auth/react";
 import { Navbar } from "@/components/marketing/navbar";
+import posthog from "posthog-js";
 
 type Uniforms = {
     [key: string]: {
@@ -344,6 +345,7 @@ export const SignInPage = ({ className }: SignInPageProps) => {
 
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
+        posthog.capture("user_signed_in", { provider: "google" });
         await signIn("google", { callbackUrl: "/dashboard" });
     };
 

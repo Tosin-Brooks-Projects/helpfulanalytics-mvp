@@ -9,11 +9,13 @@ import { toast } from "sonner"
 import { ReportTemplate } from "@/components/dashboard/report-template"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { useAnalytics } from "@/hooks/use-analytics"
+import { usePostHog } from "posthog-js/react"
 
 export function DownloadReportButton() {
     const [loading, setLoading] = useState(false)
     const { selectedProperty, dateRange } = useDashboard()
     const { data, loading: fetchingData } = useAnalytics(selectedProperty)
+    const posthog = usePostHog()
 
     const generatePDF = async () => {
         const element = document.getElementById('report-container')
@@ -47,6 +49,7 @@ export function DownloadReportButton() {
         try {
             const pdf = await generatePDF()
             pdf.save('analytics-report.pdf')
+            posthog?.capture("report_downloaded", { property_id: selectedProperty })
             toast.success("Report downloaded")
         } catch (error) {
             console.error(error)
