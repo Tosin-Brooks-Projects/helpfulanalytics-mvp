@@ -21,6 +21,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { signOut } from "next-auth/react"
 import { useDashboard } from "./dashboard-context"
+import { getTierDisplayName } from "@/config/subscriptions"
 import { useState, useEffect } from "react"
 import { ExportDialog } from "@/components/dashboard/export-dialog"
 
@@ -130,8 +131,8 @@ export function MobileBottomNav() {
                                 {subscription && (
                                     <div className="mx-1 my-3 rounded-lg border border-zinc-100 bg-zinc-50 p-3">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-medium text-zinc-700 capitalize">
-                                                {subscription.tier} Plan
+                                            <span className="text-xs font-medium text-zinc-700">
+                                                {getTierDisplayName(subscription.tier)} Plan
                                             </span>
                                             <span className={cn(
                                                 "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium",

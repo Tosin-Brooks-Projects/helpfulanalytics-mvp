@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { db } from "@/lib/firebase-admin"
-import { pricingData, PER_PROPERTY_TIER, PER_PROPERTY_DEFAULT_CAP } from "@/config/subscriptions"
+import { pricingData, PER_PROPERTY_TIER, PER_PROPERTY_DEFAULT_CAP, TRIAL_PROPERTY_CAP } from "@/config/subscriptions"
 import { getSubscriptionStatus } from "@/lib/subscription"
 import { logOnboardingEvent } from "@/lib/onboarding/log"
 import { getEffectivePropertyLimit } from "@/lib/property-limits"
@@ -16,6 +16,11 @@ function normalizePropertyId(propertyId: string) {
 
 function isPerProperty(tier: string | undefined) {
     return String(tier).toLowerCase() === PER_PROPERTY_TIER
+}
+
+// 5 properties during the free trial, 30 once they're actually paying.
+function perPropertyCap(status: string | undefined) {
+    return status === "trialing" ? TRIAL_PROPERTY_CAP : PER_PROPERTY_DEFAULT_CAP
 }
 
 // Best-effort mirror of the Firestore property count onto the Stripe
@@ -69,8 +74,10 @@ export async function GET() {
         const userData = userDoc.data()
         const deletionUsage = userData?.deletionRateLimit || { count: 0, resetAt: Date.now() + 30 * 24 * 60 * 60 * 1000 }
         const subInfo = getSubscriptionStatus(userData)
-        const tierConfig = pricingData.find(t => t.title.toLowerCase() === subInfo.tier?.toLowerCase())
-        const propertyLimit = getEffectivePropertyLimit(session, userData, tierConfig?.maxProperties ?? 1)
+        const tierMax = isPerProperty(subInfo.tier)
+            ? perPropertyCap(subInfo.status)
+            : pricingData.find(t => t.title.toLowerCase() === subInfo.tier?.toLowerCase())?.maxProperties ?? 1
+        const propertyLimit = getEffectivePropertyLimit(session, userData, tierMax)
 
         return NextResponse.json({ properties, deletionUsage, propertyLimit })
     } catch (error) {
@@ -119,7 +126,7 @@ export async function POST(request: Request) {
         let maxProperties: number
         let tierConfig: (typeof pricingData)[number] | undefined
         if (perProperty) {
-            maxProperties = getEffectivePropertyLimit(session, userData, PER_PROPERTY_DEFAULT_CAP)
+            maxProperties = getEffectivePropertyLimit(session, userData, perPropertyCap(subInfo.status))
         } else {
             const tierName = subInfo.isPremium
                 ? subInfo.tier

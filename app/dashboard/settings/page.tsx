@@ -340,7 +340,7 @@ export default function SettingsPage() {
 
     if (initialLoading) {
         return (
-            <LinearShell>
+            <LinearShell gated={false}>
                 <div className="flex items-center gap-2.5 text-zinc-400 p-8">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span className="text-sm">Loading…</span>
@@ -350,7 +350,7 @@ export default function SettingsPage() {
     }
 
     return (
-        <LinearShell>
+        <LinearShell gated={false}>
             <div className="flex flex-col gap-8 max-w-3xl">
 
                 {/* Page header */}
@@ -406,7 +406,7 @@ export default function SettingsPage() {
                                 })}
                             </div>
                             <p className="text-[11px] text-zinc-400 leading-relaxed">
-                                Summarizes yesterday's statistics across all your connected GA4 properties in Kea's witty personality.
+                                Summarizes yesterday&apos;s statistics across all your connected GA4 properties in Kea&apos;s witty personality.
                             </p>
                         </div>
 

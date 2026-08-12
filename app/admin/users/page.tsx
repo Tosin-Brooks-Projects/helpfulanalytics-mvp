@@ -26,6 +26,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { toast } from "sonner"
+import { LEGACY_TIER_TITLES } from "@/config/subscriptions"
 
 type AdminUserRow = {
     id: string
@@ -46,6 +47,7 @@ export default function AdminUsersPage() {
     const [users, setUsers] = useState<AdminUserRow[]>([])
     const [loading, setLoading] = useState(true)
     const [savingUserId, setSavingUserId] = useState<string | null>(null)
+    const [switchingUserId, setSwitchingUserId] = useState<string | null>(null)
 
     async function fetchUsers() {
         setLoading(true)
@@ -84,6 +86,29 @@ export default function AdminUsersPage() {
             toast.error(e?.message || "Failed to update user")
         } finally {
             setSavingUserId(null)
+        }
+    }
+
+    async function switchToPerProperty(userId: string) {
+        setSwitchingUserId(userId)
+        try {
+            const res = await fetch(`/api/admin/users/${userId}/switch-to-per-property`, {
+                method: "POST",
+            })
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) {
+                throw new Error(data?.error || "Failed to switch billing")
+            }
+            toast.success(
+                data.mode === "stripe"
+                    ? `Switched to per-property billing (qty ${data.quantity}), effective next renewal.`
+                    : "Tier switched to per-property (no Stripe subscription attached, no charge)."
+            )
+            await fetchUsers()
+        } catch (e: any) {
+            toast.error(e?.message || "Failed to switch billing")
+        } finally {
+            setSwitchingUserId(null)
         }
     }
 
@@ -185,6 +210,8 @@ export default function AdminUsersPage() {
                                                     user={user}
                                                     saving={savingUserId === user.id}
                                                     onSave={(payload) => saveUserEdits(user.id, payload)}
+                                                    switching={switchingUserId === user.id}
+                                                    onSwitchToPerProperty={() => switchToPerProperty(user.id)}
                                                 />
                                             </td>
                                         </tr>
@@ -203,10 +230,14 @@ function EditUserDialog({
     user,
     saving,
     onSave,
+    switching,
+    onSwitchToPerProperty,
 }: {
     user: AdminUserRow
     saving: boolean
     onSave: (payload: any) => Promise<void>
+    switching: boolean
+    onSwitchToPerProperty: () => Promise<void>
 }) {
     const [open, setOpen] = useState(false)
     const [role, setRole] = useState<"admin" | "user">((user.role as any) || "user")
@@ -249,6 +280,18 @@ function EditUserDialog({
         }
         await onSave(payload)
         setOpen(false)
+    }
+
+    const isLegacyTier = LEGACY_TIER_TITLES.includes(String(user.tier || "").toLowerCase())
+
+    async function handleSwitchToPerProperty() {
+        const confirmed = window.confirm(
+            `Switch ${user.email || user.id} from "${user.tier}" to per-property billing?\n\n` +
+            `If they have a real Stripe subscription, this changes their price at their next renewal (no immediate charge). ` +
+            `If not, this only updates their tier in Firestore.`
+        )
+        if (!confirmed) return
+        await onSwitchToPerProperty()
     }
 
     return (
@@ -362,6 +405,26 @@ function EditUserDialog({
                         </div>
                         <Switch checked={resetTrialStart} onCheckedChange={setResetTrialStart} />
                     </div>
+
+                    {isLegacyTier && (
+                        <div className="flex items-center justify-between rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+                            <div>
+                                <div className="text-xs font-semibold text-amber-800">Switch to per-property billing</div>
+                                <div className="text-xs text-amber-700">
+                                    Moves this account off &quot;{user.tier}&quot; onto the $12/property plan. Takes effect at next renewal if they have a Stripe subscription.
+                                </div>
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-amber-300 text-amber-800 hover:bg-amber-100 shrink-0"
+                                disabled={switching}
+                                onClick={handleSwitchToPerProperty}
+                            >
+                                {switching ? "Switching..." : "Switch"}
+                            </Button>
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter>

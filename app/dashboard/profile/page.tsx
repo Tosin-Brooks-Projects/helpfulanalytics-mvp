@@ -5,6 +5,8 @@ export const dynamic = "force-dynamic"
 import { useEffect, useState } from "react"
 import { LinearShell } from "@/components/linear/linear-shell"
 import { LinearGraphCard } from "@/components/linear"
+import { useDashboard } from "@/components/linear/dashboard-context"
+import { getTierDisplayName } from "@/config/subscriptions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -22,6 +24,7 @@ interface UserProfile {
 export default function ProfilePage() {
     const [user, setUser] = useState<UserProfile | null>(null)
     const [loading, setLoading] = useState(true)
+    const { subscription } = useDashboard()
 
     useEffect(() => {
         async function fetchProfile() {
@@ -46,7 +49,7 @@ export default function ProfilePage() {
 
     if (loading) {
         return (
-            <LinearShell>
+            <LinearShell gated={false}>
                 <div className="flex items-center justify-center h-96 text-zinc-500">
                     Loading profile...
                 </div>
@@ -55,7 +58,7 @@ export default function ProfilePage() {
     }
 
     return (
-        <LinearShell>
+        <LinearShell gated={false}>
             <div className="flex flex-col gap-8 max-w-2xl">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-zinc-900 font-outfit">User Profile</h1>
@@ -73,10 +76,20 @@ export default function ProfilePage() {
                     <div>
                         <h2 className="text-xl font-bold text-zinc-900 font-outfit">{user?.name || "User"}</h2>
                         <p className="text-zinc-500">{user?.email || "No email"}</p>
-                        <div className="mt-3 flex gap-2">
-                            <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-widest border border-amber-200 font-outfit">Pro Plan</span>
-                            <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-widest border border-emerald-200 font-outfit">Active</span>
-                        </div>
+                        {subscription && (
+                            <div className="mt-3 flex gap-2">
+                                <span className="px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-widest border border-amber-200 font-outfit">
+                                    {getTierDisplayName(subscription.tier)} Plan
+                                </span>
+                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border font-outfit ${
+                                    subscription.status === 'active' || subscription.status === 'trialing'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                        : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                                }`}>
+                                    {subscription.status === 'trialing' ? 'Trial' : subscription.status}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
 

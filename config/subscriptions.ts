@@ -4,8 +4,17 @@ import { type SubscriptionTier } from "@/types/subscription"
 export const PER_PROPERTY_TIER = "per-property"
 // Flat self-serve cap for per-property accounts, unless overridden per-account by an admin.
 export const PER_PROPERTY_DEFAULT_CAP = 30
+// Property cap while a per-property account is still on its free trial (not yet paying).
+export const TRIAL_PROPERTY_CAP = 5
 // Legacy tiers kept only for existing (grandfathered) subscribers.
 export const LEGACY_TIER_TITLES = ["starter", "pro", "agency", "enterprise"]
+
+/** Human-readable tier label (e.g. "per-property" -> "Per-Property"), sourced from pricingData. */
+export function getTierDisplayName(tier: string | undefined): string {
+    if (!tier) return "Starter"
+    const match = pricingData.find(t => t.title.toLowerCase() === tier.toLowerCase())
+    return match?.title ?? tier
+}
 
 export const pricingData: SubscriptionTier[] = [
     {

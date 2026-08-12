@@ -6,13 +6,18 @@ import { useDashboard } from "./dashboard-context"
 import { cn } from "@/lib/utils"
 import { DashboardTour } from "@/components/dashboard/dashboard-tour"
 import { AIChatPanel } from "@/components/linear/ai-chat-panel"
+import { AnalyticsPaywall } from "@/components/dashboard/analytics-paywall"
 
 interface LinearShellProps {
     children: ReactNode
+    /** Set false for pages that must stay reachable even after the trial ends (e.g. Settings, Profile). */
+    gated?: boolean
 }
 
-export function LinearShell({ children }: LinearShellProps) {
-    const { sidebarCollapsed } = useDashboard()
+export function LinearShell({ children, gated = true }: LinearShellProps) {
+    const { sidebarCollapsed, subscription, loading } = useDashboard()
+    const isPremium = subscription?.status === "active" || subscription?.status === "trialing"
+    const showPaywall = gated && !loading && !!subscription && !isPremium
 
     return (
         <div className="flex h-screen w-full bg-transparent text-zinc-900 selection:bg-amber-500/30 overflow-hidden">
@@ -35,7 +40,7 @@ export function LinearShell({ children }: LinearShellProps) {
                 {/* Scrollable Main Area */}
                 <main id="main-dashboard-content" className="flex-1 overflow-y-auto p-4 lg:p-10 pt-4 lg:pt-10 pb-24 lg:pb-20 animate-in fade-in duration-500">
                     <div className="max-w-[1600px] mx-auto">
-                        {children}
+                        {showPaywall ? <AnalyticsPaywall /> : children}
                     </div>
                 </main>
             </div>
