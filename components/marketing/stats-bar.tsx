@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const stats = [
     { value: "60s", label: "Average setup time" },
     { value: "0", label: "Lines of code to add" },
-    { value: "30", label: "Days free trial" },
+    { value: "14", label: "Days free trial" },
     { value: "100%", label: "Data stays in Google" },
 ];
 

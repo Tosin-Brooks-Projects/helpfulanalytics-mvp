@@ -89,7 +89,7 @@ export function Pricing() {
                         </div>
                         <div>
                             <h3 className="text-red-900 font-bold text-lg">Your Free Trial Has Expired</h3>
-                            <p className="text-red-700 text-sm mt-1">You&apos;ve enjoyed your 30 days of complimentary access. Please upgrade to a paid plan below to continue using the dashboard.</p>
+                            <p className="text-red-700 text-sm mt-1">You&apos;ve enjoyed your 14 days of complimentary access. Please upgrade to a paid plan below to continue using the dashboard.</p>
                         </div>
                     </div>
                 )}

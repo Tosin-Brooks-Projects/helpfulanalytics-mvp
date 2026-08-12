@@ -1,7 +1,7 @@
 import { UserSubscription } from "@/types/subscription";
 import { PER_PROPERTY_TIER } from "@/config/subscriptions";
 
-export const TRIAL_DAYS = 30;
+export const TRIAL_DAYS = 14;
 
 export function getSubscriptionStatus(userData: any): { 
     tier: string; 
@@ -23,7 +23,7 @@ export function getSubscriptionStatus(userData: any): {
     // A user is "Premium" if they have an active or trialing Stripe subscription
     let isPremium = status === "active" || status === "trialing";
 
-    // Trial enforcement logic (30 days from createdAt)
+    // Trial enforcement logic (TRIAL_DAYS from createdAt)
     const now = new Date();
     const trialDurationMs = TRIAL_DAYS * 24 * 60 * 60 * 1000;
     const trialEndsAt = new Date(createdAt.getTime() + trialDurationMs);

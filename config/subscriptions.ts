@@ -16,13 +16,13 @@ export const pricingData: SubscriptionTier[] = [
         features: [
             "$12 / property / month",
             "No long-term commitment",
-            "30 day free trial",
+            "14 day free trial",
         ],
         highlight: true,
         priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PER_PROPERTY || "price_1U3Mz0AQjADCPHYI78fGzKdq",
         priceIdYearly: "",
         maxProperties: PER_PROPERTY_DEFAULT_CAP,
-        trialDays: 30,
+        trialDays: 14,
     },
     {
         title: "Starter",
@@ -31,14 +31,14 @@ export const pricingData: SubscriptionTier[] = [
         description: "Perfect for getting started",
         features: [
             "1 GA4 property",
-            "30 day free trial",
+            "14 day free trial",
             "Basic Analytics",
         ],
         highlight: false,
         priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_STARTER || "price_1SeZSPGuYUi194RaHzbFW6Nd",
         priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_STARTER_YEARLY || "",
         maxProperties: 1,
-        trialDays: 30,
+        trialDays: 14,
     },
     {
         title: "Pro",
@@ -78,7 +78,7 @@ export const pricingData: SubscriptionTier[] = [
         features: [
             "30+ GA4 properties",
             "Custom Onboarding",
-            "Priority Phone Support",
+            "Priority Support",
         ],
         highlight: false,
         priceIdMonthly: "",

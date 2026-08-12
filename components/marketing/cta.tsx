@@ -7,7 +7,7 @@ import Link from "next/link";
 const promises = [
     { icon: Zap, text: "Connected in 60 seconds" },
     { icon: Shield, text: "Your data never leaves Google" },
-    { icon: Clock, text: "30-day free trial, cancel anytime" },
+    { icon: Clock, text: "14-day free trial, cancel anytime" },
 ];
 
 export function CTA() {
@@ -97,7 +97,7 @@ export function CTA() {
                             <div className="w-full border-t border-white/8 pt-5 space-y-2">
                                 <div className="flex justify-between text-xs text-slate-500">
                                     <span>Trial length</span>
-                                    <span className="text-slate-300 font-medium">30 days</span>
+                                    <span className="text-slate-300 font-medium">14 days</span>
                                 </div>
                                 <div className="flex justify-between text-xs text-slate-500">
                                     <span>Credit card</span>

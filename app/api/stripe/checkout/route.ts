@@ -30,7 +30,7 @@ export async function POST(req: Request) {
         // @ts-ignore
         const userEmail = session.user.email
 
-        // The app grants a 30-day trial automatically from signup
+        // The app grants a TRIAL_DAYS-day trial automatically from signup
         // (see lib/subscription.ts). Only grant Stripe's trial_period_days
         // for users who (a) have never subscribed before, and (b) still have
         // time left on their signup trial. Otherwise they'd get a second free

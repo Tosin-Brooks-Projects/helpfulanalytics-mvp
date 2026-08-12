@@ -88,7 +88,7 @@ export const authOptions: NextAuthOptions = {
                                 name: user.name,
                                 image: user.image,
                                 lastSeen: new Date(),
-                                createdAt: new Date(), // Start 30-day trial
+                                createdAt: new Date(), // Start TRIAL_DAYS-day trial
                                 subscriptionStatus: 'free',
                                 role: "user",
                                 isOnboarded: false, // Flag as new
