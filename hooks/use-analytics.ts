@@ -1,40 +1,42 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import useSWR from "swr"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { format } from "date-fns"
 
+const ANALYTICS_REFRESH_INTERVAL_MS = 60_000
+
+async function analyticsFetcher([, propertyId, reportType, startDate, endDate]: [
+    string, string, string, string, string
+]) {
+    const params = new URLSearchParams({ propertyId, reportType, startDate, endDate })
+    const res = await fetch(`/api/analytics?${params.toString()}`)
+    if (!res.ok) throw new Error("Failed to fetch analytics")
+    return res.json()
+}
+
 export function useAnalytics(propertyId: string | undefined, reportType: string = "overview") {
-    const [data, setData] = useState<any>(null)
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
     const { dateRange } = useDashboard()
 
-    useEffect(() => {
-        async function fetchData() {
-            if (!propertyId) return
-            setLoading(true)
-            setError(null)
-            try {
-                // Format dates for API (YYYY-MM-DD or use "30daysAgo" fallback)
-                const start = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "30daysAgo"
-                const end = dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "today"
+    const start = dateRange?.from ? format(dateRange.from, "yyyy-MM-dd") : "30daysAgo"
+    const end = dateRange?.to ? format(dateRange.to, "yyyy-MM-dd") : "today"
 
-                const res = await fetch(`/api/analytics?propertyId=${propertyId}&reportType=${encodeURIComponent(reportType)}&startDate=${start}&endDate=${end}`)
-                if (!res.ok) throw new Error("Failed to fetch analytics")
+    const key = propertyId
+        ? (["analytics", propertyId, reportType, start, end] as const)
+        : null
 
-                const json = await res.json()
-                setData(json)
-            } catch (err: any) {
-                console.error("Failed to fetch analytics", err)
-                setError(err.message || "Unknown error")
-            } finally {
-                setLoading(false)
-            }
-        }
+    const { data, error, isLoading, mutate } = useSWR(key, analyticsFetcher, {
+        refreshInterval: ANALYTICS_REFRESH_INTERVAL_MS,
+        revalidateOnFocus: true,
+        dedupingInterval: ANALYTICS_REFRESH_INTERVAL_MS,
+        keepPreviousData: true,
+        errorRetryCount: 3,
+    })
 
-        fetchData()
-    }, [propertyId, dateRange, reportType])
-
-    return { data, loading, error }
+    return {
+        data: data ?? null,
+        loading: isLoading,
+        error: error ? (error.message || "Unknown error") : null,
+        refresh: mutate,
+    }
 }

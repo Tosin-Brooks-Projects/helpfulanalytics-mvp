@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { stripe } from "@/lib/stripe"
-import { pricingData } from "@/config/subscriptions"
+import { pricingData, PER_PROPERTY_TIER } from "@/config/subscriptions"
 import { db } from "@/lib/firebase-admin"
 import { TRIAL_DAYS } from "@/lib/subscription"
 import { getPostHogClient } from "@/lib/posthog-server"
@@ -38,29 +38,54 @@ export async function POST(req: Request) {
         let signupTrialRemainingDays = 0
         let existingStripeCustomerId: string | undefined
         let hasSubscribedBefore = false
-        try {
-            const userDoc = await db.collection("users").doc(userId).get()
-            const data = userDoc.data()
-            existingStripeCustomerId = data?.subscription?.stripeCustomerId
-            hasSubscribedBefore = Boolean(
-                existingStripeCustomerId || data?.subscription?.stripeSubscriptionId
-            )
+        let quantity = 1
 
-            if (tier.trialDays && !hasSubscribedBefore) {
-                const createdAtRaw = data?.createdAt
-                const createdAt = createdAtRaw
-                    ? (typeof createdAtRaw.toDate === "function"
-                        ? createdAtRaw.toDate()
-                        : new Date(createdAtRaw))
-                    : null
-                if (createdAt) {
-                    const msPerDay = 24 * 60 * 60 * 1000
-                    const elapsedDays = Math.floor((Date.now() - createdAt.getTime()) / msPerDay)
-                    signupTrialRemainingDays = Math.max(0, TRIAL_DAYS - elapsedDays)
-                }
-            }
+        let userDoc
+        try {
+            userDoc = await db.collection("users").doc(userId).get()
         } catch (e) {
             console.error("[STRIPE_CHECKOUT] Failed to read user record", e)
+            return new NextResponse("Failed to start checkout. Please try again.", { status: 500 })
+        }
+
+        const data = userDoc.data()
+        existingStripeCustomerId = data?.subscription?.stripeCustomerId
+        hasSubscribedBefore = Boolean(
+            existingStripeCustomerId || data?.subscription?.stripeSubscriptionId
+        )
+        const existingTier = String(data?.subscription?.tier || "").toLowerCase()
+
+        // Grandfathering: a legacy-tier subscriber can't start a second,
+        // competing subscription on the new per-property price.
+        if (
+            tier.title.toLowerCase() === PER_PROPERTY_TIER &&
+            hasSubscribedBefore &&
+            existingTier &&
+            existingTier !== PER_PROPERTY_TIER
+        ) {
+            return new NextResponse(
+                "You're already on an existing plan. Please contact support to change plans.",
+                { status: 400 }
+            )
+        }
+
+        if (tier.title.toLowerCase() === PER_PROPERTY_TIER) {
+            const propsSnap = await db.collection("users").doc(userId).collection("properties").get()
+            quantity = Math.max(1, propsSnap.size)
+        }
+
+        if (tier.trialDays && !hasSubscribedBefore) {
+            const createdAtRaw = data?.createdAt
+            const createdAt = createdAtRaw
+                ? (typeof createdAtRaw.toDate === "function"
+                    ? createdAtRaw.toDate()
+                    : new Date(createdAtRaw))
+                : null
+            if (createdAt) {
+                const msPerDay = 24 * 60 * 60 * 1000
+                const elapsedDays = Math.floor((Date.now() - createdAt.getTime()) / msPerDay)
+                signupTrialRemainingDays = Math.max(0, TRIAL_DAYS - elapsedDays)
+            }
         }
 
         const subscription_data = signupTrialRemainingDays > 0
@@ -81,7 +106,7 @@ export async function POST(req: Request) {
             line_items: [
                 {
                     price: priceId,
-                    quantity: 1,
+                    quantity,
                 },
             ],
             metadata: {

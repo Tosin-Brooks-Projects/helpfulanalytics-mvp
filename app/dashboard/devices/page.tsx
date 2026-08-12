@@ -10,6 +10,7 @@ import { useDashboard } from "@/components/linear/dashboard-context"
 import { useAnalytics } from "@/hooks/use-analytics"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Smartphone, Monitor, Tablet, Laptop, Chrome, Globe, Laptop2, MonitorSmartphone } from "lucide-react"
+import { BrowserIcon, OSIcon } from "@/lib/brand-icons"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
 
 export default function DevicesPage() {
@@ -116,11 +117,16 @@ export default function DevicesPage() {
                     <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-zinc-600">Top OS</CardTitle>
-                            <Laptop2 className="h-4 w-4 text-zinc-400" />
+                            {osData[0] ? (
+                                <OSIcon os={osData[0].name} className="h-4 w-4" />
+                            ) : (
+                                <Laptop2 className="h-4 w-4 text-zinc-400" />
+                            )}
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-zinc-900 truncate">
-                                {osData[0]?.name || "--"}
+                            <div className="flex items-center gap-2 text-2xl font-bold text-zinc-900">
+                                {osData[0] && <OSIcon os={osData[0].name} className="h-5 w-5 shrink-0" />}
+                                <span className="truncate">{osData[0]?.name || "--"}</span>
                             </div>
                             <p className="text-xs text-zinc-500 mt-1">
                                 {osData[0]?.percentage.toFixed(1)}% usage
@@ -131,11 +137,16 @@ export default function DevicesPage() {
                     <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-zinc-600">Top Browser</CardTitle>
-                            <Globe className="h-4 w-4 text-zinc-400" />
+                            {browsers[0] ? (
+                                <BrowserIcon browser={browsers[0].browser} className="h-4 w-4" />
+                            ) : (
+                                <Globe className="h-4 w-4 text-zinc-400" />
+                            )}
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-zinc-900 truncate">
-                                {browsers[0]?.browser || "--"}
+                            <div className="flex items-center gap-2 text-2xl font-bold text-zinc-900">
+                                {browsers[0] && <BrowserIcon browser={browsers[0].browser} className="h-5 w-5 shrink-0" />}
+                                <span className="truncate">{browsers[0]?.browser || "--"}</span>
                             </div>
                             <p className="text-xs text-zinc-500 mt-1">{browsers[0]?.percentage.toFixed(1)}% usage</p>
                         </CardContent>
@@ -219,7 +230,16 @@ export default function DevicesPage() {
                         <LinearDataTable
                             data={browsers.slice(0, 8)}
                             columns={[
-                                { header: "Browser", accessorKey: "browser" },
+                                {
+                                    header: "Browser",
+                                    accessorKey: "browser",
+                                    cell: (item: any) => (
+                                        <span className="flex items-center gap-2">
+                                            <BrowserIcon browser={item.browser} className="h-4 w-4 shrink-0" />
+                                            {item.browser}
+                                        </span>
+                                    ),
+                                },
                                 { header: "Sessions", accessorKey: "sessions", className: "text-right" },
                                 {
                                     header: "Share",

@@ -5,6 +5,7 @@ import { ErrorBoundary } from "@/components/error-boundary"
 import { SessionProviderWrapper } from "@/components/SessionProviderWrapper"
 import { PostHogProvider } from "@/components/PostHogProvider"
 import { Toaster } from "@/components/ui/sonner"
+import { Agentation } from "agentation"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
@@ -99,6 +100,7 @@ export default function RootLayout({
           <PostHogProvider>
             <ErrorBoundary>{children}</ErrorBoundary>
             <Toaster />
+            {process.env.NODE_ENV === "development" && <Agentation />}
           </PostHogProvider>
         </SessionProviderWrapper>
       </body>

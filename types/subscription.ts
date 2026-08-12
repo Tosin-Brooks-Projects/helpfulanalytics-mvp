@@ -18,6 +18,7 @@ export interface UserSubscription {
     status: "free" | "active" | "canceled" | "incomplete" | "incomplete_expired" | "past_due" | "trialing" | "unpaid"
     stripeCustomerId?: string
     stripeSubscriptionId?: string
+    stripeSubscriptionItemId?: string
     stripePriceId?: string
     stripeCurrentPeriodEnd?: Date
 }

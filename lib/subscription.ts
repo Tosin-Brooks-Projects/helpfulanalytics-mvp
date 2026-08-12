@@ -1,4 +1,5 @@
 import { UserSubscription } from "@/types/subscription";
+import { PER_PROPERTY_TIER } from "@/config/subscriptions";
 
 export const TRIAL_DAYS = 30;
 
@@ -29,7 +30,7 @@ export function getSubscriptionStatus(userData: any): {
     const isTrialing = now < trialEndsAt;
 
     // If NOT premium from Stripe, but still trialing, mark as trialing (Starter tier only)
-    if (!isPremium && isTrialing && tier === "starter") {
+    if (!isPremium && isTrialing && (tier === "starter" || tier === PER_PROPERTY_TIER)) {
         status = "trialing";
         isPremium = true;
     }

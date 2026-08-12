@@ -112,7 +112,7 @@ importers:
         version: 8.18.0(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.160.0)
       '@sentry/nextjs':
         specifier: ^10.61.0
-        version: 10.61.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.108.0(postcss@8.5.6))
+        version: 10.61.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(encoding@0.1.13)(next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.108.0(postcss@8.5.6))
       '@tabler/icons-react':
         specifier: ^3.35.0
         version: 3.36.1(react@18.3.1)
@@ -175,10 +175,10 @@ importers:
         version: 12.24.7(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next:
         specifier: 14.2.35
-        version: 14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-auth:
         specifier: latest
-        version: 4.24.13(@auth/core@0.34.3(nodemailer@7.0.12))(next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nodemailer@7.0.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 4.24.13(@auth/core@0.34.3(nodemailer@7.0.12))(next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nodemailer@7.0.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next-themes:
         specifier: latest
         version: 0.4.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -203,6 +203,9 @@ importers:
       react-hook-form:
         specifier: latest
         version: 7.70.0(react@18.3.1)
+      react-icons:
+        specifier: ^5.7.0
+        version: 5.7.0(react@18.3.1)
       react-markdown:
         specifier: ^10.1.0
         version: 10.1.0(@types/react@18.3.27)(react@18.3.1)
@@ -239,6 +242,9 @@ importers:
       vaul:
         specifier: latest
         version: 1.1.2(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      world-countries:
+        specifier: ^5.1.0
+        version: 5.1.0
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -255,6 +261,9 @@ importers:
       '@types/react-dom':
         specifier: ^18
         version: 18.3.7(@types/react@18.3.27)
+      agentation:
+        specifier: ^3.0.2
+        version: 3.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       autoprefixer:
         specifier: ^10
         version: 10.4.23(postcss@8.5.6)
@@ -2965,6 +2974,17 @@ packages:
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
+
+  agentation@3.0.2:
+    resolution: {integrity: sha512-iGzBxFVTuZEIKzLY6AExSLAQH6i6SwxV4pAu7v7m3X6bInZ7qlZXAwrEqyc4+EfP4gM7z2RXBF6SF4DeH0f2lA==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
 
   ai@6.0.103:
     resolution: {integrity: sha512-4eY6Ut4u41zKH+P2S/oLlZrwxeWQh4kIV1FjE34Jhoiwg+v1AyfSYM8FslXk9rTAtIIaOBimrCUqXacC5RBqJw==}
@@ -6142,6 +6162,11 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17 || ^18 || ^19
 
+  react-icons@5.7.0:
+    resolution: {integrity: sha512-LBLy340Rzqy6+/yVhZKT3B/QpP1BZaesGqasf09HPOBzRarcDIFH0WwXlXQfE7q7ipxK4MSiC5DIBWURCny6fw==}
+    peerDependencies:
+      react: '*'
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -7166,6 +7191,9 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
+
+  world-countries@5.1.0:
+    resolution: {integrity: sha512-CXR6EBvTbArDlDDIWU3gfKb7Qk0ck2WNZ234b/A0vuecPzIfzzxH+O6Ejnvg1sT8XuiZjVlzOH0h08ZtaO7g0w==}
 
   wrap-ansi@6.2.0:
     resolution: {integrity: sha512-r6lPcBGxZXlIcymEu7InxDMhdW0KDxpLgoFLcguasxCaJ/SOIZwINatK9KY/tf+ZrlywOKU0UDj3ATXUBfxJXA==}
@@ -8720,11 +8748,6 @@ snapshots:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/semantic-conventions': 1.28.0
 
-  '@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/semantic-conventions': 1.41.1
-
   '@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
@@ -8739,23 +8762,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@opentelemetry/resources@2.8.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/semantic-conventions': 1.41.1
-
   '@opentelemetry/resources@2.8.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/semantic-conventions': 1.41.1
-
-  '@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0)':
-    dependencies:
-      '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/resources': 2.8.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/semantic-conventions': 1.41.1
 
   '@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1)':
@@ -9722,7 +9732,7 @@ snapshots:
     dependencies:
       '@sentry/core': 10.61.0
 
-  '@sentry/nextjs@10.61.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0))(encoding@0.1.13)(next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.108.0(postcss@8.5.6))':
+  '@sentry/nextjs@10.61.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))(encoding@0.1.13)(next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)(webpack@5.108.0(postcss@8.5.6))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@rollup/plugin-commonjs': 28.0.1(rollup@4.62.2)
@@ -9730,12 +9740,12 @@ snapshots:
       '@sentry/bundler-plugin-core': 5.3.0(encoding@0.1.13)
       '@sentry/conventions': 0.12.0
       '@sentry/core': 10.61.0
-      '@sentry/node': 10.61.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
-      '@sentry/opentelemetry': 10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0))
+      '@sentry/node': 10.61.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))
+      '@sentry/opentelemetry': 10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))
       '@sentry/react': 10.61.0(react@18.3.1)
       '@sentry/vercel-edge': 10.61.0
       '@sentry/webpack-plugin': 5.3.0(encoding@0.1.13)(webpack@5.108.0(postcss@8.5.6))
-      next: 14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       rollup: 4.62.2
       stacktrace-parser: 0.1.11
     transitivePeerDependencies:
@@ -9747,27 +9757,27 @@ snapshots:
       - supports-color
       - webpack
 
-  '@sentry/node-core@10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0))':
+  '@sentry/node-core@10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))':
     dependencies:
       '@sentry/conventions': 0.12.0
       '@sentry/core': 10.61.0
-      '@sentry/opentelemetry': 10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0))
+      '@sentry/opentelemetry': 10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))
       import-in-the-middle: 3.2.0
     optionalDependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/instrumentation': 0.214.0(@opentelemetry/api@1.9.1)
-      '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.1)
 
-  '@sentry/node@10.61.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))':
+  '@sentry/node@10.61.0(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/instrumentation': 0.214.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/semantic-conventions': 1.41.1
       '@sentry/core': 10.61.0
-      '@sentry/node-core': 10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0))
-      '@sentry/opentelemetry': 10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0))
+      '@sentry/node-core': 10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/instrumentation@0.214.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))
+      '@sentry/opentelemetry': 10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))
       '@sentry/server-utils': 10.61.0
       import-in-the-middle: 3.2.0
     transitivePeerDependencies:
@@ -9775,11 +9785,11 @@ snapshots:
       - '@opentelemetry/exporter-trace-otlp-http'
       - supports-color
 
-  '@sentry/opentelemetry@10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.0))':
+  '@sentry/opentelemetry@10.61.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.8.0(@opentelemetry/api@1.9.1))':
     dependencies:
       '@opentelemetry/api': 1.9.1
-      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-trace-base': 2.8.0(@opentelemetry/api@1.9.1)
       '@sentry/conventions': 0.12.0
       '@sentry/core': 10.61.0
 
@@ -10550,6 +10560,11 @@ snapshots:
       - supports-color
 
   agent-base@7.1.4: {}
+
+  agentation@3.0.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    optionalDependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
 
   ai@6.0.103(zod@4.3.6):
     dependencies:
@@ -13753,13 +13768,13 @@ snapshots:
 
   netmask@2.0.2: {}
 
-  next-auth@4.24.13(@auth/core@0.34.3(nodemailer@7.0.12))(next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nodemailer@7.0.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next-auth@4.24.13(@auth/core@0.34.3(nodemailer@7.0.12))(next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(nodemailer@7.0.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.28.4
       '@panva/hkdf': 1.2.1
       cookie: 0.7.2
       jose: 4.15.9
-      next: 14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      next: 14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       oauth: 0.9.15
       openid-client: 5.7.1
       preact: 10.28.1
@@ -13776,7 +13791,7 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  next@14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@next/env': 14.2.35
       '@swc/helpers': 0.5.5
@@ -13797,7 +13812,7 @@ snapshots:
       '@next/swc-win32-arm64-msvc': 14.2.33
       '@next/swc-win32-ia32-msvc': 14.2.33
       '@next/swc-win32-x64-msvc': 14.2.33
-      '@opentelemetry/api': 1.9.0
+      '@opentelemetry/api': 1.9.1
     transitivePeerDependencies:
       - '@babel/core'
       - babel-plugin-macros
@@ -14385,6 +14400,10 @@ snapshots:
       scheduler: 0.23.2
 
   react-hook-form@7.70.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+
+  react-icons@5.7.0(react@18.3.1):
     dependencies:
       react: 18.3.1
 
@@ -15639,7 +15658,7 @@ snapshots:
 
   webpack@5.108.0(postcss@8.5.6):
     dependencies:
-      '@types/estree': 1.0.8
+      '@types/estree': 1.0.9
       '@types/json-schema': 7.0.15
       '@webassemblyjs/ast': 1.14.1
       '@webassemblyjs/wasm-edit': 1.14.1
@@ -15765,6 +15784,8 @@ snapshots:
       winston-transport: 4.9.0
 
   word-wrap@1.2.5: {}
+
+  world-countries@5.1.0: {}
 
   wrap-ansi@6.2.0:
     dependencies:

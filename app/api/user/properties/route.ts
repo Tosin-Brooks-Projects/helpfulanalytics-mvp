@@ -2,23 +2,50 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth-options"
 import { db } from "@/lib/firebase-admin"
-import { pricingData } from "@/config/subscriptions"
+import { pricingData, PER_PROPERTY_TIER, PER_PROPERTY_DEFAULT_CAP } from "@/config/subscriptions"
 import { getSubscriptionStatus } from "@/lib/subscription"
 import { logOnboardingEvent } from "@/lib/onboarding/log"
+import { getEffectivePropertyLimit } from "@/lib/property-limits"
+import { stripe } from "@/lib/stripe"
 
 export const dynamic = "force-dynamic"
-
-const TESTING_PROPERTY_LIMITS: Record<string, number> = {
-    "support@konetiq.com": 3,
-}
 
 function normalizePropertyId(propertyId: string) {
     return propertyId.replace(/^properties\//, "")
 }
 
-function getEffectivePropertyLimit(session: any, userData: any, tierLimit: number) {
-    const email = String(session?.user?.email || userData?.email || "").toLowerCase().trim()
-    return Math.max(tierLimit, TESTING_PROPERTY_LIMITS[email] || 0)
+function isPerProperty(tier: string | undefined) {
+    return String(tier).toLowerCase() === PER_PROPERTY_TIER
+}
+
+// Best-effort mirror of the Firestore property count onto the Stripe
+// subscription quantity. Firestore is the source of truth: a Stripe
+// failure here is logged but never blocks or rolls back the property
+// write, so the failure mode is under-billing, never invisible over-billing.
+async function syncStripeQuantity(userData: any, quantity: number) {
+    const stripeSubscriptionId = userData?.subscription?.stripeSubscriptionId
+    if (!stripeSubscriptionId) return
+
+    const cachedItemId = userData.subscription.stripeSubscriptionItemId
+
+    try {
+        const itemId = cachedItemId
+            ?? (await stripe.subscriptions.retrieve(stripeSubscriptionId)).items.data[0].id
+        await stripe.subscriptionItems.update(itemId, { quantity })
+    } catch (err) {
+        // The cached item id may be stale (e.g. price swapped outside this app).
+        // Refetch the live item id once before giving up.
+        if (cachedItemId) {
+            try {
+                const liveItemId = (await stripe.subscriptions.retrieve(stripeSubscriptionId)).items.data[0].id
+                await stripe.subscriptionItems.update(liveItemId, { quantity })
+                return
+            } catch (retryErr) {
+                console.error("[PROPERTIES] Stripe quantity sync retry failed", retryErr)
+            }
+        }
+        console.error("[PROPERTIES] Stripe quantity sync failed", err)
+    }
 }
 
 export async function GET() {
@@ -87,32 +114,42 @@ export async function POST(request: Request) {
         const userData = userDoc.data()
         
         const subInfo = getSubscriptionStatus(userData)
+        const perProperty = isPerProperty(subInfo.tier)
 
-        const tierName = subInfo.isPremium
-            ? subInfo.tier
-            : 'starter'
+        let maxProperties: number
+        let tierConfig: (typeof pricingData)[number] | undefined
+        if (perProperty) {
+            maxProperties = getEffectivePropertyLimit(session, userData, PER_PROPERTY_DEFAULT_CAP)
+        } else {
+            const tierName = subInfo.isPremium
+                ? subInfo.tier
+                : 'starter'
 
-        const tierConfig = pricingData.find(t => t.title.toLowerCase() === tierName?.toLowerCase())
-        const maxProperties = getEffectivePropertyLimit(session, userData, tierConfig?.maxProperties ?? 1)
+            tierConfig = pricingData.find(t => t.title.toLowerCase() === tierName?.toLowerCase())
+            maxProperties = getEffectivePropertyLimit(session, userData, tierConfig?.maxProperties ?? 1)
+        }
 
         // Check if the property already exists (re-selecting vs adding new)
         const normalizedPropertyId = normalizePropertyId(propertyId)
         const propertyRef = db.collection("users").doc(userId).collection("properties").doc(normalizedPropertyId)
         const propertyDoc = await propertyRef.get()
+        const isNewProperty = !propertyDoc.exists
+        let currentCount = 0
 
         // Only enforce limit when adding a NEW property
-        if (!propertyDoc.exists) {
+        if (isNewProperty) {
             const propertiesSnap = await db.collection("users").doc(userId).collection("properties").get()
-            const currentCount = propertiesSnap.size
+            currentCount = propertiesSnap.size
 
             if (currentCount >= maxProperties) {
+                const planLabel = perProperty ? "Per-Property" : (tierConfig?.title || "Starter")
                 await logOnboardingEvent({
                     userId, email, step: "save_property.plan_limit_reached", status: "error",
                     message: `Plan limit reached (${currentCount}/${maxProperties})`,
-                    meta: { tier: tierConfig?.title || "Starter", maxProperties, currentCount },
+                    meta: { tier: planLabel, maxProperties, currentCount },
                 })
                 return NextResponse.json({
-                    error: `Plan limit reached. You can only add ${maxProperties} properties on the ${tierConfig?.title || 'Starter'} plan.`
+                    error: `Plan limit reached. You can only add ${maxProperties} properties on the ${planLabel} plan.`
                 }, { status: 403 })
             }
         }
@@ -130,7 +167,7 @@ export async function POST(request: Request) {
             // Initialize basic subscription if not present (only if it's completely missing)
             ...(!userData?.subscription ? {
                 subscription: {
-                    tier: "starter",
+                    tier: PER_PROPERTY_TIER,
                     status: "free",
                 }
             } : {}),
@@ -143,6 +180,11 @@ export async function POST(request: Request) {
             accountId: accountId,
             addedAt: new Date()
         })
+
+        if (perProperty && isNewProperty) {
+            const freshSnap = await db.collection("users").doc(userId).collection("properties").get()
+            await syncStripeQuantity(userData, freshSnap.size)
+        }
 
         await logOnboardingEvent({
             userId, email, step: "save_property.success", status: "info",
@@ -292,6 +334,11 @@ export async function DELETE(request: Request) {
         }
 
         await userRef.update(updates)
+
+        if (isPerProperty(userData?.subscription?.tier)) {
+            const remainingSnap = await propertiesRef.get()
+            await syncStripeQuantity(userData, remainingSnap.size)
+        }
 
         return NextResponse.json({ success: true, activeProperty: updates.activeProperty ?? userData?.activeProperty ?? null })
     } catch (error) {

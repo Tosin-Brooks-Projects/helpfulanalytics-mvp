@@ -127,10 +127,10 @@ export function Pricing() {
                     </span>
                 </div>
 
-                <div className="isolate mx-auto mt-12 grid max-w-md grid-cols-1 gap-y-8 sm:mt-16 lg:mx-0 lg:max-w-none lg:grid-cols-4 lg:gap-x-8">
-                    {pricingData.map((tier) => {
-                        const priceId = isAnnual ? tier.priceIdYearly : tier.priceIdMonthly
-                        const price = isAnnual ? tier.priceYearly : tier.priceMonthly
+                <div className="isolate mx-auto mt-12 grid max-w-md grid-cols-1 gap-y-8 sm:mt-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:gap-x-8">
+                    {pricingData.filter((tier) => tier.title === "Per-Property" || tier.title === "Enterprise").map((tier) => {
+                        const priceId = isAnnual && tier.priceIdYearly ? tier.priceIdYearly : tier.priceIdMonthly
+                        const price = isAnnual && tier.priceYearly ? tier.priceYearly : tier.priceMonthly
 
                         return (
                             <div
@@ -152,10 +152,10 @@ export function Pricing() {
                                     <p className="mt-4 text-sm leading-6 text-muted-foreground">{tier.description}</p>
                                     <p className="mt-6 flex items-baseline gap-x-1">
                                         <span className="text-4xl font-bold tracking-tight text-foreground">{price}</span>
-                                        {tier.title === "Starter" && !isAnnual && (
+                                        {tier.title === "Per-Property" && !isAnnual && (
                                             <span className="text-lg font-bold text-muted-foreground line-through decoration-amber-500/50 decoration-2 ml-1">$29</span>
                                         )}
-                                        {!tier.isCustom && <span className="text-sm font-semibold leading-6 text-muted-foreground">/{isAnnual ? 'year' : 'month'}</span>}
+                                        {!tier.isCustom && <span className="text-sm font-semibold leading-6 text-muted-foreground">/property/{isAnnual && tier.priceIdYearly ? 'year' : 'month'}</span>}
                                     </p>
                                     <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-muted-foreground">
                                         {tier.features.map((feature) => (
@@ -171,7 +171,7 @@ export function Pricing() {
                                     onClick={() => handleSubscribe(priceId, tier.isCustom || false)}
                                     disabled={!!isLoading}
                                 >
-                                    {isLoading === priceId ? "Processing..." : tier.isCustom ? "Contact Sales" : tier.title === "Starter" ? "Start Free Trial" : "Subscribe"}
+                                    {isLoading === priceId ? "Processing..." : tier.isCustom ? "Contact Sales" : "Start Free Trial"}
                                 </ShinyButton>
                             </div>
                         )

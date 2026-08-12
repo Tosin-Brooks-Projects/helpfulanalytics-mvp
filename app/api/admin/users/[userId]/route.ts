@@ -20,6 +20,8 @@ const patchSchema = z.object({
     .optional(),
   // Admin convenience: restart trial window by resetting createdAt.
   resetTrialStart: z.boolean().optional(),
+  // Admin override for property cap. `null` clears the override.
+  maxPropertiesOverride: z.number().int().positive().nullable().optional(),
 })
 
 async function requireAdmin() {
@@ -58,6 +60,7 @@ export async function GET(_req: Request, ctx: { params: { userId: string } }) {
       lastSeen,
       subscription: data.subscription || null,
       subscriptionStatus: data.subscriptionStatus,
+      maxPropertiesOverride: data.maxPropertiesOverride ?? null,
     },
   })
 }
@@ -103,6 +106,10 @@ export async function PATCH(req: Request, ctx: { params: { userId: string } }) {
 
   if (parsed.data.resetTrialStart) {
     updates.createdAt = new Date()
+  }
+
+  if (parsed.data.maxPropertiesOverride !== undefined) {
+    updates.maxPropertiesOverride = parsed.data.maxPropertiesOverride
   }
 
   if (Object.keys(updates).length === 0) {

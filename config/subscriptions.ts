@@ -1,6 +1,29 @@
 import { type SubscriptionTier } from "@/types/subscription"
 
+// Tier title (lowercased) for the self-serve per-property plan.
+export const PER_PROPERTY_TIER = "per-property"
+// Flat self-serve cap for per-property accounts, unless overridden per-account by an admin.
+export const PER_PROPERTY_DEFAULT_CAP = 30
+// Legacy tiers kept only for existing (grandfathered) subscribers.
+export const LEGACY_TIER_TITLES = ["starter", "pro", "agency", "enterprise"]
+
 export const pricingData: SubscriptionTier[] = [
+    {
+        title: "Per-Property",
+        priceMonthly: "$12",
+        priceYearly: "",
+        description: "Pay only for the properties you connect",
+        features: [
+            "$12 / property / month",
+            "No long-term commitment",
+            "30 day free trial",
+        ],
+        highlight: true,
+        priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PER_PROPERTY || "price_1U3Mz0AQjADCPHYI78fGzKdq",
+        priceIdYearly: "",
+        maxProperties: PER_PROPERTY_DEFAULT_CAP,
+        trialDays: 30,
+    },
     {
         title: "Starter",
         priceMonthly: "$19",

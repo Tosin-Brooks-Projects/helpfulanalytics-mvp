@@ -2,10 +2,21 @@
 
 import { useState } from "react"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Loader2, ChevronRight, BarChart2, Search } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import { useRouter } from "next/navigation"
 import { useDashboard } from "@/components/linear/dashboard-context"
+import { PER_PROPERTY_TIER } from "@/config/subscriptions"
 import { mutate } from "swr"
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion"
 
@@ -13,15 +24,27 @@ export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
     const [open, setOpen] = useState(false)
     const [submitting, setSubmitting] = useState<string | null>(null)
     const [query, setQuery] = useState("")
-    const { availableProperties, loading: contextLoading } = useDashboard()
+    const [pendingProperty, setPendingProperty] = useState<any>(null)
+    const { availableProperties, loading: contextLoading, subscription } = useDashboard()
     const { toast } = useToast()
     const router = useRouter()
     const reduced = useReducedMotion()
+
+    const willCharge = subscription?.tier === PER_PROPERTY_TIER && !!subscription?.hasStripeSubscription
 
     const filtered = availableProperties.filter((p: any) =>
         p.name.toLowerCase().includes(query.toLowerCase()) ||
         p.id.includes(query)
     )
+
+    const handlePropertyClick = (property: any) => {
+        if (submitting) return
+        if (willCharge) {
+            setPendingProperty(property)
+            return
+        }
+        handleSelect(property)
+    }
 
     const handleSelect = async (property: any) => {
         if (submitting) return
@@ -154,7 +177,7 @@ export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
                                             variants={itemVariants}
                                             initial="hidden"
                                             animate="visible"
-                                            onClick={() => handleSelect(prop)}
+                                            onClick={() => handlePropertyClick(prop)}
                                             disabled={!!submitting}
                                             className={[
                                                 "group w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-left",
@@ -195,6 +218,29 @@ export function AddPropertyModal({ children }: { children?: React.ReactNode }) {
                     </AnimatePresence>
                 </div>
             </DialogContent>
+
+            <AlertDialog open={!!pendingProperty} onOpenChange={(v) => { if (!v) setPendingProperty(null) }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Add {pendingProperty?.name}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Adding this property adds $12/mo to your bill, prorated for the rest of this billing cycle.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => {
+                                const property = pendingProperty
+                                setPendingProperty(null)
+                                if (property) handleSelect(property)
+                            }}
+                        >
+                            Add property
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </Dialog>
     )
 }

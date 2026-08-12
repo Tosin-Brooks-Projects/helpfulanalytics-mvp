@@ -39,6 +39,7 @@ type AdminUserRow = {
     createdAt?: string
     lastSeen?: string
     isOnboarded?: boolean
+    maxPropertiesOverride?: number | null
 }
 
 export default function AdminUsersPage() {
@@ -214,6 +215,9 @@ function EditUserDialog({
     const [isOnboarded, setIsOnboarded] = useState<boolean>(!!user.isOnboarded)
     const [disabled, setDisabled] = useState<boolean>(!!user.disabled)
     const [resetTrialStart, setResetTrialStart] = useState(false)
+    const [maxPropertiesOverride, setMaxPropertiesOverride] = useState<string>(
+        user.maxPropertiesOverride != null ? String(user.maxPropertiesOverride) : ""
+    )
 
     // Re-sync when opening for a different user row (or after list refresh).
     useEffect(() => {
@@ -223,14 +227,24 @@ function EditUserDialog({
         setIsOnboarded(!!user.isOnboarded)
         setDisabled(!!user.disabled)
         setResetTrialStart(false)
-    }, [user.id, user.role, user.tier, user.status, user.isOnboarded, user.disabled])
+        setMaxPropertiesOverride(user.maxPropertiesOverride != null ? String(user.maxPropertiesOverride) : "")
+    }, [user.id, user.role, user.tier, user.status, user.isOnboarded, user.disabled, user.maxPropertiesOverride])
 
     async function handleSave() {
+        const trimmed = maxPropertiesOverride.trim()
+        const parsedOverride = trimmed === "" ? null : Number(trimmed)
+
+        if (trimmed !== "" && (!Number.isFinite(parsedOverride) || !Number.isInteger(parsedOverride) || (parsedOverride as number) <= 0)) {
+            toast.error("Max properties must be a positive whole number, or blank for no override.")
+            return
+        }
+
         const payload: any = {
             role,
             isOnboarded,
             disabled,
             subscription: { tier, status },
+            maxPropertiesOverride: parsedOverride,
             ...(resetTrialStart ? { resetTrialStart: true } : {}),
         }
         await onSave(payload)
@@ -283,7 +297,8 @@ function EditUserDialog({
                                     <SelectItem value="starter">starter</SelectItem>
                                     <SelectItem value="pro">pro</SelectItem>
                                     <SelectItem value="agency">agency</SelectItem>
-                                    <SelectItem value="custom">custom</SelectItem>
+                                    <SelectItem value="enterprise">enterprise</SelectItem>
+                                    <SelectItem value="per-property">per-property</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
@@ -316,6 +331,20 @@ function EditUserDialog({
                                 <Switch checked={isOnboarded} onCheckedChange={setIsOnboarded} />
                             </div>
                         </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="text-xs font-semibold text-zinc-700">Max properties override</div>
+                        <div className="text-xs text-zinc-500 mb-1">Leave blank to use the plan/default limit.</div>
+                        <input
+                            type="number"
+                            min={1}
+                            step={1}
+                            value={maxPropertiesOverride}
+                            onChange={(e) => setMaxPropertiesOverride(e.target.value)}
+                            placeholder="No override"
+                            className="w-full rounded-md border border-zinc-200 px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-400"
+                        />
                     </div>
 
                     <div className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2">
