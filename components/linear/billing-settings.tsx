@@ -45,7 +45,6 @@ export function BillingSettings() {
                     <h3 className="text-lg font-bold text-zinc-900">Subscription Plans</h3>
                     <p className="text-sm text-zinc-500">Upgrade to unlock more properties and features. Save 20% with annual billing.</p>
                 </div>
-                {/* Billing Toggle */}
                 <div className="flex items-center gap-3 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
                     <button
                         onClick={() => setIsAnnual(false)}

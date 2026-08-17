@@ -20,7 +20,7 @@ export const pricingData: SubscriptionTier[] = [
     {
         title: "Per-Property",
         priceMonthly: "$12",
-        priceYearly: "",
+        priceYearly: "$115", // 20% off ($9.58/mo)
         description: "Pay only for the properties you connect",
         features: [
             "$12 / property / month",
@@ -29,7 +29,7 @@ export const pricingData: SubscriptionTier[] = [
         ],
         highlight: true,
         priceIdMonthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PER_PROPERTY || "price_1U3Mz0AQjADCPHYI78fGzKdq",
-        priceIdYearly: "",
+        priceIdYearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PER_PROPERTY_YEARLY || "price_1U5PvaAQjADCPHYIN4vNYdyj",
         maxProperties: PER_PROPERTY_DEFAULT_CAP,
         trialDays: 14,
     },

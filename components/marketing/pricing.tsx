@@ -100,11 +100,10 @@ export function Pricing() {
                         Pricing plans for teams of&nbsp;all&nbsp;sizes
                     </p>
                     <p className="mt-6 text-lg leading-8 text-muted-foreground">
-                        Choose the plan that&apos;s right for you. Save 20% with annual billing.
+                        Choose the plan that&apos;s right for you.
                     </p>
                 </div>
 
-                {/* Billing Toggle */}
                 <div className="mt-12 flex justify-center items-center gap-4">
                     <span className={`text-sm ${!isAnnual ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>Monthly</span>
                     <button
