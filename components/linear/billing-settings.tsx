@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Check, Star } from "lucide-react"
 import { ShinyButton } from "@/components/ui/shiny-button"
-import { pricingData } from "@/config/subscriptions"
+import { pricingData, LEGACY_TIER_TITLES } from "@/config/subscriptions"
 import { useDashboard } from "./dashboard-context"
 import { cn } from "@/lib/utils"
 
@@ -45,7 +45,6 @@ export function BillingSettings() {
                     <h3 className="text-lg font-bold text-zinc-900">Subscription Plans</h3>
                     <p className="text-sm text-zinc-500">Upgrade to unlock more properties and features. Save 20% with annual billing.</p>
                 </div>
-                {/* Billing Toggle */}
                 <div className="flex items-center gap-3 bg-zinc-100 p-1 rounded-lg border border-zinc-200">
                     <button
                         onClick={() => setIsAnnual(false)}
@@ -70,9 +69,17 @@ export function BillingSettings() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                {pricingData.map((tier) => {
-                    const priceId = isAnnual ? tier.priceIdYearly : tier.priceIdMonthly
-                    const price = isAnnual ? tier.priceYearly : tier.priceMonthly
+                {pricingData
+                    .filter((tier) => {
+                        const currentTier = subscription?.tier?.toLowerCase()
+                        const onLegacyTier = currentTier ? LEGACY_TIER_TITLES.includes(currentTier) : false
+                        return onLegacyTier
+                            ? LEGACY_TIER_TITLES.includes(tier.title.toLowerCase())
+                            : tier.title === "Per-Property" || tier.title === "Enterprise"
+                    })
+                    .map((tier) => {
+                    const priceId = isAnnual && tier.priceIdYearly ? tier.priceIdYearly : tier.priceIdMonthly
+                    const price = isAnnual && tier.priceYearly ? tier.priceYearly : tier.priceMonthly
                     const isCurrent = subscription?.stripePriceId === priceId || (subscription?.tier?.toLowerCase() === tier.title.toLowerCase() && !subscription.stripePriceId)
 
                     return (

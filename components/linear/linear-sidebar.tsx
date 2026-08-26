@@ -23,6 +23,7 @@ import {
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useDashboard } from "./dashboard-context"
+import { getTierDisplayName } from "@/config/subscriptions"
 import {
     Tooltip,
     TooltipContent,
@@ -105,8 +106,8 @@ export function LinearSidebar() {
                     {subscription && !sidebarCollapsed && (
                         <div className="mb-4 rounded-md border border-zinc-100 bg-zinc-50 p-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <div className="flex items-center justify-between">
-                                <span className="text-xs font-medium text-zinc-700 capitalize">
-                                    {subscription.tier} Plan
+                                <span className="text-xs font-medium text-zinc-700">
+                                    {getTierDisplayName(subscription.tier)} Plan
                                 </span>
                                 <span className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${subscription.status === 'active' || subscription.status === 'trialing'
                                     ? 'bg-emerald-500/10 text-emerald-600'

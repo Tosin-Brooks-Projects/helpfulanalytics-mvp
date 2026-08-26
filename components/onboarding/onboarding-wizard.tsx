@@ -336,7 +336,7 @@ export function OnboardingWizard() {
                                         animate={reduced ? {} : { scale: [1, 1.6, 1], opacity: [1, 0.4, 1] }}
                                         transition={{ duration: 1.4, repeat: Infinity }}
                                     />
-                                    <span className="text-[11px] font-medium text-amber-700">30-day free trial included</span>
+                                    <span className="text-[11px] font-medium text-amber-700">14-day free trial included</span>
                                 </div>
 
                                 <motion.button

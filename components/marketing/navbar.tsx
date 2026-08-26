@@ -216,7 +216,7 @@ export function Navbar() {
                                 </div>
                             )}
                             <p className="mt-4 text-center text-xs text-white/20">
-                                No credit card required · 30-day free trial
+                                No credit card required · 14-day free trial
                             </p>
                         </motion.div>
                     </motion.div>

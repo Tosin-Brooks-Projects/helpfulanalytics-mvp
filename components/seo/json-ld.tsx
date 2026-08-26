@@ -122,7 +122,7 @@ export function SoftwareAppJsonLd() {
                 name: "Starter",
                 price: "0",
                 priceCurrency: "USD",
-                description: "Free 30-day trial, 1 GA4 property",
+                description: "Free 14-day trial, 1 GA4 property",
             },
             {
                 "@type": "Offer",

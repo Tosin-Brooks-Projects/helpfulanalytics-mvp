@@ -31,11 +31,12 @@ export async function GET() {
         const settings = settingsDoc.exists ? settingsDoc.data() : {}
 
         // Build subscription object for client consumption
-        const subscription: Record<string, any> = { 
+        const subscription: Record<string, any> = {
             tier: subInfo.tier,
             status: subInfo.status,
             trialEndsAt: subInfo.trialEndsAt?.toISOString(),
-            stripeCurrentPeriodEnd: subInfo.stripeCurrentPeriodEnd?.toISOString()
+            stripeCurrentPeriodEnd: subInfo.stripeCurrentPeriodEnd?.toISOString(),
+            hasStripeSubscription: Boolean(userData?.subscription?.stripeSubscriptionId),
         }
 
         return NextResponse.json({

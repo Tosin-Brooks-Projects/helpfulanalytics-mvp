@@ -15,6 +15,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { useDashboard } from "@/components/linear/dashboard-context"
+import { PER_PROPERTY_TIER } from "@/config/subscriptions"
 import { useToast } from "@/components/ui/use-toast"
 import { Loader2, Plus, Check, Trash2, BarChart2, Mail, Clock, Globe } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -206,7 +207,8 @@ function PropertyCard({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
-    const { properties, selectedProperty, setSelectedProperty, loading: initialLoading, deletionUsage, propertyLimit } = useDashboard()
+    const { properties, selectedProperty, setSelectedProperty, loading: initialLoading, deletionUsage, propertyLimit, subscription } = useDashboard()
+    const willChargeOnRemove = subscription?.tier === PER_PROPERTY_TIER && !!subscription?.hasStripeSubscription
     const { toast } = useToast()
     const router = useRouter()
     const reduced = useReducedMotion()
@@ -338,7 +340,7 @@ export default function SettingsPage() {
 
     if (initialLoading) {
         return (
-            <LinearShell>
+            <LinearShell gated={false}>
                 <div className="flex items-center gap-2.5 text-zinc-400 p-8">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span className="text-sm">Loading…</span>
@@ -348,7 +350,7 @@ export default function SettingsPage() {
     }
 
     return (
-        <LinearShell>
+        <LinearShell gated={false}>
             <div className="flex flex-col gap-8 max-w-3xl">
 
                 {/* Page header */}
@@ -404,7 +406,7 @@ export default function SettingsPage() {
                                 })}
                             </div>
                             <p className="text-[11px] text-zinc-400 leading-relaxed">
-                                Summarizes yesterday's statistics across all your connected GA4 properties in Kea's witty personality.
+                                Summarizes yesterday&apos;s statistics across all your connected GA4 properties in Kea&apos;s witty personality.
                             </p>
                         </div>
 
@@ -632,6 +634,7 @@ export default function SettingsPage() {
                                                     <p className="text-[12px] font-semibold text-rose-600">Remove property</p>
                                                     <p className="text-[11px] text-zinc-500 mt-0.5 leading-relaxed">
                                                         Disconnects this property from your dashboard. Your GA4 data is untouched.
+                                                        {willChargeOnRemove ? " Your bill will drop by $12/mo, prorated for the rest of this billing cycle." : ""}
                                                     </p>
                                                     <p className="text-[10px] text-zinc-400 mt-1 tabular-nums">
                                                         {deletionsLeft} removal{deletionsLeft !== 1 ? "s" : ""} remaining this month

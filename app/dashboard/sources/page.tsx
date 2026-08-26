@@ -8,7 +8,10 @@ import { LinearGraphCard, LinearDataTable, NoPropertyPlaceholder } from "@/compo
 import { DateFilterBar } from "@/components/linear/date-filter-bar"
 import { useDashboard } from "@/components/linear/dashboard-context"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowUpRight, Globe, MousePointerClick } from "lucide-react"
+import { ArrowUpRight, Globe, Info, MousePointerClick } from "lucide-react"
+import { SourceIcon } from "@/lib/brand-icons"
+import { getSourceExplanation, getMediumExplanation } from "@/lib/traffic-source-labels"
+import { Tooltip as UiTooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 
 interface SourceData {
@@ -92,10 +95,29 @@ export default function SourcesPage() {
                     <Card className="border-white/20 shadow-lg shadow-zinc-500/5 bg-white/60 backdrop-blur-md">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium text-zinc-600">Top Source</CardTitle>
-                            <Globe className="h-4 w-4 text-zinc-400" />
+                            {topSource ? (
+                                <SourceIcon source={topSource.source} className="h-4 w-4" />
+                            ) : (
+                                <Globe className="h-4 w-4 text-zinc-400" />
+                            )}
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-zinc-900 truncate">{topSource?.source || "--"}</div>
+                            <div className="flex items-center gap-2 text-2xl font-bold text-zinc-900">
+                                {topSource && <SourceIcon source={topSource.source} className="h-5 w-5 shrink-0" />}
+                                <span className="truncate">{topSource?.source || "--"}</span>
+                                {topSource && getSourceExplanation(topSource.source) && (
+                                    <TooltipProvider delayDuration={200}>
+                                        <UiTooltip>
+                                            <TooltipTrigger asChild>
+                                                <Info className="h-3.5 w-3.5 shrink-0 text-zinc-300 hover:text-zinc-500 transition-colors cursor-help" />
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
+                                                {getSourceExplanation(topSource.source)}
+                                            </TooltipContent>
+                                        </UiTooltip>
+                                    </TooltipProvider>
+                                )}
+                            </div>
                             <p className="text-xs text-zinc-500 mt-1">Driving the most traffic</p>
                         </CardContent>
                     </Card>
@@ -105,7 +127,21 @@ export default function SourcesPage() {
                             <MousePointerClick className="h-4 w-4 text-zinc-400" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-zinc-900 truncate capitalize">{topSource?.medium || "--"}</div>
+                            <div className="flex items-center gap-2 text-2xl font-bold text-zinc-900">
+                                <span className="truncate capitalize">{topSource?.medium || "--"}</span>
+                                {topSource && getMediumExplanation(topSource.medium) && (
+                                    <TooltipProvider delayDuration={200}>
+                                        <UiTooltip>
+                                            <TooltipTrigger asChild>
+                                                <Info className="h-3.5 w-3.5 shrink-0 text-zinc-300 hover:text-zinc-500 transition-colors cursor-help" />
+                                            </TooltipTrigger>
+                                            <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
+                                                {getMediumExplanation(topSource.medium)}
+                                            </TooltipContent>
+                                        </UiTooltip>
+                                    </TooltipProvider>
+                                )}
+                            </div>
                             <p className="text-xs text-zinc-500 mt-1">Most effective channel</p>
                         </CardContent>
                     </Card>
@@ -165,6 +201,27 @@ export default function SourcesPage() {
                                     header: "Source",
                                     accessorKey: "source",
                                     className: "font-medium capitalize",
+                                    cell: (item) => {
+                                        const explanation = getSourceExplanation(item.source)
+                                        return (
+                                            <span className="flex items-center gap-2">
+                                                <SourceIcon source={item.source} className="h-4 w-4 shrink-0" />
+                                                {item.source}
+                                                {explanation && (
+                                                    <TooltipProvider delayDuration={200}>
+                                                        <UiTooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Info className="h-3 w-3 shrink-0 text-zinc-300 hover:text-zinc-500 transition-colors cursor-help" />
+                                                            </TooltipTrigger>
+                                                            <TooltipContent side="top" className="max-w-[260px] text-xs leading-relaxed">
+                                                                {explanation}
+                                                            </TooltipContent>
+                                                        </UiTooltip>
+                                                    </TooltipProvider>
+                                                )}
+                                            </span>
+                                        )
+                                    },
                                 },
                                 {
                                     header: "Medium",

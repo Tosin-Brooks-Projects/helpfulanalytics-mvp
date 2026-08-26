@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt,
                 lastSeen: data.lastSeen?.toDate ? data.lastSeen.toDate().toISOString() : data.lastSeen,
                 isOnboarded: data.isOnboarded ?? false,
+                maxPropertiesOverride: typeof data.maxPropertiesOverride === "number" ? data.maxPropertiesOverride : null,
             }
         })
 

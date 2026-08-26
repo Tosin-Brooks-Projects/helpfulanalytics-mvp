@@ -90,8 +90,8 @@ export function SetupProgress() {
         },
         {
             id: 4,
-            label: "Upgrade to Pro",
-            isCompleted: subscription?.status === 'active' || subscription?.status === 'trialing', // Consider trialing as done for setup? Maybe. Let's strictly say Active for "Pro". Or usually Trialing is good enough. Let's say active or trialing is "On Plan".
+            label: "Subscribe to a plan",
+            isCompleted: subscription?.status === 'active' || subscription?.status === 'trialing',
             action: !(subscription?.status === 'active' || subscription?.status === 'trialing') ? (
                 <Link href="/dashboard/settings" className="block mt-1">
                     <span className="text-amber-600 text-[10px] font-medium hover:underline flex items-center">

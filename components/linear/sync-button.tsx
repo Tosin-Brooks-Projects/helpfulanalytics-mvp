@@ -4,6 +4,7 @@ import { useState } from "react"
 import { RefreshCw, Check, AlertCircle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import { useSWRConfig } from "swr"
 import { useDashboard } from "./dashboard-context"
 import { motion, useReducedMotion } from "framer-motion"
 
@@ -12,6 +13,7 @@ const E = [0.23, 1, 0.32, 1] as const
 export function SyncButton() {
     const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
     const { selectedProperty } = useDashboard()
+    const { mutate } = useSWRConfig()
     const reduced = useReducedMotion()
 
     const handleSync = async () => {
@@ -19,10 +21,9 @@ export function SyncButton() {
         const toastId = toast.loading("Syncing analytics data...")
 
         try {
-            const url = selectedProperty ? `/api/analytics/sync?propertyId=${selectedProperty}` : "/api/analytics/sync"
-            const res = await fetch(url, { method: "POST" })
-
-            if (!res.ok) throw new Error("Sync failed")
+            await mutate(
+                (key: unknown) => Array.isArray(key) && key[0] === "analytics" && key[1] === selectedProperty
+            )
 
             setStatus("success")
             toast.success("Analytics synced successfully", { id: toastId })

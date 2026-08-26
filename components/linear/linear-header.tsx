@@ -9,7 +9,7 @@ import { DatePickerWithRange } from "./date-range-picker"
 import { VersusDatePicker } from "./versus-date-picker"
 import { SyncButton } from "./sync-button"
 import { ExportDialog } from "@/components/dashboard/export-dialog"
-import { pricingData } from "@/config/subscriptions"
+import { pricingData, PER_PROPERTY_DEFAULT_CAP } from "@/config/subscriptions"
 import { EmptyPropertyCTA } from "@/components/dashboard/empty-property-cta"
 import { PropertySwitcher } from "@/components/dashboard/property-switcher"
 import { CommandPalette } from "./command-palette"
@@ -41,7 +41,7 @@ export function LinearHeader() {
     const tierConfig = pricingData.find(t => t.title.toLowerCase() === currentTier.toLowerCase())
     const maxProps = propertyLimit ?? tierConfig?.maxProperties ?? 1
     const freeSlots = Math.max(0, maxProps - properties.length)
-    const showUpgrade = maxProps < 30
+    const showUpgrade = maxProps < PER_PROPERTY_DEFAULT_CAP
 
     const propertySwitcher = !loading && properties.length > 0 && (
         <PropertySwitcher

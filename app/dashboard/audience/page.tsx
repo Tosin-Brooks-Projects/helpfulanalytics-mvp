@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Users, Globe, MapPin, ChevronLeft } from "lucide-react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from "recharts"
 import { format } from "date-fns"
+import { getCountryFlag } from "@/lib/country-flags"
 
 export default function AudiencePage() {
     const { selectedProperty, dateRange } = useDashboard()
@@ -292,7 +293,10 @@ export default function AudiencePage() {
                             <MapPin className="h-4 w-4 text-zinc-400" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold text-zinc-900">{topCountry?.country || "--"}</div>
+                            <div className="flex items-center gap-2 text-2xl font-bold text-zinc-900">
+                                {topCountry && <span className="text-xl leading-none">{getCountryFlag(topCountry.country)}</span>}
+                                <span className="truncate">{topCountry?.country || "--"}</span>
+                            </div>
                             <p className="text-xs text-zinc-500 mt-1">
                                 {topCountry ? `${topCountry.percentage.toFixed(1)}% of total sessions` : "No data"}
                             </p>
@@ -340,7 +344,8 @@ export default function AudiencePage() {
                                     tickLine={false}
                                     axisLine={false}
                                     tick={{ fontSize: 11, fill: '#71717a' }}
-                                    width={75}
+                                    width={90}
+                                    tickFormatter={(value: string) => `${getCountryFlag(value) || ""} ${value}`.trim()}
                                 />
                                 <Tooltip
                                     cursor={{ fill: 'rgba(0,0,0,0.05)' }}
@@ -369,7 +374,16 @@ export default function AudiencePage() {
                         <LinearDataTable
                             data={countries}
                             columns={[
-                                { header: "Country", accessorKey: "country" },
+                                {
+                                    header: "Country",
+                                    accessorKey: "country",
+                                    cell: (item) => (
+                                        <span className="flex items-center gap-2">
+                                            <span className="text-base leading-none">{getCountryFlag(item.country) || "🌐"}</span>
+                                            {item.country}
+                                        </span>
+                                    ),
+                                },
                                 { header: "Sessions", accessorKey: "sessions", className: "text-right" },
                                 { header: "Users", accessorKey: "users", className: "text-right", mobileHidden: true },
                                 {
