@@ -10,6 +10,10 @@ export const metadata: Metadata = {
         description: "Simple, transparent pricing for GA4 reporting. Free 14-day trial. Plans for solo marketers and agencies managing multiple clients.",
         url: "https://helpfulanalytics.com/pricing",
     },
+    twitter: {
+        title: "Pricing — Helpful Analytics",
+        description: "Simple, transparent pricing for GA4 reporting. Free 14-day trial. Plans for solo marketers and agencies managing multiple clients.",
+    },
     alternates: {
         canonical: "https://helpfulanalytics.com/pricing",
     },

@@ -2,6 +2,7 @@ export interface SubscriptionTier {
     title: string
     priceMonthly: string
     priceYearly: string
+    priceYearlyMonthlyEquivalent?: string
     description: string
     features: string[]
     highlight: boolean

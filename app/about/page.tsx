@@ -10,6 +10,10 @@ export const metadata: Metadata = {
         description: "Built by a founder who was tired of wrestling with Google Analytics and decided to fix it for everyone.",
         url: "https://helpfulanalytics.com/about",
     },
+    twitter: {
+        title: "About — Helpful Analytics",
+        description: "Built by a founder who was tired of wrestling with Google Analytics and decided to fix it for everyone.",
+    },
     alternates: {
         canonical: "https://helpfulanalytics.com/about",
     },

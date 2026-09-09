@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     default: "Helpful Analytics - Simple GA4 Reporting for Marketing Agencies",
     template: "%s | Helpful Analytics",
   },
-  description: "The GA4 dashboard built for marketing agencies. Simple client reporting, multi-account management, and white-label dashboards — without the GA4 complexity.",
+  description: "The GA4 dashboard built for marketing agencies. Simple client reporting, multi-account management — without the GA4 complexity.",
   keywords: [
     "GA4 for marketing agencies",
     "google analytics dashboard for agencies",
@@ -39,8 +39,6 @@ export const metadata: Metadata = {
     "GA4 too complicated",
     "simple google analytics for agencies",
     "manage multiple GA4 accounts",
-    "white label analytics reporting",
-    "GA4 alternative for agencies",
     "automate client reporting GA4",
     "dashthis alternative",
     "agencyanalytics alternative",
@@ -55,8 +53,8 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://helpfulanalytics.com",
-    title: "Helpful Analytics - The Best Google Analytics Dashboard for GA4",
-    description: "Simple, privacy-friendly Google Analytics metrics with our easy to use dashboard. Understand your traffic without the confusion of GA4.",
+    title: "Helpful Analytics - Simple GA4 Reporting for Marketing Agencies",
+    description: "The GA4 dashboard built for marketing agencies. Simple client reporting, multi-account management — without the GA4 complexity.",
     siteName: "Helpful Analytics",
     images: [
       {
@@ -69,8 +67,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Helpful Analytics - The Best Google Analytics Dashboard for GA4",
-    description: "Simple, privacy-friendly Google Analytics metrics with our easy to use dashboard. Understand your traffic without the confusion of GA4.",
+    title: "Helpful Analytics - Simple GA4 Reporting for Marketing Agencies",
+    description: "The GA4 dashboard built for marketing agencies. Simple client reporting, multi-account management — without the GA4 complexity.",
     creator: "@brooksconkle",
     images: ["/landingpage.png"],
   },

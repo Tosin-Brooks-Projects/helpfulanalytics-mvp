@@ -113,7 +113,7 @@ export function LinearSidebar() {
                                     ? 'bg-emerald-500/10 text-emerald-600'
                                     : 'bg-yellow-500/10 text-yellow-600'
                                     }`}>
-                                    {subscription.status === 'trialing' ? 'Trial' : subscription.status}
+                                    {subscription.status === 'trialing' ? 'Trial' : subscription.status === 'free' ? 'Trial ended' : subscription.status}
                                     {subscription.status === 'trialing' && <PlanCountdown subscription={subscription} />}
                                 </span>
                             </div>

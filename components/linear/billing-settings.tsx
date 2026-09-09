@@ -14,7 +14,7 @@ export function BillingSettings() {
 
     const handleSubscribe = async (priceId: string, isCustom: boolean) => {
         if (isCustom) {
-            window.location.href = "mailto:sales@example.com?subject=Enterprise%20Inquiry"
+            window.location.href = "mailto:brooks@erasefriction.com?subject=Enterprise%20Inquiry"
             return
         }
 
@@ -80,7 +80,8 @@ export function BillingSettings() {
                     .map((tier) => {
                     const priceId = isAnnual && tier.priceIdYearly ? tier.priceIdYearly : tier.priceIdMonthly
                     const price = isAnnual && tier.priceYearly ? tier.priceYearly : tier.priceMonthly
-                    const isCurrent = subscription?.stripePriceId === priceId || (subscription?.tier?.toLowerCase() === tier.title.toLowerCase() && !subscription.stripePriceId)
+                    const isCurrent = subscription?.tier?.toLowerCase() === tier.title.toLowerCase()
+                        && (subscription.status === "active" || subscription.status === "trialing")
 
                     return (
                         <div
@@ -106,6 +107,14 @@ export function BillingSettings() {
                                     {!tier.isCustom && <span className="text-sm text-zinc-500">/{isAnnual ? 'yr' : 'mo'}</span>}
                                 </div>
                                 <ul className="mt-4 space-y-2">
+                                    {tier.title === "Per-Property" && (
+                                        <li className="flex items-start gap-2 text-xs text-zinc-600">
+                                            <Check className="h-3.5 w-3.5 shrink-0 text-amber-500" />
+                                            {isAnnual && tier.priceYearlyMonthlyEquivalent
+                                                ? `${tier.priceYearlyMonthlyEquivalent} / property / month`
+                                                : `${tier.priceMonthly} / property / month`}
+                                        </li>
+                                    )}
                                     {tier.features.map((feature) => (
                                         <li key={feature} className="flex items-start gap-2 text-xs text-zinc-600">
                                             <Check className="h-3.5 w-3.5 shrink-0 text-amber-500" />

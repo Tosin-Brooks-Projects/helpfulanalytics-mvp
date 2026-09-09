@@ -13,6 +13,10 @@ export const metadata: Metadata = {
     description: "Sign in to your Helpful Analytics dashboard.",
     url: "https://helpfulanalytics.com/login",
   },
+  twitter: {
+    title: "Sign In — Helpful Analytics",
+    description: "Sign in to your Helpful Analytics dashboard.",
+  },
 };
 
 export default function LoginPage() {

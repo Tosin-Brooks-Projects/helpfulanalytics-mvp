@@ -15,6 +15,11 @@ export const metadata: Metadata = {
       "GA4 tips, agency reporting guides, and analytics strategies to help marketing agencies save time and deliver better results for clients.",
     url: "https://helpfulanalytics.com/blog",
   },
+  twitter: {
+    title: "GA4 & Agency Analytics Blog — Helpful Analytics",
+    description:
+      "GA4 tips, agency reporting guides, and analytics strategies to help marketing agencies save time and deliver better results for clients.",
+  },
   alternates: {
     canonical: "https://helpfulanalytics.com/blog",
   },
