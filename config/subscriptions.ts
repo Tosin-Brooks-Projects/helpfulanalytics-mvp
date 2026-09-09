@@ -21,9 +21,9 @@ export const pricingData: SubscriptionTier[] = [
         title: "Per-Property",
         priceMonthly: "$12",
         priceYearly: "$115", // 20% off ($9.58/mo)
+        priceYearlyMonthlyEquivalent: "$9.60",
         description: "Pay only for the properties you connect",
         features: [
-            "$12 / property / month",
             "No long-term commitment",
             "14 day free trial",
         ],

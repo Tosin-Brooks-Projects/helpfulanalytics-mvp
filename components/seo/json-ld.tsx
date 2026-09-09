@@ -17,7 +17,7 @@ export function WebsiteJsonLd() {
                 "@id": `${BASE}/#website`,
                 url: BASE,
                 name: NAME,
-                description: "Simple GA4 reporting dashboard for marketing agencies. Multi-property management, client reporting, and white-label dashboards without the GA4 complexity.",
+                description: "Simple GA4 reporting dashboard for marketing agencies. Multi-property management and client reporting without the GA4 complexity.",
                 inLanguage: "en-US",
                 potentialAction: {
                     "@type": "SearchAction",
@@ -62,7 +62,7 @@ export function WebsiteJsonLd() {
                 name: `${NAME} — Simple GA4 Reporting for Marketing Agencies`,
                 isPartOf: { "@id": `${BASE}/#website` },
                 about: { "@id": `${BASE}/#organization` },
-                description: "The GA4 dashboard built for marketing agencies. Simple client reporting, multi-account management, and white-label dashboards — without the GA4 complexity.",
+                description: "The GA4 dashboard built for marketing agencies. Simple client reporting, multi-account management — without the GA4 complexity.",
                 inLanguage: "en-US",
                 potentialAction: [
                     {
@@ -119,26 +119,12 @@ export function SoftwareAppJsonLd() {
         offers: [
             {
                 "@type": "Offer",
-                name: "Starter",
-                price: "0",
+                name: "Per-Property",
+                price: "12",
                 priceCurrency: "USD",
-                description: "Free 14-day trial, 1 GA4 property",
-            },
-            {
-                "@type": "Offer",
-                name: "Pro",
-                price: "29",
-                priceCurrency: "USD",
-                description: "Up to 10 GA4 properties, full reporting suite",
+                description: "Pay only for the properties you connect, 14-day free trial",
             },
         ],
-        aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: "4.8",
-            bestRating: "5",
-            worstRating: "1",
-            ratingCount: "47",
-        },
     }
 
     return (

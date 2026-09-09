@@ -28,7 +28,7 @@ export function Pricing() {
 
     const handleSubscribe = async (priceId: string, isCustom: boolean) => {
         if (isCustom) {
-            window.location.href = "mailto:sales@example.com?subject=Enterprise%20Inquiry"
+            window.location.href = "mailto:brooks@erasefriction.com?subject=Enterprise%20Inquiry"
             return
         }
 
@@ -157,6 +157,14 @@ export function Pricing() {
                                         {!tier.isCustom && <span className="text-sm font-semibold leading-6 text-muted-foreground">/property/{isAnnual && tier.priceIdYearly ? 'year' : 'month'}</span>}
                                     </p>
                                     <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-muted-foreground">
+                                        {tier.title === "Per-Property" && (
+                                            <li className="flex gap-x-3">
+                                                <Check className="h-6 w-5 flex-none text-primary" aria-hidden="true" />
+                                                {isAnnual && tier.priceYearlyMonthlyEquivalent
+                                                    ? `${tier.priceYearlyMonthlyEquivalent} / property / month`
+                                                    : `${tier.priceMonthly} / property / month`}
+                                            </li>
+                                        )}
                                         {tier.features.map((feature) => (
                                             <li key={feature} className="flex gap-x-3">
                                                 <Check className="h-6 w-5 flex-none text-primary" aria-hidden="true" />
